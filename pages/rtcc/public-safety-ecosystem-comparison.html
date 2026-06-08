@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Public Safety Ecosystem Comparison</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #050a14;
+    --bg-secondary: #080f1e;
+    --bg-card: #0b1526;
+    --bg-elevated: #0f1d34;
+    --grid-line: rgba(30, 80, 160, 0.15);
+    --accent-blue: #1a6fff;
+    --accent-cyan: #00d4ff;
+    --accent-amber: #ffb800;
+    --text-primary: #e8eef8;
+    --text-secondary: #7a92b8;
+    --text-dim: #3d5578;
+
+    /* Vendor Colors */
+    --motorola: #005bbb;
+    --motorola-light: #1a7fff;
+    --motorola-glow: rgba(0, 91, 187, 0.3);
+    --axon: #e8321a;
+    --axon-light: #ff5a3d;
+    --axon-glow: rgba(232, 50, 26, 0.3);
+    --genetec: #00a878;
+    --genetec-light: #00d499;
+    --genetec-glow: rgba(0, 168, 120, 0.3);
+    --flock: #f5a623;
+    --flock-light: #ffc24a;
+    --flock-glow: rgba(245, 166, 35, 0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Radial glow */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 600px;
+    background: radial-gradient(ellipse at center, rgba(26,111,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 32px 80px;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    padding: 52px 0 40px;
+    border-bottom: 1px solid rgba(26,111,255,0.2);
+    margin-bottom: 48px;
+  }
+
+  .header-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--accent-cyan);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-label::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 1px;
+    background: var(--accent-cyan);
+  }
+
+  h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(32px, 5vw, 64px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  h1 span {
+    color: var(--accent-blue);
+  }
+
+  .header-sub {
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    color: var(--text-secondary);
+    font-weight: 300;
+    margin-top: 12px;
+    max-width: 680px;
+    line-height: 1.6;
+  }
+
+  /* ─── LEGEND / VENDOR BADGES ─── */
+  .vendor-legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+
+  .vendor-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    cursor: default;
+    transition: all 0.2s ease;
+  }
+
+  .vendor-badge:hover { transform: translateY(-2px); }
+
+  .vendor-badge.motorola { background: rgba(0,91,187,0.12); border-color: rgba(0,91,187,0.4); }
+  .vendor-badge.axon     { background: rgba(232,50,26,0.12); border-color: rgba(232,50,26,0.4); }
+  .vendor-badge.genetec  { background: rgba(0,168,120,0.12); border-color: rgba(0,168,120,0.4); }
+  .vendor-badge.flock    { background: rgba(245,166,35,0.12); border-color: rgba(245,166,35,0.4); }
+
+  .badge-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .motorola .badge-dot { background: var(--motorola-light); box-shadow: 0 0 8px var(--motorola); }
+  .axon .badge-dot     { background: var(--axon-light);     box-shadow: 0 0 8px var(--axon); }
+  .genetec .badge-dot  { background: var(--genetec-light);  box-shadow: 0 0 8px var(--genetec); }
+  .flock .badge-dot    { background: var(--flock-light);    box-shadow: 0 0 8px var(--flock); }
+
+  .badge-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .motorola .badge-name { color: var(--motorola-light); }
+  .axon .badge-name     { color: var(--axon-light); }
+  .genetec .badge-name  { color: var(--genetec-light); }
+  .flock .badge-name    { color: var(--flock-light); }
+
+  .badge-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── SCORE SUMMARY CARDS ─── */
+  .score-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .score-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 6px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+  }
+  .score-card:hover { transform: translateY(-3px); }
+
+  .score-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .score-card.motorola::before { background: linear-gradient(90deg, var(--motorola), var(--motorola-light)); }
+  .score-card.axon::before     { background: linear-gradient(90deg, var(--axon), var(--axon-light)); }
+  .score-card.genetec::before  { background: linear-gradient(90deg, var(--genetec), var(--genetec-light)); }
+  .score-card.flock::before    { background: linear-gradient(90deg, #c87a00, var(--flock-light)); }
+
+  .score-card-vendor {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .score-card.motorola .score-card-vendor { color: var(--motorola-light); }
+  .score-card.axon .score-card-vendor     { color: var(--axon-light); }
+  .score-card.genetec .score-card-vendor  { color: var(--genetec-light); }
+  .score-card.flock .score-card-vendor    { color: var(--flock-light); }
+
+  .score-card-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    line-height: 1.1;
+  }
+
+  .score-number {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .score-card.motorola .score-number { color: var(--motorola-light); }
+  .score-card.axon .score-number     { color: var(--axon-light); }
+  .score-card.genetec .score-number  { color: var(--genetec-light); }
+  .score-card.flock .score-number    { color: var(--flock-light); }
+
+  .score-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .score-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+  .score-card.motorola .score-bar-fill { background: linear-gradient(90deg, var(--motorola), var(--motorola-light)); width: 89%; }
+  .score-card.axon .score-bar-fill     { background: linear-gradient(90deg, var(--axon), var(--axon-light));         width: 81%; }
+  .score-card.genetec .score-bar-fill  { background: linear-gradient(90deg, var(--genetec), var(--genetec-light));   width: 67%; }
+  .score-card.flock .score-bar-fill    { background: linear-gradient(90deg, #c87a00, var(--flock-light));             width: 44%; }
+
+  /* ─── SECTION TITLE ─── */
+  .section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(26,111,255,0.15);
+  }
+
+  /* ─── COMPARISON TABLE ─── */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid rgba(26,111,255,0.15);
+    margin-bottom: 48px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+  }
+
+  /* Sticky header row */
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg-elevated);
+    padding: 20px 24px;
+    text-align: left;
+    border-bottom: 1px solid rgba(26,111,255,0.2);
+  }
+
+  thead th:first-child {
+    width: 220px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+
+  .th-vendor {
+    text-align: center;
+  }
+
+  .th-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .th-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .th-motorola .th-name { color: var(--motorola-light); }
+  .th-axon .th-name     { color: var(--axon-light); }
+  .th-genetec .th-name  { color: var(--genetec-light); }
+  .th-flock .th-name    { color: var(--flock-light); }
+
+  .th-platform {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* Layer header rows */
+  tr.layer-header td {
+    background: rgba(26,111,255,0.05);
+    border-top: 1px solid rgba(26,111,255,0.2);
+    border-bottom: 1px solid rgba(26,111,255,0.12);
+    padding: 12px 24px;
+    vertical-align: middle;
+  }
+
+  .layer-number {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--accent-cyan);
+    letter-spacing: 0.15em;
+    margin-bottom: 2px;
+  }
+
+  .layer-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-primary);
+    text-transform: uppercase;
+  }
+
+  /* Data rows */
+  tr.data-row {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s ease;
+  }
+  tr.data-row:hover { background: rgba(26,111,255,0.04); }
+
+  tr.data-row td {
+    padding: 16px 24px;
+    vertical-align: top;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .row-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding-left: 36px !important;
+  }
+
+  .cell {
+    text-align: center;
+    vertical-align: middle !important;
+    padding: 14px 16px !important;
+  }
+
+  /* Status pills */
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 3px;
+    padding: 5px 11px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    font-weight: 400;
+    white-space: nowrap;
+    margin-bottom: 4px;
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status.full {
+    background: rgba(0, 212, 100, 0.1);
+    border: 1px solid rgba(0, 212, 100, 0.35);
+    color: #00d464;
+  }
+  .status.full .status-dot { background: #00d464; box-shadow: 0 0 6px #00d464; }
+
+  .status.native {
+    background: rgba(26,111,255,0.1);
+    border: 1px solid rgba(26,111,255,0.35);
+    color: #5fa0ff;
+  }
+  .status.native .status-dot { background: #5fa0ff; box-shadow: 0 0 6px #5fa0ff; }
+
+  .status.partial {
+    background: rgba(255,184,0,0.08);
+    border: 1px solid rgba(255,184,0,0.3);
+    color: var(--accent-amber);
+  }
+  .status.partial .status-dot { background: var(--accent-amber); box-shadow: 0 0 6px var(--accent-amber); }
+
+  .status.limited {
+    background: rgba(255,120,0,0.08);
+    border: 1px solid rgba(255,120,0,0.25);
+    color: #ff8c42;
+  }
+  .status.limited .status-dot { background: #ff8c42; }
+
+  .status.none {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-dim);
+  }
+  .status.none .status-dot { background: var(--text-dim); }
+
+  .status.new {
+    background: rgba(200,100,255,0.1);
+    border: 1px solid rgba(200,100,255,0.3);
+    color: #d480ff;
+  }
+  .status.new .status-dot { background: #d480ff; box-shadow: 0 0 6px #d480ff; }
+
+  .cell-note {
+    display: block;
+    font-family: 'Barlow', sans-serif;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  /* Alternate row shading */
+  tr.data-row:nth-child(even) { background: rgba(255,255,255,0.01); }
+  tr.data-row:nth-child(even):hover { background: rgba(26,111,255,0.04); }
+
+  /* ─── CLEVELAND RECOMMENDATION ─── */
+  .rec-section {
+    background: var(--bg-card);
+    border: 1px solid rgba(0,91,187,0.35);
+    border-radius: 8px;
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 48px;
+  }
+
+  .rec-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--motorola), var(--motorola-light), transparent);
+  }
+
+  .rec-section::after {
+    content: 'CDP';
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 160px;
+    font-weight: 700;
+    color: rgba(0,91,187,0.06);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .rec-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--accent-cyan);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .rec-heading {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+  }
+
+  .rec-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .rec-item {
+    background: var(--bg-elevated);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 4px;
+    padding: 20px;
+  }
+
+  .rec-item-icon {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--motorola-light);
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+  }
+
+  .rec-item-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .rec-item-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: gap;
+  }
+
+  .footer-note {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+  }
+
+  .footer-date {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .score-row { grid-template-columns: repeat(2, 1fr); }
+    .rec-grid  { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .score-row { grid-template-columns: 1fr; }
+    .wrapper   { padding: 0 16px 60px; }
+  }
+
+  /* Animate bars on load */
+  @keyframes fillBar {
+    from { width: 0; }
+  }
+  .score-bar-fill {
+    animation: fillBar 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    animation-delay: 0.4s;
+    width: 0 !important;
+  }
+  .score-card.motorola .score-bar-fill { animation-name: fillBar; --target: 89%; }
+  .score-card.axon     .score-bar-fill { animation-name: fillBar; --target: 81%; }
+  .score-card.genetec  .score-bar-fill { animation-name: fillBar; --target: 67%; }
+  .score-card.flock    .score-bar-fill { animation-name: fillBar; --target: 44%; }
+
+  /* Use inline style hack for dynamic width */
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-label">RTCC Platform Intelligence Report</div>
+    <h1>Public Safety <span>Ecosystem</span><br>Comparison Matrix</h1>
+    <p class="header-sub">Full-stack analysis across 9 integration layers: Motorola Solutions CommandCentral Aware, Axon Enterprise, Genetec Security Center, and Flock Safety — evaluated for Cleveland Division of Police RTCC deployment.</p>
+  </header>
+
+  <!-- VENDOR LEGEND -->
+  <div class="vendor-legend">
+    <div class="vendor-badge motorola">
+      <span class="badge-dot"></span>
+      <div>
+        <div class="badge-name">Motorola Solutions</div>
+        <div class="badge-sub">CommandCentral Aware</div>
+      </div>
+    </div>
+    <div class="vendor-badge axon">
+      <span class="badge-dot"></span>
+      <div>
+        <div class="badge-name">Axon Enterprise</div>
+        <div class="badge-sub">Fusus / Axon 911 / Evidence</div>
+      </div>
+    </div>
+    <div class="vendor-badge genetec">
+      <span class="badge-dot"></span>
+      <div>
+        <div class="badge-name">Genetec</div>
+        <div class="badge-sub">Security Center / Citigraf</div>
+      </div>
+    </div>
+    <div class="vendor-badge flock">
+      <span class="badge-dot"></span>
+      <div>
+        <div class="badge-name">Flock Safety</div>
+        <div class="badge-sub">Falcon / Raven / Harbor</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCORE SUMMARY CARDS -->
+  <div class="section-title">Overall Ecosystem Readiness Score</div>
+  <div class="score-row">
+    <div class="score-card motorola">
+      <div class="score-card-vendor">Motorola Solutions</div>
+      <div class="score-card-name">CommandCentral<br>Aware</div>
+      <div class="score-number">89</div>
+      <div class="score-label">/ 100 — Full Stack</div>
+      <div class="score-bar"><div class="score-bar-fill" style="animation: fillBar 1.2s 0.4s cubic-bezier(0.25,1,0.5,1) forwards; --w:89%;"></div></div>
+    </div>
+    <div class="score-card axon">
+      <div class="score-card-vendor">Axon Enterprise</div>
+      <div class="score-card-name">Fusus / Axon<br>Ecosystem</div>
+      <div class="score-number">81</div>
+      <div class="score-label">/ 100 — Expanding Fast</div>
+      <div class="score-bar"><div class="score-bar-fill" style="animation: fillBar 1.2s 0.55s cubic-bezier(0.25,1,0.5,1) forwards; --w:81%;"></div></div>
+    </div>
+    <div class="score-card genetec">
+      <div class="score-card-vendor">Genetec</div>
+      <div class="score-card-name">Security Center<br>+ Citigraf</div>
+      <div class="score-number">67</div>
+      <div class="score-label">/ 100 — Open Architecture</div>
+      <div class="score-bar"><div class="score-bar-fill" style="animation: fillBar 1.2s 0.7s cubic-bezier(0.25,1,0.5,1) forwards; --w:67%;"></div></div>
+    </div>
+    <div class="score-card flock">
+      <div class="score-card-vendor">Flock Safety</div>
+      <div class="score-card-name">Falcon / Raven<br>Platform</div>
+      <div class="score-number">44</div>
+      <div class="score-label">/ 100 — Sensor Specialist</div>
+      <div class="score-bar"><div class="score-bar-fill" style="animation: fillBar 1.2s 0.85s cubic-bezier(0.25,1,0.5,1) forwards; --w:44%;"></div></div>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="section-title">9-Layer Integration Analysis</div>
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Layer / Capability</th>
+        <th class="th-vendor th-motorola">
+          <div class="th-inner">
+            <span class="th-name">Motorola</span>
+            <span class="th-platform">CommandCentral Aware</span>
+          </div>
+        </th>
+        <th class="th-vendor th-axon">
+          <div class="th-inner">
+            <span class="th-name">Axon</span>
+            <span class="th-platform">Fusus / Axon 911</span>
+          </div>
+        </th>
+        <th class="th-vendor th-genetec">
+          <div class="th-inner">
+            <span class="th-name">Genetec</span>
+            <span class="th-platform">Security Center</span>
+          </div>
+        </th>
+        <th class="th-vendor th-flock">
+          <div class="th-inner">
+            <span class="th-name">Flock</span>
+            <span class="th-platform">Falcon Platform</span>
+          </div>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- LAYER 1 -->
+      <tr class="layer-header">
+        <td colspan="5">
+          <div class="layer-number">LAYER 01</div>
+          <div class="layer-name">Common Operating Picture (COP)</div>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Unified Map Interface</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Esri-based geospatial map</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Fusus map + Axon ecosystem overlay</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Citigraf geospatial dashboard</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Falcon map — sensors only</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Multi-Source Data Fusion</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">CAD, radio, video, sensors, LPR unified</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Fusus aggregates 80+ partner feeds</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Security Center open federation</span>
+        </td>
+        <td class="cell">
+          <span class="status limited"><span class="status-dot"></span>LIMITED</span>
+          <span class="cell-note">ALPR + cameras + drone only</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Role-Based Operator Views</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Agency Groups — SWAT, K9, undercover permissioned</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">User-level permissions per data layer</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Partition-based security model</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Basic user tiering</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Activity Monitor / Alert Table</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Configurable columns, sortable by operator</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Fusus alert feed with incident correlation</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Citigraf event correlation engine</span>
+        </td>
+        <td class="cell">
+          <span class="status limited"><span class="status-dot"></span>LIMITED</span>
+          <span class="cell-note">Alert feed for ALPR / gunshot only</span>
+        </td>
+      </tr>
+
+      <!-- LAYER 2 -->
+      <tr class="layer-header">
+        <td colspan="5">
+          <div class="layer-number">LAYER 02</div>
+          <div class="layer-name">Video Infrastructure</div>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">City Camera Aggregation</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Safety Hub edge device — ONVIF/RTSP</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Fusus CORE device</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Security Center VMS — vendor agnostic</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Flock cameras only natively</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">AI Video Analytics</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Avigilon: Appearance Search, UMD, ACC integration</span>
+        </td>
+        <td class="cell">
+          <span class="status new"><span class="status-dot"></span>NEW 2026</span>
+          <span class="cell-note">Axon Vision launched April 2026</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Security Center analytics — object detection, rules</span>
+        </td>
+        <td class="cell">
+          <span class="status limited"><span class="status-dot"></span>LIMITED</span>
+          <span class="cell-note">ALPR-focused; basic video analytics</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Community Camera Program</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">CommandCentral Community + Avigilon Blue</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Fusus Community — SAFE SMART CLE model</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Clearance camera registry module</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">Not a core capability</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">PTZ Camera Control</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Direct PTZ from within CCA interface</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Fusus supports PTZ on compatible cameras</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Full PTZ in Security Center</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">Fixed cameras only</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Building Floor Plans</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Facility profiles with interior layouts</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Fusus floor plan overlays via partner</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Full floor plan management in Security Center</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+        </td>
+      </tr>
+
+      <!-- LAYER 3 -->
+      <tr class="layer-header">
+        <td colspan="5">
+          <div class="layer-number">LAYER 03</div>
+          <div class="layer-name">Gunshot Detection (ShotSpotter)</div>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">ShotSpotter API Integration</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Alert pins on CCA Esri map via open API</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Core Fusus integration — 40+ agencies deployed</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Citigraf ingests gunshot sensor data natively</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">API integration available; not primary workflow</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Auto Camera Surface on Alert</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Workflow rule — configurable radius auto-triggers</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Core Fusus feature — cameras populate on detection</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Citigraf CAD + sensor correlation triggers cameras</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">No camera surfacing capability</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">ShotSpotter → Drone Trigger</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">ShotSpotter → CCA workflow → BRINC dock</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">ShotSpotter → Fusus → Axon Air / Skydio</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Requires third-party DFR integration</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">ShotSpotter → Raven DFR via open API</span>
+        </td>
+      </tr>
+
+      <!-- LAYER 4 -->
+      <tr class="layer-header">
+        <td colspan="5">
+          <div class="layer-number">LAYER 04</div>
+          <div class="layer-name">CAD &amp; Radio Integration</div>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">CAD Integration</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">PremierOne CAD — zero latency, no middleware</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Axon 911 (Carbyne/Prepared) — AI-enabled dispatch</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Citigraf ingests CAD via API — not native CAD</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">No CAD platform</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">911 Call Handling</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">VESTA 911 — call pins on CCA map in real-time</span>
+        </td>
+        <td class="cell">
+          <span class="status new"><span class="status-dot"></span>NEW 2026</span>
+          <span class="cell-note">Axon 911 — AI transcription, caller livestream video</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">No 911 platform</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">No 911 platform</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Land Mobile Radio (P25)</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">APX NEXT GPS feeds directly to CCA — 3-4 sec refresh</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">No radio infrastructure — critical gap</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">No radio infrastructure</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">No radio infrastructure</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Radio Console Integration</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">MCC 7500E console — talkgroup control in CCA</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Officer Emergency Button Alert</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">APX emergency button → CCA map alert instantly</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Body cam emergency → Fusus via third-party CAD</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+        </td>
+      </tr>
+
+      <!-- LAYER 5 -->
+      <tr class="layer-header">
+        <td colspan="5">
+          <div class="layer-number">LAYER 05</div>
+          <div class="layer-name">Drone as First Responder (DFR)</div>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">DFR Platform Integration</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">BRINC Responder — one-click from CCA or PremierOne</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Axon Air + Skydio DFR — tightly integrated with Fusus</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Third-party DFR via integration — not native</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Raven DFR — Flock's own drone platform</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Drone Video in COP</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">BRINC feed + CAPE drone livestream on CCA map</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Drone video streams into Fusus single pane</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Via RTSP/ONVIF integration into Security Center</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Raven feed native to Falcon dashboard</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Counter-UAS (C-UAS)</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">SkySafe integration — detect/track rogue drones in CCA</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Dedrone (Axon-acquired) C-UAS platform</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">Not a core capability</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Evidence-Grade Drone Data</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">CAPE — encrypted, tamper-proof cloud storage</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Axon Evidence — full chain of custody</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Clearance can receive drone video — manual process</span>
+        </td>
+        <td class="cell">
+          <span class="status limited"><span class="status-dot"></span>LIMITED</span>
+          <span class="cell-note">Local storage; no evidence management chain</span>
+        </td>
+      </tr>
+
+      <!-- LAYER 6 -->
+      <tr class="layer-header">
+        <td colspan="5">
+          <div class="layer-number">LAYER 06</div>
+          <div class="layer-name">LPR &amp; Vehicle Intelligence</div>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">LPR Platform</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Vigilant VehicleManager — nationwide plate network</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Flock ALPR integrated into Fusus + own fixed cameras</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Cloudrunner — ALPR investigation + mapping</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Flock's core product — largest US LPR network</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Vehicle Appearance Search</td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Vigilant + Avigilon — plate + make/model/color search</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Flock vehicle search across nationwide network</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Cloudrunner — movement patterns, partial plate</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Best-in-class — Flock's primary differentiator</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">NCIC Hot-List Integration</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Stolen vehicle, warrants, BOLO auto-query</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Flock hot-list alert fed into Fusus dashboard</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Cloudrunner cross-references NCIC</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Flock hot-list is a flagship capability</span>
+        </td>
+      </tr>
+
+      <!-- LAYER 7 -->
+      <tr class="layer-header">
+        <td colspan="5">
+          <div class="layer-number">LAYER 07</div>
+          <div class="layer-name">Workflow Automation</div>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">IF/THEN Rules Engine</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">CCA rules engine — AND/OR operators, multi-trigger</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Fusus event-driven automation on all data sources</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Security Center rules + Citigraf correlation engine</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Alert routing rules — limited to sensor events</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">AI-Powered Report Writing</td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">Not currently available in CCA</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Draft One — saves 40% admin time; body cam transcription</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Mass Notification / Alerts</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Rave Alert integration in CCA</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Via third-party notification partner</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Via third-party integration</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Geofence Triggers</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Perimeter breach → alert + camera surface + supervisor</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Fusus geofence alerts with camera correlation</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Security Center zone-based rules</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">ALPR zone alerts only</span>
+        </td>
+      </tr>
+
+      <!-- LAYER 8 -->
+      <tr class="layer-header">
+        <td colspan="5">
+          <div class="layer-number">LAYER 08</div>
+          <div class="layer-name">Evidence &amp; Case Management</div>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Digital Evidence Management</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">PremierOne Records — full chain of custody</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Axon Evidence — market-dominant DEMS platform</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Clearance — case files, video, prosecutor sharing</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">No evidence management</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Body Camera Integration</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">V700 body cam GPS + livestream in CCA via 4RE system</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Axon Body 4 — bi-directional comms, supervisor view</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Body cam video importable into Clearance — not real-time</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">No body camera platform</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Records Management System</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">PremierOne Records — incident to prosecution</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Axon Records — AI-assisted, integrated with body cam</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+          <span class="cell-note">No native RMS — integrates with third-party</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Prosecutor / Disclosure Sharing</td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Via PremierOne Records integration</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Axon Evidence — Brief One AI review, one-click disclosure</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Clearance — secure sharing with defense and prosecution</span>
+        </td>
+        <td class="cell">
+          <span class="status none"><span class="status-dot"></span>NONE</span>
+        </td>
+      </tr>
+
+      <!-- LAYER 9 -->
+      <tr class="layer-header">
+        <td colspan="5">
+          <div class="layer-number">LAYER 09</div>
+          <div class="layer-name">Multi-Agency &amp; Regional Integration</div>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Multi-Agency Data Sharing</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Permissioned agency layers — county, state, federal</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Fusus regional sharing across enrolled agencies</span>
+        </td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Federation model — open sharing architecture</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Flock network — LPR data sharing across agencies only</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Mutual Aid Integration</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Temporary elevated access during declared emergencies</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Fusus guest access for mutual aid operations</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Partition-based guest access in Security Center</span>
+        </td>
+        <td class="cell">
+          <span class="status limited"><span class="status-dot"></span>LIMITED</span>
+          <span class="cell-note">LPR data sharing only; no video or CAD sharing</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">CJIS / FedRAMP Compliance</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">FedRAMP Authorized, StateRAMP, SOC 1/2, ISO 27001</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">CJIS-compliant GovCloud; AWS FedRAMP</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">CJIS-compliant; SOC 2 Type II certified</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">CJIS-compliant cloud infrastructure</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Regional GIS / Traffic Layers</td>
+        <td class="cell">
+          <span class="status native"><span class="status-dot"></span>NATIVE</span>
+          <span class="cell-note">Esri — traffic, weather, GIS, NOACA data layers</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>PARTIAL</span>
+          <span class="cell-note">Traffic + weather layers via map overlay</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>FULL</span>
+          <span class="cell-note">Security Center — GIS layers, traffic, custom maps</span>
+        </td>
+        <td class="cell">
+          <span class="status limited"><span class="status-dot"></span>LIMITED</span>
+          <span class="cell-note">Basic mapping only</span>
+        </td>
+      </tr>
+      <tr class="data-row">
+        <td class="row-label">Vendor Lock-In Risk</td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>MODERATE</span>
+          <span class="cell-note">High for radio; moderate for software stack</span>
+        </td>
+        <td class="cell">
+          <span class="status partial"><span class="status-dot"></span>MODERATE</span>
+          <span class="cell-note">High for evidence / body cam; growing ecosystem lock</span>
+        </td>
+        <td class="cell">
+          <span class="status full"><span class="status-dot"></span>LOWEST</span>
+          <span class="cell-note">Open architecture — best vendor independence</span>
+        </td>
+        <td class="cell">
+          <span class="status limited"><span class="status-dot"></span>MODERATE</span>
+          <span class="cell-note">Camera + LPR hardware creates switching cost</span>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+  </div>
+
+  <!-- LEGEND KEY -->
+  <div class="section-title">Status Key</div>
+  <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:48px;">
+    <span class="status native"><span class="status-dot"></span>NATIVE — Built-in, zero middleware</span>
+    <span class="status full"><span class="status-dot"></span>FULL — Complete via integration</span>
+    <span class="status new"><span class="status-dot"></span>NEW 2026 — Recently launched</span>
+    <span class="status partial"><span class="status-dot"></span>PARTIAL — Incomplete or limited</span>
+    <span class="status limited"><span class="status-dot"></span>LIMITED — Minimal capability</span>
+    <span class="status none"><span class="status-dot"></span>NONE — Not available</span>
+  </div>
+
+  <!-- CLEVELAND RECOMMENDATION -->
+  <div class="section-title">Cleveland Division of Police — Strategic Recommendation</div>
+  <div class="rec-section">
+    <div class="rec-title">CDP RTCC — Platform Assessment</div>
+    <div class="rec-heading">Motorola CommandCentral Aware: Recommended Primary Platform</div>
+    <div class="rec-grid">
+      <div class="rec-item">
+        <div class="rec-item-icon">DECISIVE ADVANTAGE</div>
+        <div class="rec-item-title">Radio Infrastructure Lock</div>
+        <div class="rec-item-text">Cleveland's APX P25 radio fleet is a 15–25 year capital investment. Only Motorola provides native GPS telemetry and console integration — no other ecosystem can replicate this without significant parallel infrastructure cost.</div>
+      </div>
+      <div class="rec-item">
+        <div class="rec-item-icon">DECISIVE ADVANTAGE</div>
+        <div class="rec-item-title">CAD Native Integration</div>
+        <div class="rec-item-text">PremierOne CAD feeds into CommandCentral Aware with zero latency and no middleware. Axon, Genetec, and Flock all require API bridges that introduce failure points and lag. For a city-scale RTCC, this difference is operationally significant.</div>
+      </div>
+      <div class="rec-item">
+        <div class="rec-item-icon">DECISIVE ADVANTAGE</div>
+        <div class="rec-item-title">Avigilon AI Analytics</div>
+        <div class="rec-item-text">Avigilon's Appearance Search and Unusual Motion Detection represent the most mature AI video analytics in the market. Axon Vision (launched April 2026) is promising but unproven at scale. Genetec's analytics are solid. Flock is limited.</div>
+      </div>
+      <div class="rec-item">
+        <div class="rec-item-icon">WATCH CLOSELY</div>
+        <div class="rec-item-title">Axon Threat: AI Velocity</div>
+        <div class="rec-item-text">Axon's Draft One, Axon Vision, and Axon 911 represent the fastest AI innovation velocity in the market. Motorola's gap on AI report writing is real. If Axon successfully integrates its 911 platform at scale, the competitive picture will shift significantly by 2027–2028.</div>
+      </div>
+      <div class="rec-item">
+        <div class="rec-item-icon">RETAIN AS ASSET</div>
+        <div class="rec-item-title">Flock Safety LPR Network</div>
+        <div class="rec-item-text">Cleveland's 2,700+ Flock cameras are a real operational asset. The recommendation is not to rip them out — Flock LPR data feeds into CommandCentral Aware via API. Flock's vehicle search capability remains best-in-class and should be retained as a data source.</div>
+      </div>
+      <div class="rec-item">
+        <div class="rec-item-icon">PHASE OUT</div>
+        <div class="rec-item-title">Fusus Subscription</div>
+        <div class="rec-item-text">With CommandCentral Aware handling camera aggregation, community cameras via CommandCentral Community, and event-driven automation natively, Fusus becomes redundant middleware. The subscription cost should be redirected to BRINC DFR dock deployment across Cleveland's five districts.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-note">PREPARED FOR: CLEVELAND DIVISION OF POLICE — RTCC MODERNIZATION ANALYSIS</div>
+    <div class="footer-date">APRIL 2026 // INTELLIGENCE SOURCED FROM MOTOROLA, AXON, GENETEC, FLOCK PUBLIC DOCUMENTATION</div>
+  </footer>
+
+</div>
+
+<script>
+  // Animate score bars on load
+  document.addEventListener('DOMContentLoaded', () => {
+    const targets = {
+      'motorola': '89%',
+      'axon': '81%',
+      'genetec': '67%',
+      'flock': '44%'
+    };
+    document.querySelectorAll('.score-bar-fill').forEach(el => {
+      const card = el.closest('.score-card');
+      if (!card) return;
+      const cls = ['motorola','axon','genetec','flock'].find(c => card.classList.contains(c));
+      if (cls) {
+        setTimeout(() => { el.style.width = targets[cls]; }, 500);
+      }
+    });
+  });
+</script>
+</body>
+</html>

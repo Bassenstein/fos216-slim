@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STDS · CommandCentral Aware · Cleveland PD 3rd District</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Bebas+Neue&display=swap');
+
+:root {
+  --bg: #06080d;
+  --s1: #0b0f1a;
+  --s2: #0f1525;
+  --s3: #141c30;
+  --border: #1a2540;
+  --border2: #253560;
+  --accent: #1e6ef5;
+  --msi: #009de0;
+  --msi2: #00c4ff;
+  --avi: #e85c1e;
+  --sky: #00d4a0;
+  --stds: #f5a623;
+  --red: #e83535;
+  --green: #22c55e;
+  --yellow: #f5c623;
+  --dim: #2d4060;
+  --text: #c0d0e8;
+  --textdim: #4a6080;
+}
+
+* { margin:0;padding:0;box-sizing:border-box; }
+
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* SCANLINES */
+body::before {
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px);
+  pointer-events:none;z-index:9999;
+}
+
+/* TOP BAR */
+.topbar {
+  height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(90deg,rgba(30,110,245,0.08),transparent 60%);
+  position:relative;flex-shrink:0;
+}
+
+.topbar::after {
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,var(--accent),var(--msi2) 40%,transparent);
+}
+
+.brand {
+  display:flex;align-items:center;gap:12px;
+}
+
+.brand-hex {
+  width:36px;height:36px;
+  background:var(--accent);
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:#fff;font-weight:700;
+}
+
+.brand-text h1 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:18px;letter-spacing:3px;color:#fff;line-height:1;
+}
+
+.brand-text p {
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;color:var(--textdim);letter-spacing:2px;
+}
+
+.topbar-center {
+  display:flex;gap:24px;
+}
+
+.sys-pill {
+  display:flex;align-items:center;gap:6px;
+  padding:4px 12px;border:1px solid;border-radius:2px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;
+}
+
+.sys-pill.msi { border-color:var(--msi);color:var(--msi);background:rgba(0,157,224,0.07); }
+.sys-pill.avi { border-color:var(--avi);color:var(--avi);background:rgba(232,92,30,0.07); }
+.sys-pill.sky { border-color:var(--sky);color:var(--sky);background:rgba(0,212,160,0.07); }
+.sys-pill.stds { border-color:var(--stds);color:var(--stds);background:rgba(245,166,35,0.07); }
+
+.sdot {
+  width:6px;height:6px;border-radius:50%;
+  animation:blink 1.4s step-end infinite;
+}
+
+.sdot.msi { background:var(--msi);box-shadow:0 0 6px var(--msi); }
+.sdot.avi { background:var(--avi);box-shadow:0 0 6px var(--avi); }
+.sdot.sky { background:var(--sky);box-shadow:0 0 6px var(--sky); }
+.sdot.stds { background:var(--stds);box-shadow:0 0 6px var(--stds); }
+.sdot.red { background:var(--red);box-shadow:0 0 6px var(--red); }
+
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:0.2} }
+
+.topbar-right {
+  display:flex;align-items:center;gap:16px;
+}
+
+.clock {
+  font-family:'Share Tech Mono',monospace;
+  font-size:13px;color:var(--textdim);
+}
+
+/* MAIN LAYOUT */
+.app {
+  display:grid;
+  grid-template-columns:260px 1fr 280px;
+  height:calc(100vh - 52px);
+  overflow:hidden;
+}
+
+/* PANELS */
+.panel {
+  border:1px solid var(--border);
+  background:var(--s1);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+}
+
+.ph {
+  padding:8px 14px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(0,0,0,0.2);flex-shrink:0;
+}
+
+.ph-title {
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:3px;
+  font-weight:600;
+}
+
+.ph-badge {
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;color:var(--textdim);letter-spacing:1px;
+}
+
+.ph-title.msi { color:var(--msi); }
+.ph-title.avi { color:var(--avi); }
+.ph-title.sky { color:var(--sky); }
+.ph-title.stds { color:var(--stds); }
+.ph-title.red { color:var(--red); }
+.ph-title.acc { color:var(--accent); }
+
+/* LEFT COLUMN */
+.left {
+  border-right:none;
+  display:flex;flex-direction:column;
+}
+
+/* CENTER COLUMN */
+.center {
+  display:flex;flex-direction:column;
+  border-left:1px solid var(--border);
+  border-right:1px solid var(--border);
+  overflow:hidden;
+}
+
+/* RIGHT COLUMN */
+.right {
+  border-left:none;
+  display:flex;flex-direction:column;
+}
+
+/* ─── STDS ACOUSTIC STATUS ─── */
+.acoustic-block {
+  padding:14px 14px 10px;flex-shrink:0;
+}
+
+.rpm-row {
+  display:flex;align-items:center;gap:10px;margin-bottom:10px;
+}
+
+canvas#miniGauge { flex-shrink:0; }
+
+.rpm-vals { flex:1; }
+
+.rpm-big {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:32px;line-height:1;
+  transition:color 0.3s;
+}
+
+.rpm-big.ok { color:var(--green); }
+.rpm-big.warn { color:var(--yellow); }
+.rpm-big.crit { color:var(--red); }
+
+.rpm-lbl {
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;color:var(--textdim);letter-spacing:2px;
+}
+
+.stat-mini-row {
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;
+}
+
+.stat-mini {
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:2px;padding:6px 8px;text-align:center;
+}
+
+.stat-mini .val {
+  font-family:'Share Tech Mono',monospace;
+  font-size:12px;color:var(--accent);
+  line-height:1;margin-bottom:2px;
+}
+
+.stat-mini .lbl {
+  font-size:8px;color:var(--textdim);
+  font-family:'Share Tech Mono',monospace;letter-spacing:1px;
+}
+
+/* CONFIDENCE BAR */
+.conf-wrap { padding:0 14px 12px;flex-shrink:0; }
+.conf-hdr { display:flex;justify-content:space-between;margin-bottom:4px;
+  font-family:'Share Tech Mono',monospace;font-size:9px; }
+.conf-hdr span:first-child { color:var(--textdim); }
+.conf-hdr span:last-child { color:var(--stds); }
+.conf-track { height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden; }
+.conf-fill { height:100%;border-radius:3px;transition:width 0.5s,background 0.5s; }
+
+/* FREQ BANDS */
+.freq-list { flex:1;overflow-y:auto;padding:6px 10px 10px; }
+
+.freq-item {
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;margin-bottom:5px;
+  border:1px solid var(--border);border-radius:2px;
+  background:rgba(0,0,0,0.2);
+  transition:all 0.3s;
+}
+
+.freq-item.alert { border-color:var(--red);background:rgba(232,53,53,0.07); }
+.freq-item.active { border-color:var(--stds);background:rgba(245,166,35,0.06); }
+
+.freq-dot {
+  width:7px;height:7px;border-radius:50%;
+  flex-shrink:0;transition:all 0.3s;
+}
+
+.freq-item .fd { font-size:11px;font-weight:600;flex:1;line-height:1.3; }
+.freq-item .fr { font-size:9px;color:var(--textdim);font-family:'Share Tech Mono',monospace; }
+.freq-item .fl { font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--textdim); }
+
+/* ─── CENTER: COMMAND MAP ─── */
+.map-area {
+  flex:1;position:relative;overflow:hidden;
+  background:var(--s1);
+}
+
+canvas#mapCanvas { width:100%;height:100%;display:block; }
+
+.map-overlay-tl {
+  position:absolute;top:10px;left:10px;
+  display:flex;flex-direction:column;gap:6px;
+}
+
+.map-tag {
+  padding:4px 10px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;
+  border:1px solid;border-radius:2px;
+  background:rgba(6,8,13,0.85);
+}
+
+.map-tag.msi { border-color:var(--msi);color:var(--msi); }
+.map-tag.sky { border-color:var(--sky);color:var(--sky); }
+.map-tag.stds { border-color:var(--stds);color:var(--stds); }
+
+.incident-banner {
+  position:absolute;bottom:0;left:0;right:0;
+  padding:10px 16px;
+  display:none;align-items:center;gap:12px;
+  background:rgba(232,53,53,0.18);
+  border-top:2px solid var(--red);
+  backdrop-filter:blur(4px);
+}
+
+.incident-banner.show { display:flex; }
+
+.ib-title {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:16px;letter-spacing:3px;color:var(--red);
+}
+
+.ib-sub {
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;color:rgba(255,100,100,0.8);margin-top:2px;
+}
+
+.ib-actions { display:flex;gap:6px;margin-left:auto; }
+
+.btn-sm {
+  padding:6px 12px;border:1px solid;
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;
+  cursor:pointer;background:transparent;border-radius:2px;
+  transition:all 0.2s;
+}
+
+.btn-sm.sky { border-color:var(--sky);color:var(--sky); }
+.btn-sm.sky:hover { background:var(--sky);color:#000; }
+.btn-sm.red { border-color:var(--red);color:var(--red); }
+.btn-sm.red:hover { background:var(--red);color:#fff; }
+.btn-sm.acc { border-color:var(--accent);color:var(--accent); }
+.btn-sm.acc:hover { background:var(--accent);color:#fff; }
+
+/* BOTTOM PANELS */
+.bottom-row {
+  height:240px;flex-shrink:0;
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  border-top:1px solid var(--border);
+}
+
+.bottom-panel {
+  border-right:1px solid var(--border);
+  overflow:hidden;display:flex;flex-direction:column;
+}
+
+.bottom-panel:last-child { border-right:none; }
+
+.bp-content { flex:1;overflow-y:auto;padding:8px; }
+
+/* ─── RIGHT COLUMN CONTENT ─── */
+
+/* Drone status cards */
+.drone-cards { padding:10px;display:flex;flex-direction:column;gap:8px; }
+
+.drone-card {
+  border:1px solid var(--border);border-radius:2px;
+  background:var(--s2);padding:10px 12px;
+  position:relative;transition:all 0.3s;
+}
+
+.drone-card.active {
+  border-color:var(--sky);
+  background:rgba(0,212,160,0.05);
+}
+
+.drone-card.deployed {
+  border-color:var(--stds);
+  background:rgba(245,166,35,0.06);
+  animation:dpulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes dpulse {
+  from { background:rgba(245,166,35,0.04); }
+  to { background:rgba(245,166,35,0.12); }
+}
+
+.dc-header { display:flex;align-items:center;gap:8px;margin-bottom:6px; }
+
+.dc-id {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:16px;letter-spacing:2px;color:#fff;
+}
+
+.dc-status {
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;padding:2px 7px;border:1px solid;border-radius:2px;
+  margin-left:auto;
+}
+
+.dc-status.ready { border-color:var(--green);color:var(--green); }
+.dc-status.deployed { border-color:var(--stds);color:var(--stds); }
+.dc-status.charging { border-color:var(--textdim);color:var(--textdim); }
+.dc-status.rtb { border-color:var(--msi);color:var(--msi); }
+
+.dc-bar-row { display:flex;align-items:center;gap:6px;margin-bottom:4px; }
+.dc-bar-lbl { font-size:9px;color:var(--textdim);width:36px;flex-shrink:0; }
+.dc-bar-track { flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px; }
+.dc-bar-fill { height:100%;border-radius:2px;transition:width 0.5s; }
+.batt-fill { background:var(--green); }
+.sig-fill { background:var(--msi2); }
+.dc-bar-val { font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text);width:28px;text-align:right; }
+
+.dc-meta {
+  font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--textdim);
+  display:flex;gap:10px;flex-wrap:wrap;
+}
+
+/* Avigilon camera feeds */
+.avi-feeds { padding:8px;display:flex;flex-direction:column;gap:6px; }
+
+.feed-card {
+  border:1px solid var(--border);border-radius:2px;
+  background:var(--s2);overflow:hidden;
+  transition:all 0.3s;
+}
+
+.feed-card.active { border-color:var(--avi); }
+.feed-card.alert { border-color:var(--red);animation:falert 0.6s ease-in-out infinite alternate; }
+
+@keyframes falert {
+  from { border-color:rgba(232,53,53,0.3); }
+  to { border-color:var(--red); }
+}
+
+.feed-hdr {
+  display:flex;align-items:center;gap:6px;
+  padding:5px 8px;border-bottom:1px solid var(--border);
+}
+
+.feed-dot { width:6px;height:6px;border-radius:50%;flex-shrink:0; }
+.feed-dot.live { background:var(--red);animation:blink 0.8s step-end infinite; }
+.feed-dot.idle { background:var(--textdim); }
+.feed-dot.triggered { background:var(--stds);animation:blink 0.5s step-end infinite; }
+
+.feed-name { font-size:10px;font-weight:600;flex:1; }
+.feed-ai {
+  font-family:'Share Tech Mono',monospace;font-size:8px;
+  padding:1px 5px;border-radius:2px;border:1px solid;
+}
+
+.feed-ai.detect { border-color:var(--avi);color:var(--avi);background:rgba(232,92,30,0.1); }
+.feed-ai.clear { border-color:var(--textdim);color:var(--textdim); }
+
+.feed-body {
+  height:44px;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+
+.feed-noise { position:absolute;inset:0; }
+.feed-label {
+  position:relative;z-index:1;
+  font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--textdim);
+}
+
+.feed-lpr {
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  padding:4px 8px;background:rgba(0,0,0,0.4);border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:6px;
+}
+
+.lpr-plate {
+  background:var(--s3);border:1px solid var(--border2);
+  padding:1px 6px;border-radius:2px;font-size:10px;font-weight:600;color:#fff;
+  letter-spacing:2px;
+}
+
+/* Incident log */
+.log-list { padding:6px; }
+
+.log-item {
+  padding:6px 8px;margin-bottom:5px;
+  border-left:2px solid;border-radius:0 2px 2px 0;
+  background:rgba(0,0,0,0.3);
+}
+
+.log-item.crit { border-color:var(--red);background:rgba(232,53,53,0.05); }
+.log-item.warn { border-color:var(--yellow);background:rgba(245,198,35,0.04); }
+.log-item.info { border-color:var(--accent);background:rgba(30,110,245,0.03); }
+.log-item.sky { border-color:var(--sky);background:rgba(0,212,160,0.03); }
+.log-item.avi { border-color:var(--avi);background:rgba(232,92,30,0.04); }
+
+.log-time { font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--textdim);margin-bottom:2px; }
+.log-msg { font-size:10px;font-weight:600;line-height:1.3; }
+.log-item.crit .log-msg { color:var(--red); }
+.log-item.warn .log-msg { color:var(--yellow); }
+.log-item.info .log-msg { color:var(--accent); }
+.log-item.sky .log-msg { color:var(--sky); }
+.log-item.avi .log-msg { color:var(--avi); }
+.log-detail { font-size:9px;color:var(--textdim);margin-top:2px; }
+
+/* Stats row */
+.stats-row {
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:var(--border);border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+
+.stat-cell {
+  background:var(--s2);padding:10px 12px;text-align:center;
+}
+
+.stat-cell .sv {
+  font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;margin-bottom:2px;
+}
+
+.stat-cell .sl { font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--textdim);letter-spacing:1px; }
+.stat-cell:nth-child(1) .sv { color:var(--red); }
+.stat-cell:nth-child(2) .sv { color:var(--stds); }
+.stat-cell:nth-child(3) .sv { color:var(--sky); }
+.stat-cell:nth-child(4) .sv { color:var(--green); }
+
+/* CONTROLS */
+.controls { padding:10px;border-top:1px solid var(--border);flex-shrink:0; }
+
+.btn-full {
+  width:100%;padding:9px;border:1px solid;
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+  cursor:pointer;background:transparent;border-radius:2px;
+  transition:all 0.2s;margin-bottom:6px;font-weight:600;
+}
+
+.btn-full.acc { border-color:var(--accent);color:var(--accent); }
+.btn-full.acc:hover,
+.btn-full.acc.active { background:var(--accent);color:#fff; }
+.btn-full.sky { border-color:var(--sky);color:var(--sky); }
+.btn-full.sky:hover { background:var(--sky);color:#000; }
+.btn-full.red { border-color:var(--red);color:var(--red); }
+.btn-full.red:hover { background:var(--red);color:#fff; }
+.btn-full.stds { border-color:var(--stds);color:var(--stds); }
+.btn-full.stds:hover { background:var(--stds);color:#000; }
+
+/* RPM TIMELINE */
+canvas#timeline { width:100%;height:100%;display:block; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-thumb { background:var(--border2);border-radius:2px; }
+
+/* WORKFLOW DIAGRAM */
+.workflow {
+  padding:10px;display:flex;flex-direction:column;gap:4px;
+  overflow-y:auto;flex:1;
+}
+
+.wf-step {
+  display:flex;align-items:center;gap:8px;
+  padding:6px 10px;border:1px solid var(--border);border-radius:2px;
+  background:rgba(0,0,0,0.2);
+  transition:all 0.4s;
+}
+
+.wf-step.active { background:rgba(30,110,245,0.08);border-color:var(--accent); }
+.wf-step.done { background:rgba(34,197,94,0.05);border-color:rgba(34,197,94,0.3); }
+.wf-step.alert { background:rgba(232,53,53,0.08);border-color:var(--red); }
+
+.wf-num {
+  width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Share Tech Mono',monospace;font-size:8px;
+  flex-shrink:0;border:1px solid var(--dim);color:var(--textdim);
+  transition:all 0.4s;
+}
+
+.wf-step.active .wf-num { border-color:var(--accent);color:var(--accent);background:rgba(30,110,245,0.15); }
+.wf-step.done .wf-num { border-color:var(--green);color:var(--green);background:rgba(34,197,94,0.1); }
+.wf-step.alert .wf-num { border-color:var(--red);color:var(--red);background:rgba(232,53,53,0.15); }
+
+.wf-info { flex:1; }
+.wf-title { font-size:10px;font-weight:600;color:var(--text);line-height:1.2; }
+.wf-sys { font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--textdim); }
+.wf-step.active .wf-sys { color:var(--accent); }
+.wf-step.done .wf-sys { color:var(--green); }
+.wf-step.alert .wf-sys { color:var(--red); }
+
+.wf-t {
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  color:var(--textdim);flex-shrink:0;
+}
+
+.wf-step.active .wf-t { color:var(--accent); }
+.wf-step.done .wf-t { color:var(--green); }
+
+/* demo badge */
+.demo-tag {
+  position:fixed;bottom:10px;right:10px;
+  font-family:'Share Tech Mono',monospace;font-size:8px;
+  padding:3px 8px;border:1px solid var(--stds);color:var(--stds);
+  border-radius:2px;background:rgba(245,166,35,0.06);
+  z-index:1000;opacity:0.7;
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-hex">⬡</div>
+    <div class="brand-text">
+      <h1>COMMANDCENTRAL AWARE · STDS</h1>
+      <p>CLEVELAND DIVISION OF POLICE · 3RD DISTRICT OPERATIONS · CPD HQ DRONE COMMAND</p>
+    </div>
+  </div>
+  <div class="topbar-center">
+    <div class="sys-pill msi"><div class="sdot msi"></div>COMMANDCENTRAL AWARE</div>
+    <div class="sys-pill avi"><div class="sdot avi"></div>AVIGILON UNITY</div>
+    <div class="sys-pill sky"><div class="sdot sky"></div>SKYDIO DFR COMMAND</div>
+    <div class="sys-pill stds"><div class="sdot stds"></div>STDS ACOUSTIC</div>
+  </div>
+  <div class="topbar-right">
+    <div style="display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--red)">
+      <div class="sdot red"></div>INCIDENT ACTIVE
+    </div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app">
+
+  <!-- ═══ LEFT COLUMN — STDS ACOUSTIC + WORKFLOW ═══ -->
+  <div class="left panel">
+    <div class="ph">
+      <span class="ph-title stds">STDS ACOUSTIC ENGINE</span>
+      <span class="ph-badge">NODE-01 · 3RD DISTRICT</span>
+    </div>
+
+    <!-- RPM DISPLAY -->
+    <div class="acoustic-block">
+      <div class="rpm-row">
+        <canvas id="miniGauge" width="80" height="50"></canvas>
+        <div class="rpm-vals">
+          <div class="rpm-big crit" id="rpmBig">5,340</div>
+          <div class="rpm-lbl">DETECTED RPM</div>
+        </div>
+      </div>
+      <div class="stat-mini-row">
+        <div class="stat-mini">
+          <div class="val" id="peakRpm">6200</div>
+          <div class="lbl">PEAK RPM</div>
+        </div>
+        <div class="stat-mini">
+          <div class="val" id="sustainSec">14s</div>
+          <div class="lbl">SUSTAINED</div>
+        </div>
+        <div class="stat-mini">
+          <div class="val" id="dbLvl">94dB</div>
+          <div class="lbl">SPL LEVEL</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIDENCE -->
+    <div class="conf-wrap">
+      <div class="conf-hdr">
+        <span>DETECTION CONFIDENCE</span>
+        <span id="confPct">97%</span>
+      </div>
+      <div class="conf-track">
+        <div class="conf-fill" id="confFill" style="width:97%;background:var(--red)"></div>
+      </div>
+    </div>
+
+    <!-- FREQ BANDS -->
+    <div class="ph" style="border-top:1px solid var(--border)">
+      <span class="ph-title acc">FREQUENCY BANDS</span>
+      <span class="ph-badge">ENGINE SIGNATURE</span>
+    </div>
+    <div class="freq-list" id="freqList"></div>
+
+    <!-- WORKFLOW -->
+    <div class="ph" style="border-top:1px solid var(--border)">
+      <span class="ph-title acc">RESPONSE WORKFLOW</span>
+      <span class="ph-badge" id="wfTimer">T+00:14</span>
+    </div>
+    <div class="workflow" id="workflow"></div>
+  </div>
+
+  <!-- ═══ CENTER COLUMN — MAP + TIMELINE + LOG ═══ -->
+  <div class="center">
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-cell"><div class="sv" id="critCnt">1</div><div class="sl">CRITICAL</div></div>
+      <div class="stat-cell"><div class="sv" id="warnCnt">3</div><div class="sl">WARNINGS</div></div>
+      <div class="stat-cell"><div class="sv" id="dronesCnt">2</div><div class="sl">DRONES UP</div></div>
+      <div class="stat-cell"><div class="sv" id="nodesCnt">180</div><div class="sl">NODES LIVE</div></div>
+    </div>
+
+    <!-- MAP -->
+    <div class="map-area" style="flex:1;min-height:0">
+      <canvas id="mapCanvas"></canvas>
+      <div class="map-overlay-tl">
+        <div class="map-tag msi">⬡ COMMANDCENTRAL AWARE · ESRI MAP</div>
+        <div class="map-tag sky">✈ SKYDIO DFR — 2 UNITS DEPLOYED</div>
+        <div class="map-tag stds">📡 STDS — 6-NODE TRIANGULATION ACTIVE</div>
+      </div>
+      <!-- INCIDENT BANNER -->
+      <div class="incident-banner show" id="incBanner">
+        <div>
+          <div class="ib-title" id="ibTitle">⚠ STREET TAKEOVER · E 79TH & HOUGH AVE</div>
+          <div class="ib-sub" id="ibSub">5,340 RPM sustained 14s · GCC-PHAT confirmed · 6 nodes · Conf 97% · Skydio X10-A & X10-B deployed · Avigilon AI: VEHICLE DETECTED</div>
+        </div>
+        <div class="ib-actions">
+          <button class="btn-sm sky" onclick="dispatchDrone()">▲ DISPATCH X10-C</button>
+          <button class="btn-sm acc" onclick="cadEntry()">📟 CAD ENTRY</button>
+          <button class="btn-sm red" onclick="clearInc()">DISMISS</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div class="bottom-row">
+      <!-- RPM TIMELINE -->
+      <div class="bottom-panel">
+        <div class="ph">
+          <span class="ph-title stds">RPM TIMELINE · 90s</span>
+          <span class="ph-badge">GCC-PHAT LOCALIZED</span>
+        </div>
+        <div style="flex:1;padding:6px;overflow:hidden">
+          <canvas id="timeline"></canvas>
+        </div>
+      </div>
+      <!-- SPECTROGRAM -->
+      <div class="bottom-panel">
+        <div class="ph">
+          <span class="ph-title acc">SPECTROGRAM · LIVE</span>
+          <span class="ph-badge">ENGINE HARMONIC BAND</span>
+        </div>
+        <div style="flex:1;padding:6px;overflow:hidden">
+          <canvas id="spectrogram"></canvas>
+        </div>
+      </div>
+      <!-- INCIDENT LOG -->
+      <div class="bottom-panel">
+        <div class="ph">
+          <span class="ph-title red">INCIDENT LOG</span>
+          <span class="ph-badge" id="logCnt">9 EVENTS</span>
+        </div>
+        <div class="bp-content" id="logList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT COLUMN — DRONES + AVIGILON ═══ -->
+  <div class="right panel">
+    <!-- DRONE STATUS -->
+    <div class="ph">
+      <span class="ph-title sky">SKYDIO X10 · DFR COMMAND</span>
+      <span class="ph-badge">CPD HQ DOCK · 4 UNITS</span>
+    </div>
+
+    <div class="drone-cards" id="droneCards"></div>
+
+    <!-- AVIGILON -->
+    <div class="ph" style="border-top:1px solid var(--border)">
+      <span class="ph-title avi">AVIGILON UNITY · ACTIVE FEEDS</span>
+      <span class="ph-badge">AI ANALYTICS ON</span>
+    </div>
+
+    <div class="avi-feeds" id="aviFeeds" style="overflow-y:auto;flex:1"></div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+      <button class="btn-full acc active" id="monBtn" onclick="toggleMonitor()">■ MONITORING ACTIVE</button>
+      <button class="btn-full sky" onclick="deployAllDrones()">▲ DEPLOY ALL DRONES</button>
+      <button class="btn-full stds" onclick="runScenario()">⬡ RUN SCENARIO</button>
+      <button class="btn-full red" onclick="triggerManual()">⚠ MANUAL ALERT TEST</button>
+    </div>
+  </div>
+</div>
+
+<div class="demo-tag">PROOF-OF-CONCEPT · STDS + COMMANDCENTRAL AWARE + AVIGILON + SKYDIO</div>
+
+<script>
+// ─── CONSTANTS ───────────────────────────────────────────
+const FREQ_BANDS = [
+  { name:'Engine Idle', range:'50–100 Hz', color:'#22c55e' },
+  { name:'Low-RPM Rumble', range:'100–300 Hz', color:'#1e6ef5' },
+  { name:'Mid-RPM Core', range:'300–600 Hz', color:'#f5c623' },
+  { name:'High-RPM Signature', range:'600–1.2 kHz', color:'#f5a623' },
+  { name:'Exhaust Harmonics', range:'1.2–3 kHz', color:'#e83535' },
+  { name:'Tire Screech', range:'3–6 kHz', color:'#cc22ff' },
+];
+
+const DRONES = [
+  { id:'X10-A', dock:'DOCK 1', status:'deployed', batt:78, sig:92, lat:41.511, lon:-81.641, alt:220, speed:24 },
+  { id:'X10-B', dock:'DOCK 2', status:'deployed', batt:85, sig:88, lat:41.509, lon:-81.636, alt:180, speed:18 },
+  { id:'X10-C', dock:'DOCK 3', status:'ready', batt:100, sig:95, lat:41.508, lon:-81.649, alt:0, speed:0 },
+  { id:'X10-D', dock:'DOCK 4', status:'charging', batt:42, sig:0, lat:41.508, lon:-81.649, alt:0, speed:0 },
+];
+
+const AVI_FEEDS = [
+  { name:'E 79th & Hough', status:'alert', ai:'VEHICLE DETECTED', lpr:'JKT 4429' },
+  { name:'Hough Ave & E 71st', status:'triggered', ai:'3 VEHICLES', lpr:'RLM 8812' },
+  { name:'E 93rd & Superior', status:'live', ai:'CLEAR', lpr:'' },
+  { name:'MLK Blvd & E 79th', status:'live', ai:'CROWD DETECT', lpr:'HNS 2291' },
+  { name:'Cedar Rd & E 105th', status:'idle', ai:'CLEAR', lpr:'' },
+];
+
+const WORKFLOW_STEPS = [
+  { t:'T+0.0s', title:'RPM detected — 4,000+ sustained', sys:'STDS ACOUSTIC · NODE-047', state:'done' },
+  { t:'T+3.0s', title:'Sustain threshold crossed — CNN: 94%', sys:'STDS EDGE INFERENCE · PYROOMACOUSTICS', state:'done' },
+  { t:'T+4.8s', title:'GCC-PHAT triangulation — 6 nodes', sys:'STDS CENTRAL · ±22ft ACCURACY', state:'done' },
+  { t:'T+5.1s', title:'Webhook fired → CommandCentral Aware', sys:'STDS API → MOTOROLA MCC 7500', state:'done' },
+  { t:'T+5.4s', title:'Incident pinned on Esri live map', sys:'COMMANDCENTRAL AWARE · 3RD DIST', state:'done' },
+  { t:'T+5.8s', title:'Avigilon AI: Vehicle cluster detected', sys:'AVIGILON UNITY · APPEARANCE SEARCH', state:'done' },
+  { t:'T+6.2s', title:'Skydio X10-A & X10-B auto-dispatched', sys:'SKYDIO DFR COMMAND · DOCK 1 & 2', state:'done' },
+  { t:'T+8.5s', title:'PremierOne CAD incident created', sys:'MOTOROLA PREMIEREONE CAD · PRIORITY 2', state:'alert' },
+  { t:'T+9.1s', title:'MDT push to 3D patrol units', sys:'COMMANDCENTRAL AWARE · APX RADIO', state:'active' },
+  { t:'T+12s+', title:'LPR plates captured — 3 vehicles', sys:'AVIGILON LPR · FLOCK ALPR QUERY', state:'active' },
+];
+
+const LOGS_INIT = [
+  { type:'crit', time:'02:31:44', msg:'STREET TAKEOVER — E 79TH & HOUGH AVE', detail:'5340 RPM · Conf 97% · 6-node GCC-PHAT · ±22ft' },
+  { type:'sky', time:'02:31:51', msg:'Skydio X10-A deployed from Dock 1', detail:'ETA: 38s · Alt: 220ft · Speed: 24mph' },
+  { type:'sky', time:'02:31:52', msg:'Skydio X10-B deployed from Dock 2', detail:'ETA: 44s · Alt: 180ft · Speed: 18mph' },
+  { type:'avi', time:'02:31:54', msg:'Avigilon: Vehicle cluster detected', detail:'E 79th & Hough · Appearance Search active' },
+  { type:'avi', time:'02:31:55', msg:'LPR capture: JKT 4429 — watch list match', detail:'2019 Dodge Charger · Previous incident 11/02' },
+  { type:'warn', time:'02:31:58', msg:'PremierOne CAD P2 incident created', detail:'Dispatching 3D-12 · 3D-07 · Supervisor notified' },
+  { type:'info', time:'02:32:01', msg:'CommandCentral: 4 cameras activated', detail:'PTZ locked to E 79th & Hough corridor' },
+  { type:'warn', time:'02:31:22', msg:'HIGH-RPM WARNING — N Broadway & E 71st', detail:'4,200 RPM · 6s · Conf 71% · Monitoring' },
+  { type:'info', time:'02:31:08', msg:'STDS: System nominal · 180 nodes active', detail:'3rd District · Full coverage confirmed' },
+];
+
+// ─── STATE ────────────────────────────────────────────────
+let isMonitoring = true;
+let rpmHistory = new Array(90).fill(0);
+let spectroBuffer = [];
+let currentRpm = 5340;
+let scenarioT = 0;
+let wfElapsed = 14;
+let logItems = [...LOGS_INIT];
+let droneState = [...DRONES];
+let scenarioRunning = false;
+let animId = null;
+let lastTime = 0;
+
+// ─── CLOCK ────────────────────────────────────────────────
+function tick() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US',{hour12:false});
+}
+setInterval(tick,1000);tick();
+
+// ─── WORKFLOW ─────────────────────────────────────────────
+function renderWorkflow() {
+  const el = document.getElementById('workflow');
+  el.innerHTML = WORKFLOW_STEPS.map((s,i) => `
+    <div class="wf-step ${s.state}">
+      <div class="wf-num">${i+1}</div>
+      <div class="wf-info">
+        <div class="wf-title">${s.title}</div>
+        <div class="wf-sys">${s.sys}</div>
+      </div>
+      <div class="wf-t">${s.t}</div>
+    </div>
+  `).join('');
+}
+renderWorkflow();
+
+// ─── FREQ BANDS ───────────────────────────────────────────
+function renderFreqBands(levels) {
+  const el = document.getElementById('freqList');
+  el.innerHTML = FREQ_BANDS.map((b,i) => {
+    const lvl = levels ? levels[i] : 0;
+    const pct = Math.round(lvl);
+    const isAlert = i >= 4 && lvl > 65;
+    const isActive = lvl > 25;
+    return `
+      <div class="freq-item ${isAlert?'alert':isActive?'active':''}">
+        <div class="freq-dot" style="background:${isAlert||isActive?b.color:'#2d4060'};
+          ${isAlert||isActive?`box-shadow:0 0 6px ${b.color}`:''}"></div>
+        <div class="freq-info" style="flex:1">
+          <div class="fd">${b.name}</div>
+          <div class="fr">${b.range}</div>
+        </div>
+        <div class="fl">${pct}%</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─── DRONE CARDS ─────────────────────────────────────────
+function renderDrones() {
+  const el = document.getElementById('droneCards');
+  el.innerHTML = droneState.map(d => `
+    <div class="drone-card ${d.status==='deployed'?'deployed':d.status==='ready'?'active':''}">
+      <div class="dc-header">
+        <div class="dc-id">✈ ${d.id}</div>
+        <div style="font-size:9px;color:var(--textdim);font-family:'Share Tech Mono',monospace">${d.dock}</div>
+        <div class="dc-status ${d.status}">${d.status.toUpperCase()}</div>
+      </div>
+      <div class="dc-bar-row">
+        <div class="dc-bar-lbl" style="font-size:9px;color:var(--textdim);font-family:'Share Tech Mono',monospace">BATT</div>
+        <div class="dc-bar-track"><div class="dc-bar-fill batt-fill" style="width:${d.batt}%;background:${d.batt>50?'var(--green)':d.batt>20?'var(--yellow)':'var(--red)'}"></div></div>
+        <div class="dc-bar-val">${d.batt}%</div>
+      </div>
+      <div class="dc-bar-row">
+        <div class="dc-bar-lbl" style="font-size:9px;color:var(--textdim);font-family:'Share Tech Mono',monospace">LINK</div>
+        <div class="dc-bar-track"><div class="dc-bar-fill sig-fill" style="width:${d.sig}%"></div></div>
+        <div class="dc-bar-val">${d.sig}%</div>
+      </div>
+      <div class="dc-meta">
+        ${d.status==='deployed'?`<span>ALT: ${d.alt}ft</span><span>SPD: ${d.speed}mph</span><span style="color:var(--sky)">● LIVE</span>`:`<span>${d.status==='charging'?`CHARGING: ${d.batt}%`:'STANDBY · READY'}</span>`}
+      </div>
+    </div>
+  `).join('');
+}
+renderDrones();
+
+// ─── AVIGILON FEEDS ───────────────────────────────────────
+function renderAvi() {
+  const el = document.getElementById('aviFeeds');
+  el.innerHTML = AVI_FEEDS.map(f => `
+    <div class="feed-card ${f.status==='alert'?'alert':f.status!=='idle'?'active':''}">
+      <div class="feed-hdr">
+        <div class="feed-dot ${f.status==='idle'?'idle':f.status==='alert'?'live':'triggered'}"></div>
+        <div class="feed-name">${f.name}</div>
+        <div class="feed-ai ${f.ai==='CLEAR'?'clear':'detect'}">${f.ai}</div>
+      </div>
+      <div class="feed-body">
+        <canvas class="feed-noise" width="200" height="44" id="noise-${f.name.replace(/[^a-z0-9]/gi,'_')}"></canvas>
+        <span class="feed-label">${f.status==='idle'?'NO ACTIVITY':'▶ LIVE FEED'}</span>
+      </div>
+      ${f.lpr ? `<div class="feed-lpr"><span style="color:var(--textdim)">LPR:</span> <span class="lpr-plate">${f.lpr}</span></div>` : ''}
+    </div>
+  `).join('');
+  drawNoise();
+}
+renderAvi();
+
+function drawNoise() {
+  AVI_FEEDS.forEach(f => {
+    const id = 'noise-'+f.name.replace(/[^a-z0-9]/gi,'_');
+    const c = document.getElementById(id);
+    if(!c) return;
+    const ctx = c.getContext('2d');
+    const W=c.width,H=c.height;
+    ctx.clearRect(0,0,W,H);
+    if(f.status==='idle') return;
+    const img = ctx.createImageData(W,H);
+    for(let i=0;i<img.data.length;i+=4){
+      const v = Math.random()*(f.status==='alert'?40:25);
+      img.data[i]=img.data[i+1]=img.data[i+2]=v;
+      img.data[i+3]=255;
+    }
+    ctx.putImageData(img,0,0);
+  });
+}
+setInterval(drawNoise, 120);
+
+// ─── LOG ─────────────────────────────────────────────────
+function renderLog() {
+  const el = document.getElementById('logList');
+  el.innerHTML = logItems.slice(0,15).map(l => `
+    <div class="log-item ${l.type}">
+      <div class="log-time">${l.time}</div>
+      <div class="log-msg">${l.msg}</div>
+      ${l.detail?`<div class="log-detail">${l.detail}</div>`:''}
+    </div>
+  `).join('');
+  document.getElementById('logCnt').textContent = `${logItems.length} EVENTS`;
+}
+renderLog();
+
+function addLog(type, msg, detail) {
+  const now = new Date().toLocaleTimeString('en-US',{hour12:false});
+  logItems.unshift({type,time:now,msg,detail});
+  if(logItems.length>50) logItems.pop();
+  renderLog();
+}
+
+// ─── MINI GAUGE ──────────────────────────────────────────
+function drawMiniGauge(rpm) {
+  const c = document.getElementById('miniGauge');
+  const ctx = c.getContext('2d');
+  const W=80,H=50,cx=40,cy=48,R=36;
+  ctx.clearRect(0,0,W,H);
+
+  ctx.beginPath();ctx.arc(cx,cy,R,Math.PI,0);
+  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=8;ctx.stroke();
+
+  const zones=[{f:0,t:0.5,c:'rgba(34,197,94,0.4)'},{f:0.5,t:0.75,c:'rgba(245,198,35,0.5)'},{f:0.75,t:1,c:'rgba(232,53,53,0.5)'}];
+  zones.forEach(z=>{
+    ctx.beginPath();ctx.arc(cx,cy,R,Math.PI+z.f*Math.PI,Math.PI+z.t*Math.PI);
+    ctx.strokeStyle=z.c;ctx.lineWidth=8;ctx.stroke();
+  });
+
+  const pct=Math.min(rpm/8000,1);
+  const color=rpm>=6000?'#e83535':rpm>=4000?'#f5c623':'#1e6ef5';
+  ctx.beginPath();ctx.arc(cx,cy,R,Math.PI,Math.PI+pct*Math.PI);
+  ctx.strokeStyle=color;ctx.lineWidth=8;ctx.lineCap='round';ctx.stroke();
+
+  const ang=Math.PI+pct*Math.PI;
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(ang);
+  ctx.beginPath();ctx.moveTo(-4,0);ctx.lineTo(R-10,0);
+  ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
+  ctx.restore();
+
+  ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+}
+
+// ─── MAP CANVAS ──────────────────────────────────────────
+function drawMap(ts) {
+  const c = document.getElementById('mapCanvas');
+  if(!c) return;
+  const W=c.offsetWidth, H=c.offsetHeight;
+  if(c.width!==W||c.height!==H){c.width=W;c.height=H;}
+  const ctx=c.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+
+  // Background grid (street map sim)
+  ctx.fillStyle='#0a0e18';ctx.fillRect(0,0,W,H);
+
+  // Grid streets
+  ctx.strokeStyle='rgba(30,50,80,0.6)';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // Major corridors (Hough, E 79th etc)
+  ctx.strokeStyle='rgba(40,70,110,0.8)';ctx.lineWidth=3;
+  [H*0.35,H*0.55,H*0.72].forEach(y=>{
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+  });
+  [W*0.3,W*0.5,W*0.65,W*0.8].forEach(x=>{
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();
+  });
+
+  // INCIDENT LOCATION — center
+  const ix=W*0.5, iy=H*0.42;
+  const pulse=(Math.sin(ts/300)+1)/2;
+
+  // Outer pulse rings
+  [80,55,35].forEach((r,i)=>{
+    ctx.beginPath();ctx.arc(ix,iy,r+pulse*8,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(232,53,53,${0.15+i*0.08})`;ctx.lineWidth=1;ctx.stroke();
+  });
+
+  // Triangulation lines to nodes
+  const nodes=[
+    {x:W*0.3,y:H*0.3},{x:W*0.65,y:H*0.25},{x:W*0.75,y:H*0.45},
+    {x:W*0.6,y:H*0.62},{x:W*0.35,y:H*0.6},{x:W*0.2,y:H*0.45},
+  ];
+
+  nodes.forEach((n,i)=>{
+    const alpha=0.3+pulse*0.3;
+    ctx.beginPath();ctx.moveTo(ix,iy);ctx.lineTo(n.x,n.y);
+    ctx.strokeStyle=`rgba(245,166,35,${alpha})`;ctx.lineWidth=0.5;
+    ctx.setLineDash([4,6]);ctx.stroke();ctx.setLineDash([]);
+
+    // Node dot
+    const nodeR=6;
+    ctx.beginPath();ctx.arc(n.x,n.y,nodeR,0,Math.PI*2);
+    ctx.fillStyle=`rgba(30,110,245,${0.6+pulse*0.3})`;ctx.fill();
+    ctx.strokeStyle='rgba(100,150,255,0.8)';ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle='rgba(150,200,255,0.9)';ctx.font='8px Share Tech Mono';
+    ctx.textAlign='center';
+    ctx.fillText(`N${i+41}`,n.x,n.y+16);
+  });
+
+  // Incident marker
+  ctx.beginPath();ctx.arc(ix,iy,12,0,Math.PI*2);
+  ctx.fillStyle=`rgba(232,53,53,${0.6+pulse*0.3})`;ctx.fill();
+  ctx.strokeStyle='#e83535';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='#fff';ctx.font='bold 10px Rajdhani';ctx.textAlign='center';
+  ctx.fillText('!',ix,iy+4);
+
+  // Incident label
+  ctx.fillStyle='rgba(6,8,13,0.85)';
+  ctx.fillRect(ix-70,iy-42,140,22);
+  ctx.strokeStyle='rgba(232,53,53,0.6)';ctx.lineWidth=0.5;
+  ctx.strokeRect(ix-70,iy-42,140,22);
+  ctx.fillStyle='#e83535';ctx.font='9px Share Tech Mono';ctx.textAlign='center';
+  ctx.fillText('E 79TH & HOUGH AVE',ix,iy-27);
+
+  // DRONE TRAILS
+  droneState.filter(d=>d.status==='deployed').forEach((d,i)=>{
+    const dx=ix+(i===0?-80:90), dy=iy+(i===0?-60:40);
+    const pulse2=(Math.sin(ts/200+i)+1)/2;
+
+    // Trail
+    ctx.beginPath();ctx.moveTo(W*0.5,H*0.1);ctx.lineTo(dx,dy);
+    ctx.strokeStyle='rgba(0,212,160,0.4)';ctx.lineWidth=1;
+    ctx.setLineDash([3,5]);ctx.stroke();ctx.setLineDash([]);
+
+    // Drone dot
+    ctx.beginPath();ctx.arc(dx,dy,8,0,Math.PI*2);
+    ctx.fillStyle=`rgba(0,212,160,${0.5+pulse2*0.4})`;ctx.fill();
+    ctx.strokeStyle='#00d4a0';ctx.lineWidth=1.5;ctx.stroke();
+
+    // Drone FOV cone
+    ctx.beginPath();ctx.moveTo(dx,dy);
+    ctx.arc(dx,dy,40,0.5*Math.PI,1.5*Math.PI);
+    ctx.closePath();
+    ctx.fillStyle='rgba(0,212,160,0.06)';ctx.fill();
+    ctx.strokeStyle='rgba(0,212,160,0.2)';ctx.lineWidth=0.5;ctx.stroke();
+
+    ctx.fillStyle='#00d4a0';ctx.font='8px Share Tech Mono';ctx.textAlign='center';
+    ctx.fillText(d.id,dx,dy+18);
+  });
+
+  // CPD HQ DOCK location
+  ctx.fillStyle='rgba(6,8,13,0.7)';
+  ctx.fillRect(W*0.5-36,H*0.06,72,16);
+  ctx.strokeStyle='rgba(0,212,160,0.5)';ctx.lineWidth=0.5;
+  ctx.strokeRect(W*0.5-36,H*0.06,72,16);
+  ctx.fillStyle='#00d4a0';ctx.font='8px Share Tech Mono';ctx.textAlign='center';
+  ctx.fillText('CPD HQ · X10 DOCKS',W*0.5,H*0.06+11);
+
+  // Coordinates label
+  ctx.fillStyle='rgba(100,150,200,0.6)';ctx.font='8px Share Tech Mono';ctx.textAlign='left';
+  ctx.fillText('41.5112°N  81.6421°W',6,H-8);
+  ctx.textAlign='right';
+  ctx.fillText('ESRI BASEMAP · COMMANDCENTRAL AWARE',W-6,H-8);
+}
+
+// ─── RPM TIMELINE ────────────────────────────────────────
+function drawTimeline() {
+  const c = document.getElementById('timeline');
+  if(!c) return;
+  const W=c.offsetWidth||400, H=c.offsetHeight||100;
+  c.width=W;c.height=H;
+  const ctx=c.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+
+  // Zones
+  const y4k=H-(4000/8000)*H, y6k=H-(6000/8000)*H;
+  ctx.fillStyle='rgba(245,198,35,0.06)';ctx.fillRect(0,y6k,W,y4k-y6k);
+  ctx.fillStyle='rgba(232,53,53,0.09)';ctx.fillRect(0,0,W,y6k);
+
+  // Grid
+  [2000,4000,6000,8000].forEach(r=>{
+    ctx.beginPath();ctx.moveTo(0,H-(r/8000)*H);ctx.lineTo(W,H-(r/8000)*H);
+    ctx.strokeStyle='rgba(26,37,64,0.7)';ctx.lineWidth=0.5;ctx.stroke();
+    ctx.fillStyle='rgba(74,96,128,0.6)';ctx.font='8px Share Tech Mono';ctx.textAlign='left';
+    ctx.fillText(r,2,H-(r/8000)*H-2);
+  });
+
+  // Threshold lines
+  ctx.setLineDash([5,4]);
+  ctx.strokeStyle='rgba(245,198,35,0.5)';ctx.lineWidth=0.8;
+  ctx.beginPath();ctx.moveTo(0,y4k);ctx.lineTo(W,y4k);ctx.stroke();
+  ctx.strokeStyle='rgba(232,53,53,0.5)';
+  ctx.beginPath();ctx.moveTo(0,y6k);ctx.lineTo(W,y6k);ctx.stroke();
+  ctx.setLineDash([]);
+
+  if(rpmHistory.length<2) return;
+  const step=W/(rpmHistory.length-1);
+  const last=rpmHistory[rpmHistory.length-1];
+  const color=last>=6000?'#e83535':last>=4000?'#f5c623':'#1e6ef5';
+
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,last>=6000?'rgba(232,53,53,0.4)':'rgba(245,198,35,0.3)');
+  grad.addColorStop(1,'rgba(30,110,245,0.04)');
+
+  ctx.beginPath();ctx.moveTo(0,H);
+  rpmHistory.forEach((r,i)=>ctx.lineTo(i*step,H-(r/8000)*H));
+  ctx.lineTo((rpmHistory.length-1)*step,H);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+
+  ctx.beginPath();
+  rpmHistory.forEach((r,i)=>{if(i===0)ctx.moveTo(0,H-(r/8000)*H);else ctx.lineTo(i*step,H-(r/8000)*H);});
+  ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.stroke();
+}
+
+// ─── SPECTROGRAM ─────────────────────────────────────────
+function drawSpectrogram() {
+  const c = document.getElementById('spectrogram');
+  if(!c) return;
+  const W=c.offsetWidth||400, H=c.offsetHeight||100;
+  c.width=W;c.height=H;
+  const ctx=c.getContext('2d');
+
+  // Simulate engine harmonic data
+  const bins=64;
+  const fakeData=[];
+  for(let i=0;i<bins;i++){
+    const hz=(i/bins)*4000;
+    let v=10;
+    // fundamental harmonics at ~133Hz (4000RPM/30), ~200Hz, ~267Hz etc
+    [133,200,267,333,400].forEach((h,hi)=>{
+      const dist=Math.abs(hz-h);
+      if(dist<40) v+=Math.max(0,(1-dist/40))*200/(hi+1);
+    });
+    v+=(Math.random()-0.5)*15;
+    fakeData.push(Math.min(255,v));
+  }
+
+  spectroBuffer.push(fakeData);
+  if(spectroBuffer.length>W) spectroBuffer.shift();
+
+  ctx.clearRect(0,0,W,H);
+  const colW=W/spectroBuffer.length;
+  spectroBuffer.forEach((col,xi)=>{
+    col.forEach((val,yi)=>{
+      const norm=val/255;
+      let r=0,g=0,b=0;
+      if(norm<0.33){r=0;g=norm*3*255;b=136;}
+      else if(norm<0.66){r=(norm-0.33)*3*255;g=212;b=255-(norm-0.33)*3*255;}
+      else{r=255;g=255-(norm-0.66)*3*255;b=0;}
+      ctx.fillStyle=`rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${0.3+norm*0.7})`;
+      ctx.fillRect(xi*colW,(1-yi/bins)*H,colW+1,(H/bins)+1);
+    });
+  });
+}
+
+// ─── MAIN LOOP ────────────────────────────────────────────
+let wfSec = 14;
+
+function mainLoop(ts) {
+  animId = requestAnimationFrame(mainLoop);
+  if(!isMonitoring) return;
+
+  // Simulate dynamic RPM
+  const baseRpm = scenarioRunning ? getScenarioRpm(ts) : 5340 + Math.sin(ts/800)*400 + (Math.random()-0.5)*300;
+  currentRpm = Math.max(0, Math.min(8000, Math.round(baseRpm)));
+
+  // Update history
+  rpmHistory.push(currentRpm);
+  if(rpmHistory.length>90) rpmHistory.shift();
+
+  // UI updates every ~100ms
+  if(ts-lastTime > 80) {
+    lastTime = ts;
+
+    // RPM display
+    const rd = document.getElementById('rpmBig');
+    rd.textContent = currentRpm.toLocaleString();
+    rd.className = 'rpm-big ' + (currentRpm>=6000?'crit':currentRpm>=4000?'warn':'ok');
+
+    // Peak
+    const peak = Math.max(...rpmHistory);
+    document.getElementById('peakRpm').textContent = peak.toLocaleString();
+    document.getElementById('sustainSec').textContent = Math.round(ts/1000)+'s';
+    document.getElementById('dbLvl').textContent = Math.round(85+currentRpm/800)+'dB';
+
+    // Confidence
+    const conf = Math.min(100, Math.round(70 + (currentRpm-4000)/40));
+    document.getElementById('confPct').textContent = conf+'%';
+    const cf = document.getElementById('confFill');
+    cf.style.width = conf+'%';
+    cf.style.background = conf>80?'var(--red)':conf>50?'var(--yellow)':'var(--green)';
+
+    // Freq bands simulation
+    const bands = FREQ_BANDS.map((b,i)=>{
+      const base=[20,35,55,75,85,60][i];
+      return base + (Math.random()-0.5)*20 + (currentRpm>4000?[0,5,15,25,30,20][i]:0);
+    });
+    renderFreqBands(bands);
+
+    // Gauges
+    drawMiniGauge(currentRpm);
+    drawTimeline();
+    drawSpectrogram();
+    drawMap(ts);
+
+    // WF timer
+    wfSec = Math.round(ts/1000);
+    const m=Math.floor(wfSec/60).toString().padStart(2,'0');
+    const s=(wfSec%60).toString().padStart(2,'0');
+    document.getElementById('wfTimer').textContent = `T+${m}:${s}`;
+
+    // Drone battery drain
+    droneState.forEach(d=>{
+      if(d.status==='deployed') d.batt=Math.max(0,d.batt-(1/3600)*0.08/60);
+      if(d.status==='charging') d.batt=Math.min(100,d.batt+0.02);
+      d.batt=Math.round(d.batt*10)/10;
+    });
+    renderDrones();
+  }
+}
+
+// ─── SCENARIO RPM ─────────────────────────────────────────
+function getScenarioRpm(ts) {
+  const phases=[
+    {dur:5000,lo:800,hi:1200},
+    {dur:4000,lo:1200,hi:4500},
+    {dur:10000,lo:4500,hi:6200},
+    {dur:6000,lo:5500,hi:7500},
+    {dur:5000,lo:1000,hi:3000},
+    {dur:4000,lo:700,hi:1000},
+  ];
+  let t=ts%34000;
+  for(const p of phases){
+    if(t<p.dur){
+      const prog=t/p.dur;
+      return p.lo+(p.hi-p.lo)*prog+(Math.random()-0.5)*300;
+    }
+    t-=p.dur;
+  }
+  return 800;
+}
+
+// ─── CONTROLS ─────────────────────────────────────────────
+function toggleMonitor() {
+  isMonitoring = !isMonitoring;
+  const btn = document.getElementById('monBtn');
+  if(isMonitoring){
+    btn.textContent='■ MONITORING ACTIVE';
+    btn.classList.add('active');
+    addLog('info','STDS monitoring resumed','Full acoustic coverage restored');
+  } else {
+    btn.textContent='▶ START MONITORING';
+    btn.classList.remove('active');
+    addLog('warn','STDS monitoring paused','Manual pause by operator');
+  }
+}
+
+function deployAllDrones() {
+  droneState.forEach(d=>{
+    if(d.status==='ready'){d.status='deployed';d.alt=150;d.speed=35;}
+  });
+  renderDrones();
+  addLog('sky','All available drones deployed','X10-C scrambled from Dock 3 · CPD HQ');
+  document.getElementById('dronesCnt').textContent='3';
+}
+
+function runScenario() {
+  scenarioRunning = !scenarioRunning;
+  if(scenarioRunning) {
+    addLog('info','Scenario simulation started','Synthetic takeover event — Hough/E 79th corridor');
+  } else {
+    addLog('info','Scenario simulation ended','Returning to live monitoring');
+  }
+}
+
+function triggerManual() {
+  addLog('crit','MANUAL ALERT TEST — OPERATOR TRIGGERED','CommandCentral Aware test push');
+  document.getElementById('incBanner').classList.add('show');
+  addLog('sky','Skydio X10-A: Manual dispatch test','DFR Command test flight initiated');
+}
+
+function dispatchDrone() {
+  droneState[2].status='deployed';droneState[2].alt=200;droneState[2].speed=42;
+  renderDrones();
+  addLog('sky','Skydio X10-C deployed — Dock 3','E 79th & Hough · ETA 28s');
+  document.getElementById('dronesCnt').textContent='3';
+  document.getElementById('warnCnt').textContent = parseInt(document.getElementById('warnCnt').textContent)+1;
+}
+
+function cadEntry() {
+  addLog('info','PremierOne CAD — P2 incident created','3D-12 dispatched · ETA 4min');
+}
+
+function clearInc() {
+  document.getElementById('alertBanner')?.classList?.remove('show');
+  document.getElementById('incBanner').classList.remove('show');
+  addLog('info','Incident banner dismissed by operator','Monitoring continues');
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+// Seed RPM history with a realistic takeover profile
+for(let i=0;i<60;i++) {
+  const t=i/60;
+  const r = t<0.2 ? 800+t*5*2000 :
+            t<0.4 ? 2500+t*2000 :
+            t<0.85 ? 4800+(Math.sin(t*10)*400) :
+            t<0.95 ? 5800+(Math.random()-0.5)*600 :
+                     4000+(Math.random()-0.5)*500;
+  rpmHistory.push(Math.round(r));
+}
+
+requestAnimationFrame(mainLoop);
+</script>
+</body>
+</html>

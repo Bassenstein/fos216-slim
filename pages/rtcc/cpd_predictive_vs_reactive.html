@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPD: From Reactive to Predictive — The RTCC Intelligence Shift</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #06080d;
+  --bg2:       #0a0e16;
+  --surface:   #0f1520;
+  --surface2:  #141b28;
+  --border:    #1c2535;
+  --border2:   #243044;
+
+  --reveal:    #00d8ff;
+  --moto:      #ff5c1a;
+  --dc:        #a78bfa;
+  --green:     #22d472;
+  --amber:     #f59e0b;
+  --red:       #ef4444;
+  --blue:      #3b82f6;
+
+  --text:      #c8d8ec;
+  --muted:     #4d6480;
+  --faint:     #1e2d42;
+
+  --mono: 'JetBrains Mono', monospace;
+  --display: 'Bebas Neue', sans-serif;
+  --sans: 'DM Sans', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 400;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+/* grid bg */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(var(--faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--faint) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.page { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 64px 40px 100px; }
+
+/* ═══ HERO ═══ */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 40px;
+  align-items: end;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 64px;
+}
+.hero-kicker {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-family: var(--display);
+  font-size: clamp(52px, 7vw, 96px);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  color: #fff;
+  margin-bottom: 22px;
+}
+.hero h1 .word-reactive { color: var(--red); }
+.hero h1 .word-predictive { color: var(--green); }
+.hero-sub {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 560px;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+.hero-stat-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: right;
+}
+.hero-stat {
+  padding: 16px 20px;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  background: var(--surface);
+}
+.hero-stat .num {
+  font-family: var(--display);
+  font-size: 42px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.hero-stat .num.red   { color: var(--red); }
+.hero-stat .num.green { color: var(--green); }
+.hero-stat .num.amber { color: var(--amber); }
+.hero-stat .label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ═══ SECTION HEADERS ═══ */
+.sec {
+  margin-top: 72px;
+}
+.sec-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.sec h2 {
+  font-family: var(--display);
+  font-size: clamp(28px, 3.5vw, 48px);
+  color: #fff;
+  letter-spacing: 0.03em;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 14px;
+}
+.sec h2 .c-reveal { color: var(--reveal); }
+.sec h2 .c-moto   { color: var(--moto); }
+.sec h2 .c-green  { color: var(--green); }
+.sec h2 .c-amber  { color: var(--amber); }
+.sec h2 .c-dc     { color: var(--dc); }
+.sec-intro {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 860px;
+  margin-bottom: 32px;
+  line-height: 1.75;
+  font-weight: 300;
+}
+
+/* ═══ SHIFT TABLE — reactive vs predictive ═══ */
+.shift-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+.shift-table thead th {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 14px 20px;
+  text-align: left;
+  border-bottom: 2px solid var(--border2);
+}
+.th-domain { color: var(--muted); width: 22%; }
+.th-reactive { color: var(--red); background: rgba(239,68,68,0.05); width: 35%; }
+.th-predictive { color: var(--green); background: rgba(34,212,114,0.05); width: 35%; }
+.th-system { color: var(--dc); width: 8%; }
+
+.shift-table tbody tr { border-bottom: 1px solid var(--border); }
+.shift-table tbody tr:hover { background: var(--surface); }
+.shift-table tbody td {
+  padding: 14px 20px;
+  font-size: 13.5px;
+  vertical-align: top;
+  line-height: 1.55;
+}
+.td-domain {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.td-reactive { color: #7a4040; background: rgba(239,68,68,0.04); }
+.td-predictive { color: #2a6645; background: rgba(34,212,114,0.04); }
+.td-system {
+  text-align: center;
+}
+
+.sys-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 8px;
+  padding: 3px 7px;
+  border-radius: 2px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  margin-bottom: 3px;
+  white-space: nowrap;
+}
+.tag-r { background: rgba(0,216,255,0.1); color: var(--reveal); border: 1px solid rgba(0,216,255,0.3); }
+.tag-m { background: rgba(255,92,26,0.1); color: var(--moto); border: 1px solid rgba(255,92,26,0.3); }
+.tag-d { background: rgba(167,139,250,0.1); color: var(--dc); border: 1px solid rgba(167,139,250,0.3); }
+
+/* ═══ INTELLIGENCE LAYERS ═══ */
+.intel-layers {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 16px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.intel-layer {
+  display: grid;
+  grid-template-columns: 220px 1fr 1fr;
+  border-bottom: 1px solid var(--border);
+}
+.intel-layer:last-child { border-bottom: none; }
+
+.il-label {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  background: var(--surface);
+}
+.il-title {
+  font-family: var(--display);
+  font-size: 18px;
+  letter-spacing: 0.04em;
+}
+.il-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.il-body {
+  padding: 20px 22px;
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.65;
+  border-left: 1px solid var(--border);
+}
+.il-body-right {
+  padding: 20px 22px;
+  border-left: 1px solid var(--border);
+}
+
+.il-signals {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+.il-signal {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #3a5270;
+  line-height: 1.45;
+}
+.il-signal::before {
+  content: '→';
+  color: var(--border2);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.il-signal.active {
+  color: var(--text);
+}
+.il-signal.active::before {
+  color: var(--green);
+}
+
+/* ═══ PREDICTION SPECTRUM ═══ */
+.spectrum {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.spectrum-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 0;
+  align-items: center;
+}
+
+.spec-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+  padding-right: 20px;
+}
+
+.spec-bar-wrap {
+  position: relative;
+  height: 40px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.spec-bar {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  transition: width 0.8s ease;
+  border-radius: 2px 0 0 2px;
+}
+
+.spec-bar.reactive  { background: linear-gradient(90deg, rgba(239,68,68,0.3), rgba(239,68,68,0.15)); color: var(--red); }
+.spec-bar.partial   { background: linear-gradient(90deg, rgba(245,158,11,0.3), rgba(245,158,11,0.15)); color: var(--amber); }
+.spec-bar.predictive { background: linear-gradient(90deg, rgba(34,212,114,0.3), rgba(34,212,114,0.15)); color: var(--green); }
+
+.spec-bar-label {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ═══ SCENARIO CARDS ═══ */
+.scenario-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.scenario-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.scenario-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.scenario-icon { font-size: 24px; }
+.scenario-title {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: 0.03em;
+  color: #fff;
+}
+.scenario-tag {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 4px 10px;
+  border-radius: 2px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+.tag-red   { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.35); }
+.tag-green { background: rgba(34,212,114,0.15); color: var(--green); border: 1px solid rgba(34,212,114,0.35); }
+
+.scenario-body { padding: 20px; }
+.scenario-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.scenario-text { font-size: 13.5px; color: var(--muted); line-height: 1.65; margin-bottom: 16px; }
+
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.tl-item {
+  display: flex;
+  gap: 12px;
+  position: relative;
+}
+.tl-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 12px; top: 28px; bottom: 0;
+  width: 1px;
+  background: var(--border2);
+}
+.tl-dot {
+  width: 25px; height: 25px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  z-index: 1;
+  margin-top: 2px;
+}
+.dot-r { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.4); }
+.dot-g { background: rgba(34,212,114,0.15); color: var(--green); border: 1px solid rgba(34,212,114,0.4); }
+.dot-b { background: rgba(59,130,246,0.15); color: var(--blue); border: 1px solid rgba(59,130,246,0.4); }
+.dot-a { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.4); }
+
+.tl-content { padding-bottom: 14px; flex: 1; }
+.tl-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.tl-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* ═══ CLEVELAND CONTEXT ═══ */
+.cleveland-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+.cleve-stat {
+  background: var(--surface);
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cleve-stat .big {
+  font-family: var(--display);
+  font-size: 36px;
+  line-height: 1;
+}
+.cleve-stat .big.red   { color: var(--red); }
+.cleve-stat .big.amber { color: var(--amber); }
+.cleve-stat .big.green { color: var(--green); }
+.cleve-stat .big.blue  { color: var(--blue); }
+.cleve-stat .desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.cleve-stat .source {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--faint);
+  letter-spacing: 0.1em;
+}
+
+/* ═══ RISKS TABLE ═══ */
+.risk-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+.risk-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px 22px;
+  border-left: 3px solid;
+}
+.risk-card.high   { border-left-color: var(--red); }
+.risk-card.medium { border-left-color: var(--amber); }
+.risk-card.managed { border-left-color: var(--green); }
+
+.risk-severity {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.risk-card.high   .risk-severity { color: var(--red); }
+.risk-card.medium .risk-severity { color: var(--amber); }
+.risk-card.managed .risk-severity { color: var(--green); }
+
+.risk-title {
+  font-family: var(--display);
+  font-size: 20px;
+  color: #fff;
+  margin-bottom: 8px;
+  letter-spacing: 0.03em;
+}
+.risk-body { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 10px; }
+.risk-mitigation {
+  font-size: 12px;
+  color: #2a4a35;
+  border-left: 2px solid rgba(34,212,114,0.3);
+  padding-left: 10px;
+  line-height: 1.5;
+}
+.risk-mitigation strong { color: var(--green); }
+
+/* ═══ VERDICT ═══ */
+.verdict {
+  margin-top: 64px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.verdict-header {
+  background: linear-gradient(135deg, rgba(34,212,114,0.08), rgba(0,216,255,0.05));
+  border-bottom: 1px solid var(--border2);
+  padding: 32px 36px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: center;
+}
+.verdict-title {
+  font-family: var(--display);
+  font-size: clamp(28px, 4vw, 52px);
+  color: #fff;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+}
+.verdict-title .yes { color: var(--green); }
+
+.verdict-score {
+  text-align: center;
+}
+.verdict-pct {
+  font-family: var(--display);
+  font-size: 80px;
+  line-height: 1;
+  color: var(--green);
+  text-shadow: 0 0 40px rgba(34,212,114,0.5);
+}
+.verdict-pct-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  text-align: center;
+}
+
+.verdict-body {
+  padding: 32px 36px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+}
+.verdict-col-title {
+  font-family: var(--display);
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+.verdict-col-title.yes { color: var(--green); }
+.verdict-col-title.cond { color: var(--amber); }
+.verdict-col-title.no { color: var(--red); }
+
+.verdict-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.verdict-list li {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  padding-left: 14px;
+  position: relative;
+}
+.verdict-list li::before { position: absolute; left: 0; }
+.verdict-list.yes  li::before { content: '✓'; color: var(--green); }
+.verdict-list.cond li::before { content: '⚠'; color: var(--amber); font-size: 10px; }
+.verdict-list.no   li::before { content: '✗'; color: var(--red); }
+
+/* ═══ FOOTER ═══ */
+.footer {
+  margin-top: 72px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-text {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+  letter-spacing: 0.08em;
+  line-height: 1.9;
+}
+
+@media (max-width: 960px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-stat-block { flex-direction: row; flex-wrap: wrap; text-align: left; }
+  .scenario-grid { grid-template-columns: 1fr; }
+  .cleveland-grid { grid-template-columns: 1fr 1fr; }
+  .verdict-body { grid-template-columns: 1fr; }
+  .verdict-header { grid-template-columns: 1fr; }
+  .intel-layer { grid-template-columns: 1fr; }
+  .risk-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ═══════ HERO ═══════ -->
+<div class="hero">
+  <div>
+    <div class="hero-kicker">Cleveland Division of Police · RTCC Intelligence Assessment · May 2026</div>
+    <h1>
+      FROM<br>
+      <span class="word-reactive">REACTIVE</span><br>
+      TO<br>
+      <span class="word-predictive">PREDICTIVE</span>
+    </h1>
+    <p class="hero-sub">Can the combined Reveal Technology + Motorola CommandCentral + CPD Data Center stack transform how Cleveland police deploy, respond, and prevent crime — before it happens?</p>
+  </div>
+  <div class="hero-stat-block">
+    <div class="hero-stat">
+      <div class="num red">182%</div>
+      <div class="label">Cleveland Crime Rate<br>Above National Average</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num amber">59.51</div>
+      <div class="label">Daily Crimes in<br>Cleveland (2024 FBI Data)</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num green">37%</div>
+      <div class="label">Murder Reduction<br>Mayor Bibb Hotspot Plan '24</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num green">30–40%</div>
+      <div class="label">Crime Reduction Possible<br>with Smart Tech (McKinsey)</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════ SECTION 1: CLEVELAND CONTEXT ═══════ -->
+<div class="sec">
+  <div class="sec-num">Section 01 · Cleveland Crime Context</div>
+  <h2>The <span class="c-amber">Scale of the Problem</span> CPD Is Fighting</h2>
+  <p class="sec-intro">
+    Understanding what predictive capability means for Cleveland requires grounding the conversation in what CPD is actually dealing with. The data from 2024 FBI crime reports frames both the urgency and the opportunity.
+  </p>
+
+  <div class="cleveland-grid">
+    <div class="cleve-stat">
+      <div class="big red">1 in 17</div>
+      <div class="desc">Chance of becoming a victim of violent or property crime as a Cleveland resident — highest of any similarly-sized U.S. city</div>
+      <div class="source">NEIGHBORHOODSCOUT · FBI 2024</div>
+    </div>
+    <div class="cleve-stat">
+      <div class="big red">1,561</div>
+      <div class="desc">Violent crimes per 100,000 residents — 334.7% above the national average. Cleveland ranked in the top crime categories for medium-sized U.S. cities</div>
+      <div class="source">FBI UCR · 2024</div>
+    </div>
+    <div class="cleve-stat">
+      <div class="big amber">4%</div>
+      <div class="desc">Of city geography accounts for nearly half of all crime — Mayor Bibb's Summer Safety Plan used this exact principle to drive a 37% murder reduction in 2024</div>
+      <div class="source">CITY OF CLEVELAND · SEPT 2024</div>
+    </div>
+    <div class="cleve-stat">
+      <div class="big green">5</div>
+      <div class="desc">Citywide violent crime hotspots identified from multi-year data analysis — consistent patterns across three consecutive summers. Hotspot policing already proven to work in Cleveland</div>
+      <div class="source">BIBB ADMIN SUMMER SAFETY PLAN</div>
+    </div>
+    <div class="cleve-stat">
+      <div class="big red">110</div>
+      <div class="desc">Homicides in 2024 — down 28 from 2023, showing hotspot-directed resources produce measurable results even with current technology limitations</div>
+      <div class="source">CITY-DATA · FBI 2024</div>
+    </div>
+    <div class="cleve-stat">
+      <div class="big amber">1,709</div>
+      <div class="desc">CPD sworn officers — 4.3 per 1,000 residents, above national average, yet still outpaced by crime volume. The answer is intelligence efficiency, not more headcount</div>
+      <div class="source">AREAVIBES · 2024 FBI DATA</div>
+    </div>
+    <div class="cleve-stat">
+      <div class="big green">-10.3%</div>
+      <div class="desc">Violent crime year-over-year decline in Cleveland's most recent data — the trend is moving in the right direction but the gap to national average remains enormous</div>
+      <div class="source">FBI UCR · 2024</div>
+    </div>
+    <div class="cleve-stat">
+      <div class="big blue">+12.8%</div>
+      <div class="desc">Property crime increase year-over-year — highest burglary rate among medium-sized U.S. cities. Predictive LPR and pattern analytics directly target this category</div>
+      <div class="source">SAFEHOME · FBI 2024</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════ SECTION 2: REACTIVE vs PREDICTIVE SHIFT ═══════ -->
+<div class="sec">
+  <div class="sec-num">Section 02 · The Operational Shift</div>
+  <h2><span class="c-red">Reactive</span> CPD Today vs. <span class="c-green">Predictive</span> CPD with the Integrated Stack</h2>
+  <p class="sec-intro">
+    This table maps every major CPD operational domain — comparing how the department functions today in reactive mode versus what the Reveal + Motorola + Data Center stack enables.
+  </p>
+
+  <table class="shift-table">
+    <thead>
+      <tr>
+        <th class="th-domain">Domain</th>
+        <th class="th-reactive">🔴 Reactive — CPD Today</th>
+        <th class="th-predictive">🟢 Predictive — Integrated Stack</th>
+        <th class="th-system">System</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-domain">Patrol Deployment</td>
+        <td class="td-reactive">Officers assigned by district based on shift schedules and sergeant discretion. Crime location from yesterday informs today's beats — loosely. Patrol is generalized and spread thin.</td>
+        <td class="td-predictive">Motorola CommandCentral AI generates shift-level hotspot recommendations based on multi-year crime patterns, time-of-day modeling, LPR hit density, weather, and prior incident correlation. Officers deploy to highest-probability zones before crime occurs.</td>
+        <td class="td-system"><span class="sys-tag tag-m">MOTO</span><br><span class="sys-tag tag-d">DC AI</span></td>
+      </tr>
+      <tr>
+        <td class="td-domain">Shooting Response</td>
+        <td class="td-reactive">911 call received, unit dispatched. Officers arrive 5–12 minutes later. Canvass for witnesses. No real-time video continuity. Shooter likely fled. Investigation begins cold.</td>
+        <td class="td-predictive">ShotSpotter alerts CommandCentral in 45 seconds. Nearest drone auto-launched. Camera feeds pull within 300m. Farsight AI identifies escape route geometry. Identifi biometric intercept at predicted exit corridor. Arrest potential within first 15 minutes.</td>
+        <td class="td-system"><span class="sys-tag tag-m">MOTO</span><br><span class="sys-tag tag-r">REVEAL</span><br><span class="sys-tag tag-d">DC AI</span></td>
+      </tr>
+      <tr>
+        <td class="td-domain">Criminal Identification</td>
+        <td class="td-reactive">Officer radios dispatch for a license or name check. Wait for response. Suspect may provide false ID. No field biometric capability. Verification slow and incomplete.</td>
+        <td class="td-predictive">Identifi enables touchless facial recognition, fingerprint, iris, and ID OCR in the officer's hand. Offline watchlist match in under 15 seconds. No dispatch query needed. Geo-tagged contact record created automatically. Wanted persons flagged instantly.</td>
+        <td class="td-system"><span class="sys-tag tag-r">REVEAL</span></td>
+      </tr>
+      <tr>
+        <td class="td-domain">Hotspot Intelligence</td>
+        <td class="td-reactive">Crime analyst produces a weekly PDF report of high-activity areas. Distributed at roll call. Officers may or may not review it. Intelligence is already 3–7 days stale by the time it reaches the street.</td>
+        <td class="td-predictive">CommandCentral Aware displays live crime heat map updated in real time with every CAD incident, ShotSpotter alert, and LPR hit. CPD Data Center AI cross-references 5+ years of historical patterns to identify emerging hotspot formation before crime clusters — often 48–72 hours in advance.</td>
+        <td class="td-system"><span class="sys-tag tag-m">MOTO</span><br><span class="sys-tag tag-d">DC AI</span></td>
+      </tr>
+      <tr>
+        <td class="td-domain">SWAT / Tactical</td>
+        <td class="td-reactive">SWAT commander briefs from Google Maps satellite imagery. Approach routes based on memory and experience. Suspect LOS unknown until units are already at risk. HLZ scouted manually on arrival.</td>
+        <td class="td-predictive">Farsight generates full 3D model of scene from drone footage in under 10 minutes. Commander visualizes suspect LOS from every window and position. AI identifies approach corridors with zero exposure. HLZ analysis outputs precise helicopter coordinates. Shared to all SWAT tablets before breach.</td>
+        <td class="td-system"><span class="sys-tag tag-r">REVEAL</span></td>
+      </tr>
+      <tr>
+        <td class="td-domain">Vehicle / LPR</td>
+        <td class="td-reactive">Officers manually run plates on vehicles they notice. Coverage limited to what a single officer can see. No correlation between plate reads across shifts or districts. Vehicle of interest may pass multiple officers undetected.</td>
+        <td class="td-predictive">CommandCentral aggregates LPR reads from all fixed and mobile units. Hot-list hits trigger automatic alerts and camera activation within seconds. Data Center AI maps vehicle movement patterns across the city — identifying locations of interest 6–24 hours before they become incident scenes.</td>
+        <td class="td-system"><span class="sys-tag tag-m">MOTO</span><br><span class="sys-tag tag-d">DC AI</span></td>
+      </tr>
+      <tr>
+        <td class="td-domain">Investigations</td>
+        <td class="td-reactive">Detectives manually pull camera footage from businesses after the fact. No unified search. Footage often unavailable, overwritten, or requires subpoena. Case-building is labor-intensive and slow.</td>
+        <td class="td-predictive">RTCC analyst searches unified video archive in CommandCentral with time/location query. DC stores 500TB+ of CJIS-compliant video evidence. AI-assisted video search surfaces relevant footage in minutes. Missions creates a replayable timeline for prosecutors before the detective even submits their first report.</td>
+        <td class="td-system"><span class="sys-tag tag-m">MOTO</span><br><span class="sys-tag tag-d">DC</span></td>
+      </tr>
+      <tr>
+        <td class="td-domain">Event Security</td>
+        <td class="td-reactive">Security plan based on prior-year incident reports and officer experience. No 3D venue analysis. No pre-event biometric screening. Command post runs on radio and printed maps. Post-event debrief from memory.</td>
+        <td class="td-predictive">Farsight pre-models every venue 72 hours in advance. Identifi checkpoints screen known threats at entry. CommandCentral provides live multi-agency COP with venue camera integration. AI monitors crowd flow for anomaly. Auto-generated after-action package available within 2 hours of event end.</td>
+        <td class="td-system"><span class="sys-tag tag-r">REVEAL</span><br><span class="sys-tag tag-m">MOTO</span><br><span class="sys-tag tag-d">DC AI</span></td>
+      </tr>
+      <tr>
+        <td class="td-domain">Resource Allocation</td>
+        <td class="td-reactive">Staffing decisions driven by seniority, union rules, and historical district assignment. No real-time performance feedback. Commanders cannot see which patrol zones are outperforming or underperforming in real time.</td>
+        <td class="td-predictive">CommandCentral Missions tracks analyst and officer performance metrics per incident. Data Center AI models optimal resource allocation per time-of-day, weather, event schedule, and crime forecast. Shift commander receives actionable deployment recommendation, not just a crime map.</td>
+        <td class="td-system"><span class="sys-tag tag-m">MOTO</span><br><span class="sys-tag tag-d">DC AI</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ═══════ SECTION 3: PREDICTION SPECTRUM ═══════ -->
+<div class="sec">
+  <div class="sec-num">Section 03 · Prediction Capability Spectrum</div>
+  <h2>Where the Stack Moves CPD on the <span class="c-green">Predictive Spectrum</span></h2>
+  <p class="sec-intro">Not all prediction is equal. This spectrum maps each CPD challenge from fully reactive (responding after crime) to fully predictive (preventing crime before it occurs), and shows where the integrated stack moves the needle.</p>
+
+  <div class="spectrum">
+    <div class="spectrum-row">
+      <div class="spec-label">Patrol Deployment</div>
+      <div class="spec-bar-wrap">
+        <div class="spec-bar predictive" style="width:85%">PREDICTIVE — AI-guided shift deployment</div>
+        <div class="spec-bar-label">85% predictive</div>
+      </div>
+    </div>
+    <div class="spectrum-row">
+      <div class="spec-label">Hotspot Identification</div>
+      <div class="spec-bar-wrap">
+        <div class="spec-bar predictive" style="width:82%">PREDICTIVE — 48-72hr advance pattern detection</div>
+        <div class="spec-bar-label">82% predictive</div>
+      </div>
+    </div>
+    <div class="spectrum-row">
+      <div class="spec-label">Vehicle / LPR Interdiction</div>
+      <div class="spec-bar-wrap">
+        <div class="spec-bar predictive" style="width:75%">PREDICTIVE — Movement pattern analysis</div>
+        <div class="spec-bar-label">75% predictive</div>
+      </div>
+    </div>
+    <div class="spectrum-row">
+      <div class="spec-label">SWAT / Tactical Response</div>
+      <div class="spec-bar-wrap">
+        <div class="spec-bar partial" style="width:65%">SEMI-PREDICTIVE — Terrain intelligence before breach</div>
+        <div class="spec-bar-label">65% predictive</div>
+      </div>
+    </div>
+    <div class="spectrum-row">
+      <div class="spec-label">Shooting / GSR Response</div>
+      <div class="spec-bar-wrap">
+        <div class="spec-bar partial" style="width:55%">SEMI-PREDICTIVE — Speed + escape prediction</div>
+        <div class="spec-bar-label">55% predictive</div>
+      </div>
+    </div>
+    <div class="spectrum-row">
+      <div class="spec-label">Identity / Biometrics</div>
+      <div class="spec-bar-wrap">
+        <div class="spec-bar partial" style="width:50%">SEMI-PREDICTIVE — Proactive watchlist matching</div>
+        <div class="spec-bar-label">50% predictive</div>
+      </div>
+    </div>
+    <div class="spectrum-row">
+      <div class="spec-label">Post-Incident Investigation</div>
+      <div class="spec-bar-wrap">
+        <div class="spec-bar partial" style="width:40%">ACCELERATED REACTIVE — minutes not days</div>
+        <div class="spec-bar-label">40% predictive</div>
+      </div>
+    </div>
+    <div class="spectrum-row">
+      <div class="spec-label">Individual Crime Prevention</div>
+      <div class="spec-bar-wrap">
+        <div class="spec-bar reactive" style="width:20%">REACTIVE — Technology cannot prevent all crime</div>
+        <div class="spec-bar-label">20% predictive</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════ SECTION 4: SCENARIOS ═══════ -->
+<div class="sec">
+  <div class="sec-num">Section 04 · Before &amp; After Scenarios</div>
+  <h2>CPD Scenarios — <span class="c-red">Today</span> vs. <span class="c-green">With the Stack</span></h2>
+
+  <div class="scenario-grid">
+
+    <!-- SCENARIO 1 -->
+    <div class="scenario-card">
+      <div class="scenario-head">
+        <div class="scenario-icon">🔫</div>
+        <div class="scenario-title">Gang-Related Shooting<br>East Side / Kinsman</div>
+        <div class="scenario-tag tag-red">TODAY</div>
+      </div>
+      <div class="scenario-body">
+        <div class="scenario-label">Current CPD Response Chain</div>
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-dot dot-r">1</div><div class="tl-content"><div class="tl-title">911 Call Received — T+0:00</div><div class="tl-desc">Call comes in after shots fired. Caller uncertain of location.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-r">2</div><div class="tl-content"><div class="tl-title">Dispatch — T+2:30</div><div class="tl-desc">Nearest unit dispatched. No pre-positioned resources near the block.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-r">3</div><div class="tl-content"><div class="tl-title">Scene Arrival — T+7:00</div><div class="tl-desc">Officers arrive. Victim found. Shooter gone. No witnesses willing to talk.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-r">4</div><div class="tl-content"><div class="tl-title">Camera Canvas — T+2 hrs</div><div class="tl-desc">Detectives manually canvass businesses for footage. Many cameras offline or overwritten.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-r">5</div><div class="tl-content"><div class="tl-title">Case Goes Cold — Days+</div><div class="tl-desc">No immediate suspect. Case joins a backlog. Shooter likely commits again.</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-card">
+      <div class="scenario-head">
+        <div class="scenario-icon">🔫</div>
+        <div class="scenario-title">Gang-Related Shooting<br>East Side / Kinsman</div>
+        <div class="scenario-tag tag-green">WITH THE STACK</div>
+      </div>
+      <div class="scenario-body">
+        <div class="scenario-label">Integrated Stack Response Chain</div>
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-dot dot-g">1</div><div class="tl-content"><div class="tl-title">ShotSpotter Alert — T+0:45</div><div class="tl-desc">Acoustic sensor triangulates 3 rounds, GPS coordinates, to CommandCentral. 45 seconds before any 911 call.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-b">2</div><div class="tl-content"><div class="tl-title">AI Enrichment — T+1:15</div><div class="tl-desc">Data Center AI cross-references location with prior incidents, LPR data, and open warrants. Suspect profile surfaced.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-g">3</div><div class="tl-content"><div class="tl-title">Drone + Cameras — T+2:30</div><div class="tl-desc">Drone launched. Farsight identifies escape corridors. PTZ cameras pulled automatically. Pre-event buffer reviewed.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-g">4</div><div class="tl-content"><div class="tl-title">Intercept — T+6:00</div><div class="tl-desc">Units pre-positioned at Farsight-identified exit corridors. Suspect encountered. Identifi facial match to warrant in 15 seconds.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-g">5</div><div class="tl-content"><div class="tl-title">Arrest + Record — T+8:00</div><div class="tl-desc">Arrest made. Missions timeline provides complete evidentiary record from shot detection to custody for prosecutor.</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENARIO 2 -->
+    <div class="scenario-card">
+      <div class="scenario-head">
+        <div class="scenario-icon">🚗</div>
+        <div class="scenario-title">Carjacking Pattern<br>Near West Side</div>
+        <div class="scenario-tag tag-red">TODAY</div>
+      </div>
+      <div class="scenario-body">
+        <div class="scenario-label">Current CPD Response Chain</div>
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-dot dot-r">1</div><div class="tl-content"><div class="tl-title">Report Filed — Same Day</div><div class="tl-desc">Victim reports carjacking. Report logged in RMS. Detective assigned — 3rd in queue.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-r">2</div><div class="tl-content"><div class="tl-title">Pattern Recognition — Days Later</div><div class="tl-desc">Crime analyst notices similar reports after 4–6 incidents. Pattern memo distributed.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-r">3</div><div class="tl-content"><div class="tl-title">Carjacking #7 Occurs</div><div class="tl-desc">Pattern memo was 3 days old. Increased patrol was not sustained. Another victim.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-r">4</div><div class="tl-content"><div class="tl-title">Suspect Eventually Caught</div><div class="tl-desc">After weeks of investigation. 10–15 victims by then. (Cleveland carjacking +68% YoY per CCJ data)</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-card">
+      <div class="scenario-head">
+        <div class="scenario-icon">🚗</div>
+        <div class="scenario-title">Carjacking Pattern<br>Near West Side</div>
+        <div class="scenario-tag tag-green">WITH THE STACK</div>
+      </div>
+      <div class="scenario-body">
+        <div class="scenario-label">Integrated Stack Response Chain</div>
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-dot dot-g">1</div><div class="tl-content"><div class="tl-title">Incident #1 CAD Logged</div><div class="tl-desc">CommandCentral CAD logs the carjacking. Time, location, vehicle description, plate fragment.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-b">2</div><div class="tl-content"><div class="tl-title">AI Flags at Incident #2 — T+36hrs</div><div class="tl-desc">Data Center AI detects matching MO (time, location cluster, vehicle type). Pattern alert pushed to RTCC analyst and Missions workspace.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-g">3</div><div class="tl-content"><div class="tl-title">LPR Hotlist + Patrol Repositioned</div><div class="tl-desc">Partial plate added to LPR hotlist. CommandCentral repositions patrol resources to predicted next-occurrence zone based on pattern model.</div></div></div>
+          <div class="tl-item"><div class="tl-dot dot-g">4</div><div class="tl-content"><div class="tl-title">Vehicle Hit — Suspect Arrested at #3</div><div class="tl-desc">LPR hits the vehicle 2 blocks from predicted zone. Units converge. Identifi confirms identity at stop. Arrested before carjacking #4.</div></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════ SECTION 5: INTELLIGENCE LAYERS ═══════ -->
+<div class="sec">
+  <div class="sec-num">Section 05 · Predictive Intelligence Architecture</div>
+  <h2>The <span class="c-dc">Four Intelligence Layers</span> That Enable Prediction</h2>
+  <p class="sec-intro">Genuine predictive capability comes from stacking multiple intelligence feeds and running AI correlation across them. Each layer adds compounding predictive value.</p>
+
+  <div class="intel-layers">
+    <div class="intel-layer">
+      <div class="il-label" style="border-right:1px solid var(--border);">
+        <div class="il-title" style="color:var(--amber);">Layer 1</div>
+        <div class="il-sub" style="color:var(--muted);">Historical Pattern</div>
+      </div>
+      <div class="il-body">
+        <strong style="color:var(--text);">Data Source:</strong> CPD Data Center — 5+ years of CAD incidents, RMS reports, LPR reads, ShotSpotter events, arrest records geo-tagged to block level.<br><br>
+        <strong style="color:var(--text);">Prediction:</strong> Day-of-week, time-of-day, and location crime probability maps. The foundation all other layers build on. Mayor Bibb already proved this works — his 5-hotspot plan reduced murders 37% using manual historical analysis. The stack does this automatically, at block resolution, updated continuously.
+      </div>
+      <div class="il-body-right">
+        <div class="scenario-label">What Gets Predicted</div>
+        <div class="il-signals">
+          <div class="il-signal active">Where crimes are most likely to occur in next 6–24 hours</div>
+          <div class="il-signal active">Time windows of highest risk by crime type and location</div>
+          <div class="il-signal active">Emerging hotspot formation before it peaks</div>
+          <div class="il-signal active">Seasonal and event-driven crime pattern shifts</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="intel-layer">
+      <div class="il-label" style="border-right:1px solid var(--border);">
+        <div class="il-title" style="color:var(--reveal);">Layer 2</div>
+        <div class="il-sub" style="color:var(--muted);">Real-Time Sensor</div>
+      </div>
+      <div class="il-body">
+        <strong style="color:var(--text);">Data Source:</strong> Motorola CommandCentral live feeds — ShotSpotter GSR, LPR reads, 911 call density, unit GPS positions, camera analytics, radio emergency buttons.<br><br>
+        <strong style="color:var(--text);">Prediction:</strong> Real-time anomaly detection layered on top of historical baselines. A ShotSpotter event at 11pm in a predicted hotspot triggers a completely different response than the same event at 2pm in a low-risk area. Context converts sensors into intelligence.
+      </div>
+      <div class="il-body-right">
+        <div class="scenario-label">What Gets Predicted</div>
+        <div class="il-signals">
+          <div class="il-signal active">Escalation likelihood from ShotSpotter cluster patterns</div>
+          <div class="il-signal active">Vehicle of interest movement trajectory from LPR sequence</div>
+          <div class="il-signal active">Officer safety risk zones from real-time call volume spikes</div>
+          <div class="il-signal active">Secondary incident likelihood from first incident location</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="intel-layer">
+      <div class="il-label" style="border-right:1px solid var(--border);">
+        <div class="il-title" style="color:var(--moto);">Layer 3</div>
+        <div class="il-sub" style="color:var(--muted);">Identity Intelligence</div>
+      </div>
+      <div class="il-body">
+        <strong style="color:var(--text);">Data Source:</strong> Reveal Identifi — geo-tagged field contacts, biometric matches, watchlist hits, ID scan records — correlated with PremierOne RMS criminal histories.<br><br>
+        <strong style="color:var(--text);">Prediction:</strong> Known offender location data creates a proactive intelligence layer. When Identifi logs a person with a violent history in a predicted hotspot at 11pm on a Friday, that contact isn't just documentation — it's a pre-crime signal that the Data Center AI can correlate against prior incident patterns for that individual.
+      </div>
+      <div class="il-body-right">
+        <div class="scenario-label">What Gets Predicted</div>
+        <div class="il-signals">
+          <div class="il-signal active">Known high-risk individuals in predicted crime zones</div>
+          <div class="il-signal active">Gang network presence patterns before incidents</div>
+          <div class="il-signal active">Repeat offender location clustering ahead of events</div>
+          <div class="il-signal active">Warrant hits from routine enforcement actions in hotspots</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="intel-layer">
+      <div class="il-label" style="border-right:1px solid var(--border);">
+        <div class="il-title" style="color:var(--dc);">Layer 4</div>
+        <div class="il-sub" style="color:var(--muted);">Terrain Intelligence</div>
+      </div>
+      <div class="il-body">
+        <strong style="color:var(--text);">Data Source:</strong> Reveal Farsight — 3D terrain models of high-crime blocks, alleys, building complexes, and event venues stored in CPD Data Center, refreshed by drone overflights.<br><br>
+        <strong style="color:var(--text);">Prediction:</strong> Terrain intelligence enables predictive positioning — not just where crime will occur, but exactly where officers should be before it occurs to maximize both deterrence and response speed. A SWAT team positioned in a blind spot of a known drug stash house because Farsight said so is the definition of predictive policing.
+      </div>
+      <div class="il-body-right">
+        <div class="scenario-label">What Gets Predicted</div>
+        <div class="il-signals">
+          <div class="il-signal active">Optimal officer positions for deterrence in specific terrain</div>
+          <div class="il-signal active">Most likely escape corridors from crime scene geography</div>
+          <div class="il-signal active">Safe approach angles for tactical units pre-breach</div>
+          <div class="il-signal active">High-ground surveillance positions for patrol zones</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════ SECTION 6: RISKS AND GUARDRAILS ═══════ -->
+<div class="sec">
+  <div class="sec-num">Section 06 · Honest Assessment — Risks &amp; Guardrails</div>
+  <h2>What the Evidence <span class="c-amber">Cautions</span> and How CPD Mitigates It</h2>
+  <p class="sec-intro">
+    Predictive policing has a documented track record of benefits — and a documented track record of failures. This is not technology that deploys without guardrails. CPD's DOJ consent decree actually creates a governance framework that, if applied thoughtfully, can make Cleveland's version of predictive policing better than what failed in Los Angeles and Chicago.
+  </p>
+
+  <div class="risk-grid">
+    <div class="risk-card high">
+      <div class="risk-severity">High Risk — Must Address</div>
+      <div class="risk-title">Algorithmic Bias &amp; Feedback Loops</div>
+      <div class="risk-body">Historical crime data in Cleveland reflects decades of over-policing in specific East Side neighborhoods. An AI trained purely on arrest data will designate those same areas as high-risk — increasing patrol, which increases arrests, which feeds the model. LAPD's PredPol was suspended precisely for this. Chicago's "Heat List" was abandoned after discrimination accusations.</div>
+      <div class="risk-mitigation"><strong>CPD Mitigation:</strong> Train models on crime victimization reports, not arrests. Require human analyst review of all AI recommendations before deployment. Conduct quarterly bias audits. Include community crime reporting data as a balancing signal. DOJ monitor reviews model methodology annually.</div>
+    </div>
+    <div class="risk-card high">
+      <div class="risk-severity">High Risk — Must Address</div>
+      <div class="risk-title">Over-Policing Concentrated Communities</div>
+      <div class="risk-body">Predictive systems that generate constant hotspot alerts for specific blocks risk turning those communities into zones of constant police pressure — eroding trust, creating legal liability, and potentially violating civil rights. The DOJ consent decree was triggered precisely by CPD's history of disproportionate enforcement.</div>
+      <div class="risk-mitigation"><strong>CPD Mitigation:</strong> Hotspot deployment must include community services co-deployment (Bibb's model — violence interrupters, social services, employment referrals). Technology authorizes presence, not enforcement actions. Consent decree monitoring includes review of technology-driven deployment decisions.</div>
+    </div>
+    <div class="risk-card medium">
+      <div class="risk-severity">Medium Risk — Manage Actively</div>
+      <div class="risk-title">Biometric Accuracy and False Positives</div>
+      <div class="risk-body">Facial recognition systems have documented higher error rates for darker-skinned individuals. A false Identifi match leading to a wrongful stop or arrest in Cleveland's consent decree environment creates major legal and political exposure. The technology must be used as an investigative aid, not a standalone basis for arrest.</div>
+      <div class="risk-mitigation"><strong>CPD Mitigation:</strong> Identifi match is investigative lead only — not probable cause. Requires corroborating identification before action. All facial recognition use logged and reviewed. Minimum confidence threshold policy. Officers trained on false positive rates and required to document override decisions.</div>
+    </div>
+    <div class="risk-card medium">
+      <div class="risk-severity">Medium Risk — Manage Actively</div>
+      <div class="risk-title">Data Security and CJIS Exposure</div>
+      <div class="risk-body">A data center storing biometric records, criminal histories, and 500TB of video is an extraordinarily high-value target for ransomware and nation-state actors. A breach of CPD's Identifi database would be a catastrophic civil liberties event. Cleveland's municipal IT infrastructure has not historically been hardened to this standard.</div>
+      <div class="risk-mitigation"><strong>CPD Mitigation:</strong> CJIS Security Policy v6.0 compliance is mandatory, not optional. Zero-trust architecture, 24/7 SOC, air-gapped biometric data segment, annual penetration testing, FBI CJIS audit cycle. DC staff background checks more rigorous than for sworn officers.</div>
+    </div>
+    <div class="risk-card managed">
+      <div class="risk-severity">Manageable — Governance Handles</div>
+      <div class="risk-title">Transparency and Community Trust</div>
+      <div class="risk-body">Cleveland communities — particularly on the East Side — have legitimate concerns about surveillance technology given the DOJ consent decree history. Deploying this stack without public engagement could trigger political opposition that derails the program before it produces results.</div>
+      <div class="risk-mitigation"><strong>CPD Mitigation:</strong> Mayor Bibb's transparent hotspot model (publicly announced, explained, and reported on) is a template. Publish technology deployment policy before launch. Community advisory board reviews AI model methodology. Annual public reporting on outcomes vs. deployment data. Privacy impact assessment published.</div>
+    </div>
+    <div class="risk-card managed">
+      <div class="risk-severity">Manageable — Governance Handles</div>
+      <div class="risk-title">Technology Doesn't Replace Root Causes</div>
+      <div class="risk-body">McKinsey estimates AI can reduce urban crime 30–40%, but no technology eliminates crime driven by poverty, unemployment, disinvestment, and social fragmentation. CPD leadership must be clear internally and publicly that this is a force multiplier — not a replacement for community investment.</div>
+      <div class="risk-mitigation"><strong>CPD Mitigation:</strong> Bibb's 2024 model explicitly paired hotspot enforcement with violence interrupters, employment referrals, and social services. The RTCC should have a community liaison role that translates intelligence into social service deployment alongside law enforcement response.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════ VERDICT ═══════ -->
+<div class="verdict">
+  <div class="verdict-header">
+    <div>
+      <div class="verdict-title">
+        <span class="yes">YES</span> — The Combined System<br>
+        Gives CPD Genuine Predictive Capability.<br>
+        With Important Conditions.
+      </div>
+      <p style="font-size:15px; color:var(--muted); max-width:600px; margin-top:14px; line-height:1.7; font-weight:300;">The evidence from Cleveland's own 2024 Summer Safety Plan, from LAPD's 7.4% crime reduction from predictive patrol, from Santa Cruz's 19% burglary decline, and from McKinsey's 30–40% city crime reduction model all point the same direction: data-driven, AI-assisted, hotspot-focused policing works — when governed correctly.</p>
+    </div>
+    <div class="verdict-score">
+      <div class="verdict-pct">85%</div>
+      <div class="verdict-pct-label">Shift Toward<br>Predictive Posture</div>
+    </div>
+  </div>
+  <div class="verdict-body">
+    <div>
+      <div class="verdict-col-title yes">What the Stack Delivers</div>
+      <ul class="verdict-list yes">
+        <li>AI-generated hotspot forecasts 24–72 hours before crime clusters</li>
+        <li>Shift deployment recommendations based on crime probability, not tradition</li>
+        <li>45-second ShotSpotter-to-response vs. 7+ minute reactive dispatch</li>
+        <li>Sub-15-second field biometric ID on any contact</li>
+        <li>Vehicle pattern detection across the entire city simultaneously</li>
+        <li>Drone terrain intelligence before SWAT reaches a scene</li>
+        <li>Complete investigative timelines before detectives arrive</li>
+        <li>DOJ-compliant audit records for every AI-influenced decision</li>
+      </ul>
+    </div>
+    <div>
+      <div class="verdict-col-title cond">What Requires Governance</div>
+      <ul class="verdict-list cond">
+        <li>AI model must use victimization data, not arrest data, as primary signal</li>
+        <li>Biometric match is investigative lead only — not standalone probable cause</li>
+        <li>Human analyst must review and approve all AI deployment recommendations</li>
+        <li>Community co-deployment policy must accompany enforcement actions</li>
+        <li>Quarterly bias audits with DOJ monitor review</li>
+        <li>Public technology deployment policy before launch</li>
+        <li>CJIS-compliant data center — not a shortcut cloud deployment</li>
+      </ul>
+    </div>
+    <div>
+      <div class="verdict-col-title no">What It Cannot Do</div>
+      <ul class="verdict-list no">
+        <li>Eliminate crime driven by poverty, unemployment, or social fragmentation</li>
+        <li>Replace community trust built through human relationship</li>
+        <li>Guarantee zero false positives in biometric identification</li>
+        <li>Predict individual criminal decisions with certainty</li>
+        <li>Substitute for adequate staffing in high-violence districts</li>
+        <li>Fix the 40+ year infrastructure of disinvestment on Cleveland's East Side</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-text">
+    PREPARED FOR: Cleveland Division of Police<br>
+    DOCUMENT: Predictive Intelligence Capability Assessment<br>
+    SOURCES: FBI UCR 2024 · City of Cleveland · McKinsey Global Institute · NIJ CrimeSolutions · DOJ Dec. 2024 AI Report
+  </div>
+  <div class="footer-text" style="text-align:right;">
+    Reveal Technology · revealtech.ai<br>
+    Motorola Solutions CommandCentral Aware<br>
+    May 2026 · For Planning Purposes Only
+  </div>
+</div>
+
+</div><!-- /page -->
+</body>
+</html>

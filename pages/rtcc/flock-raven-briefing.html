@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flock/Raven + Behavior AI — The FixOurStreets216 Project</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1219;
+    --surface2: #111820;
+    --border: #1e2d3d;
+    --accent: #00c8ff;
+    --accent2: #ff4d00;
+    --accent3: #39ff14;
+    --text: #c8d8e8;
+    --text-dim: #5a7a96;
+    --text-bright: #e8f4ff;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --display: 'Bebas Neue', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,200,255,0.015) 2px,
+      rgba(0,200,255,0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Noise texture */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.4;
+  }
+
+  /* === HEADER === */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(8,12,16,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .logo-badge {
+    background: var(--accent);
+    color: #000;
+    font-family: var(--display);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 100%, 8px 100%);
+  }
+
+  .header-title {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent3);
+    box-shadow: 0 0 8px var(--accent3);
+    animation: pulse 2s ease-in-out infinite;
+    margin-right: 5px;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* === HERO === */
+  .hero {
+    padding: 5rem 2rem 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .hero-title {
+    font-family: var(--display);
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    line-height: 0.92;
+    color: var(--text-bright);
+    letter-spacing: 0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-title span {
+    color: var(--accent);
+  }
+
+  .hero-title .accent2 {
+    color: var(--accent2);
+  }
+
+  .hero-sub {
+    font-family: var(--sans);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text-dim);
+    font-size: 1rem;
+    margin-top: 1.5rem;
+    max-width: 600px;
+    border-left: 2px solid var(--accent2);
+    padding-left: 1rem;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .meta-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .meta-value {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+  }
+
+  /* Corner decoration */
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 4rem;
+    right: 2rem;
+    width: 180px;
+    height: 180px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    opacity: 0.3;
+  }
+
+  /* === SECTION DIVIDER === */
+  .divider {
+    max-width: 1100px;
+    margin: 0 auto 3rem;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .divider-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  /* === MAIN CONTENT === */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem 6rem;
+  }
+
+  /* === QUESTION BLOCK === */
+  .question-block {
+    margin-bottom: 3rem;
+    padding: 2rem 2.5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .question-block.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .question-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--accent2);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .question-text {
+    font-family: var(--sans);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-bright);
+  }
+
+  /* === ANSWER SECTIONS === */
+  .answer-block {
+    margin-bottom: 2rem;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .answer-block.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* === SECTION HEADER === */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: var(--display);
+    font-size: 2.5rem;
+    color: var(--accent);
+    line-height: 1;
+    opacity: 0.3;
+    min-width: 2.5rem;
+  }
+
+  .section-title {
+    font-family: var(--display);
+    font-size: 1.5rem;
+    color: var(--text-bright);
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+  }
+
+  /* === CONTENT CARDS === */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .card p {
+    color: var(--text);
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  .card p + p {
+    margin-top: 0.75rem;
+  }
+
+  /* Cite highlight */
+  .cite-text {
+    color: var(--text-bright);
+    font-style: italic;
+    border-left: 2px solid var(--accent);
+    padding-left: 0.75rem;
+    margin: 0.75rem 0;
+    display: block;
+    font-size: 0.9rem;
+  }
+
+  /* === FEATURE HIGHLIGHT === */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .feature-cell {
+    background: var(--surface);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s;
+    cursor: default;
+  }
+
+  .feature-cell:hover {
+    background: var(--surface2);
+  }
+
+  .feature-cell::before {
+    content: attr(data-num);
+    position: absolute;
+    top: -0.5rem;
+    right: 1rem;
+    font-family: var(--display);
+    font-size: 5rem;
+    color: var(--accent);
+    opacity: 0.05;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .feature-icon {
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .feature-title {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-body {
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* === ARCHITECTURE TABLE === */
+  .arch-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+  }
+
+  .arch-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+  }
+
+  .arch-table thead {
+    background: var(--accent);
+  }
+
+  .arch-table thead th {
+    padding: 0.75rem 1.2rem;
+    text-align: left;
+    color: #000;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    white-space: nowrap;
+  }
+
+  .arch-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  .arch-table tbody tr:hover {
+    background: var(--surface2);
+  }
+
+  .arch-table tbody td {
+    padding: 0.9rem 1.2rem;
+    color: var(--text);
+    vertical-align: top;
+  }
+
+  .arch-table tbody td:first-child {
+    color: var(--text-dim);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .arch-table tbody td:nth-child(2) {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .arch-table tbody td:nth-child(3) {
+    color: var(--text-bright);
+  }
+
+  /* === FRICTION ALERTS === */
+  .friction-list {
+    list-style: none;
+    margin-bottom: 1.5rem;
+  }
+
+  .friction-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1.2rem 1.5rem;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    margin-bottom: 0.5rem;
+    background: var(--surface);
+    transition: border-color 0.2s, background 0.2s;
+    cursor: default;
+  }
+
+  .friction-item:hover {
+    border-left-color: var(--accent);
+    background: var(--surface2);
+  }
+
+  .friction-marker {
+    font-family: var(--display);
+    font-size: 1.4rem;
+    color: var(--accent2);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .friction-content .friction-title {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+
+  .friction-content p {
+    font-size: 0.88rem;
+    color: var(--text);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* === VERDICT === */
+  .verdict-block {
+    background: linear-gradient(135deg, rgba(0,200,255,0.06) 0%, rgba(57,255,20,0.04) 100%);
+    border: 1px solid var(--accent);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    margin-top: 3rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .verdict-block.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .verdict-block::before {
+    content: 'VERDICT';
+    position: absolute;
+    top: 50%;
+    right: -1rem;
+    transform: translateY(-50%) rotate(90deg);
+    font-family: var(--display);
+    font-size: 5rem;
+    color: var(--accent);
+    opacity: 0.05;
+    letter-spacing: 0.1em;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .verdict-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent3);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .verdict-label::before {
+    content: '▶';
+    color: var(--accent3);
+  }
+
+  .verdict-text {
+    font-family: var(--display);
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    color: var(--text-bright);
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    max-width: 700px;
+  }
+
+  /* === FOOTER === */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-brand {
+    font-family: var(--display);
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+  }
+
+  .footer-brand span {
+    color: var(--accent);
+  }
+
+  .footer-meta {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  /* === NAV TABS === */
+  .nav-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  .nav-tab {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    user-select: none;
+  }
+
+  .nav-tab:hover {
+    color: var(--text);
+  }
+
+  .nav-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab-panel {
+    display: none;
+  }
+
+  .tab-panel.active {
+    display: block;
+  }
+
+  /* === TIMELINE === */
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), var(--border));
+  }
+
+  .timeline-item {
+    position: relative;
+    padding-bottom: 2rem;
+    padding-left: 1.5rem;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2.42rem;
+    top: 0.4rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  .timeline-date {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .timeline-event {
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 0.3rem;
+    font-size: 0.95rem;
+  }
+
+  .timeline-detail {
+    font-size: 0.85rem;
+    color: var(--text);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* === CALLOUT === */
+  .callout {
+    background: rgba(255,77,0,0.07);
+    border: 1px solid rgba(255,77,0,0.3);
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .callout-icon {
+    color: var(--accent2);
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .callout-text {
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  .callout-text strong {
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  /* Animation delays for stagger */
+  .answer-block:nth-child(2) { transition-delay: 0.1s; }
+  .answer-block:nth-child(3) { transition-delay: 0.2s; }
+  .answer-block:nth-child(4) { transition-delay: 0.3s; }
+  .answer-block:nth-child(5) { transition-delay: 0.4s; }
+
+  @media (max-width: 680px) {
+    header { padding: 0 1rem; }
+    .hero { padding: 3rem 1rem 2rem; }
+    main { padding: 0 1rem 4rem; }
+    .question-block { padding: 1.5rem; }
+    .card { padding: 1.2rem 1.5rem; }
+    .arch-table thead th, .arch-table tbody td { padding: 0.7rem 0.9rem; }
+    .status-bar .hide-sm { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-badge">FOS216</div>
+    <div class="header-title">Intelligence Briefing // Public Safety Technology</div>
+  </div>
+  <div class="status-bar">
+    <span><span class="status-dot"></span>LIVE</span>
+    <span class="hide-sm">JUNE 2026</span>
+    <span class="hide-sm">CLEVELAND, OH</span>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-eyebrow">Capability Assessment — Series 01</div>
+  <h1 class="hero-title">
+    FLOCK<span>/</span><br>
+    RAVEN<span class="accent2">+</span><br>
+    BEHAVIOR AI
+  </h1>
+  <p class="hero-sub">
+    Can a Flock/Raven combination system be integrated with Behavior Recognition AI? 
+    An architecture review for Cleveland-scale deployment.
+  </p>
+  <div class="hero-meta">
+    <div class="meta-item">
+      <span class="meta-label">Concept by</span>
+      <span class="meta-value">The FixOurStreets216 Project</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Topic</span>
+      <span class="meta-value">Surveillance Integration</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Status</span>
+      <span class="meta-value">Technically Viable</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider">
+  <span class="divider-label">Begin Briefing</span>
+  <div class="divider-line"></div>
+</div>
+
+<main>
+
+  <!-- NAV TABS -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('overview', this)">Overview</button>
+    <button class="nav-tab" onclick="switchTab('raven', this)">Raven Capabilities</button>
+    <button class="nav-tab" onclick="switchTab('drone', this)">Drone Integration</button>
+    <button class="nav-tab" onclick="switchTab('behavior', this)">Behavior AI Layer</button>
+    <button class="nav-tab" onclick="switchTab('architecture', this)">Full Stack</button>
+    <button class="nav-tab" onclick="switchTab('friction', this)">Friction Points</button>
+  </div>
+
+  <!-- QUESTION -->
+  <div class="question-block animate-in">
+    <div class="question-label">↳ Query // The FixOurStreets216 Project</div>
+    <div class="question-text">Can a Flock/Raven combination system be integrated with Behavior Recognition AI?</div>
+  </div>
+
+  <!-- TAB: OVERVIEW -->
+  <div id="tab-overview" class="tab-panel active">
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <div class="section-title">The Short Answer</div>
+      </div>
+      <div class="card">
+        <p>Yes — and the integration architecture is more mature than most people realize. The Flock/Raven platform already performs a primitive form of behavior recognition, and the pathway to a full behavior AI overlay is clearly defined.</p>
+        <span class="cite-text">The Raven → Drone dispatch pipeline is a shipping, deployed product — not a concept. Layering behavior AI on top of the video feeds is an integration project, not a fundamental capability gap.</span>
+      </div>
+    </div>
+
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">02</div>
+        <div class="section-title">Platform Scale (2025)</div>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-cell" data-num="1">
+          <div class="feature-icon">📡</div>
+          <div class="feature-title">Network Size</div>
+          <div class="feature-body">100,000+ cameras across 49 states. 5,000+ police departments. 6,000+ communities.</div>
+        </div>
+        <div class="feature-cell" data-num="2">
+          <div class="feature-icon">🔍</div>
+          <div class="feature-title">Monthly Scans</div>
+          <div class="feature-body">20 billion license plate scans per month — the largest vehicle surveillance network in American history.</div>
+        </div>
+        <div class="feature-cell" data-num="3">
+          <div class="feature-icon">💰</div>
+          <div class="feature-title">Valuation</div>
+          <div class="feature-body">$7.5 billion valuation after $275M raise in September 2025.</div>
+        </div>
+        <div class="feature-cell" data-num="4">
+          <div class="feature-icon">🛸</div>
+          <div class="feature-title">New Capabilities</div>
+          <div class="feature-body">Launched DFR (Drone as First Responder) and DAS (Drone as Automated Security) in October 2025.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">03</div>
+        <div class="section-title">Timeline of Key Developments</div>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-date">2017</div>
+          <div class="timeline-event">Flock Safety Founded</div>
+          <div class="timeline-detail">Atlanta, GA. Initially focused on ALPR for neighborhoods.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-date">2023 Q2</div>
+          <div class="timeline-event">Raven Launched</div>
+          <div class="timeline-detail">Gunshot detection integrated with LPR. 45-second alert window. Deep platform integration from day one.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-date">July 2024</div>
+          <div class="timeline-event">Aerodome Partnership</div>
+          <div class="timeline-detail">Drone-as-First-Responder integration announced. Scottsdale, AZ first deployment. 86-second average response.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-date">Sept 2025</div>
+          <div class="timeline-event">$275M Raise / $7.5B Valuation</div>
+          <div class="timeline-detail">Signals massive platform expansion. Amazon Ring partnership announced.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-date">Oct 2025</div>
+          <div class="timeline-event">Raven Distress Detection + DFR Launch</div>
+          <div class="timeline-detail">Human distress audio detection added. Full drone product suite released for law enforcement and private security.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: RAVEN -->
+  <div id="tab-raven" class="tab-panel">
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <div class="section-title">What Raven Detects</div>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-cell" data-num="1">
+          <div class="feature-icon">💥</div>
+          <div class="feature-title">Gunshots</div>
+          <div class="feature-body">Primary capability. AI-classified acoustic detection. Alerts within 45 seconds, before 911 is typically called.</div>
+        </div>
+        <div class="feature-cell" data-num="2">
+          <div class="feature-icon">😣</div>
+          <div class="feature-title">Human Distress</div>
+          <div class="feature-body">Detects screaming and sounds of human distress. Alerts police directly. Covers blind spots cameras miss.</div>
+        </div>
+        <div class="feature-cell" data-num="3">
+          <div class="feature-icon">🚗</div>
+          <div class="feature-title">Sideshow Events</div>
+          <div class="feature-body">Recognizes sounds associated with sideshow/street takeover activity. Self-improves as it gathers more data.</div>
+        </div>
+        <div class="feature-cell" data-num="4">
+          <div class="feature-icon">🎆</div>
+          <div class="feature-title">Fireworks</div>
+          <div class="feature-body">Distinguishes fireworks from gunshots — a common failure mode in competing systems like ShotSpotter.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">02</div>
+        <div class="section-title">Native Raven Behavior Analytics</div>
+      </div>
+      <div class="card">
+        <span class="cite-text">The integration of Raven with Flock Safety's Proximity Analytics and license plate recognition technology provides law enforcement with a deeper layer of insight, enabling them to track repeat offenders and analyze patterns linked to sideshows.</span>
+        <p>Raven isn't a standalone audio sensor — it's a behavior classification engine with native LPR correlation. When Raven fires, Flock automatically cross-references nearby plates, generating an evidence package that includes vehicle fingerprints, timestamps, and pattern analytics. This is a primitive but functioning form of behavioral intelligence.</p>
+      </div>
+    </div>
+
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">03</div>
+        <div class="section-title">Civil Liberties Considerations</div>
+      </div>
+      <div class="callout">
+        <div class="callout-icon">⚠</div>
+        <div class="callout-text"><strong>EFF Warning:</strong> Flock's Raven distress detection capability raises unresolved questions around state eavesdropping laws. High-powered microphones positioned across city streets, listening for sounds that algorithms interpret as concerning, represent a significant expansion of street-level surveillance. Cities should address this contractually before deployment.</div>
+      </div>
+      <div class="callout">
+        <div class="callout-icon">⚠</div>
+        <div class="callout-text"><strong>Legal Exposure:</strong> Introducing features that allow pre-installed Raven microphones to begin listening for human voices in distress is likely to open up a whole new can of unforeseen legal, civil liberties, and even bodily safety concerns.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: DRONE -->
+  <div id="tab-drone" class="tab-panel">
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <div class="section-title">Aerodome × Flock Safety Partnership</div>
+      </div>
+      <div class="card">
+        <span class="cite-text">When Flock Safety's Falcon LPR or Raven audio detection sensors detect incidents — such as vehicles associated with AMBER alerts or gunshots — public safety agencies can rapidly dispatch Aerodome drones through automated triggers, arriving at the incident location in mere seconds. Average response: 86 seconds.</span>
+        <p>This is a shipping product, not a prototype. Scottsdale, Arizona was the first city to implement the full stack in 2024. The automated trigger pipeline — Raven alert → drone dispatch → aerial feed — operates without requiring human authorization at each step.</p>
+      </div>
+    </div>
+
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">02</div>
+        <div class="section-title">Drone Capabilities</div>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-cell" data-num="1">
+          <div class="feature-icon">📷</div>
+          <div class="feature-title">Optics</div>
+          <div class="feature-body">HD video, thermal imaging, color night vision, and powerful zoom — from any angle, day or night.</div>
+        </div>
+        <div class="feature-cell" data-num="2">
+          <div class="feature-icon">⏱</div>
+          <div class="feature-title">Endurance</div>
+          <div class="feature-body">Drones remain aloft for up to 45 minutes per deployment. Each dock covers a 3.5-mile radius (~38 sq miles).</div>
+        </div>
+        <div class="feature-cell" data-num="3">
+          <div class="feature-icon">🏪</div>
+          <div class="feature-title">Private Security Mode</div>
+          <div class="feature-body">Drone as Automated Security (DAS) — automated drone response to break-ins at retail or breaches at power plants.</div>
+        </div>
+        <div class="feature-cell" data-num="4">
+          <div class="feature-icon">🚗</div>
+          <div class="feature-title">Flying ALPR</div>
+          <div class="feature-body">Airborne license plate readers — drones double as mobile ALPR units. The FAA has granted 410+ DFR waivers since May 2025.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">03</div>
+        <div class="section-title">Scottsdale Deployment Insight</div>
+      </div>
+      <div class="card">
+        <span class="cite-text">"With our cutting-edge Real-Time Crime Center, we have seen immense success in bringing innovative technologies to bear in addressing emergency situations, routine calls for service, assisting in complex investigations, and ensuring citizen and officer safety. By layering in a drone-as-a-first-responder program, we add another way to empower first responders to protect lives." — Scottsdale Police Chief Jeff Walther</span>
+        <p>Scottsdale's implementation positions the RTCC as the integration hub — matching Cleveland's existing RTCC architecture goals. The model is directly transferable.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: BEHAVIOR AI -->
+  <div id="tab-behavior" class="tab-panel">
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <div class="section-title">Avigilon as the Behavior AI Layer</div>
+      </div>
+      <div class="card">
+        <span class="cite-text">Avigilon's AI-powered solutions provide real-time tools including anomaly detection, license plate recognition, facial matching, behavior alerts, and acoustic monitoring — all integrated into the Motorola Solutions safety ecosystem.</span>
+        <p>Flock's video feeds (fixed cameras and drones) are RTSP-capable. These can be ingested into Avigilon's ACC/Alta VMS, which then applies behavior analytics on top. This creates the core integration pathway: <strong>Raven audio trigger → drone deployment → Avigilon behavior classification.</strong></p>
+      </div>
+    </div>
+
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">02</div>
+        <div class="section-title">Avigilon Analytics Capabilities</div>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-cell" data-num="1">
+          <div class="feature-icon">🎯</div>
+          <div class="feature-title">Anomaly Detection</div>
+          <div class="feature-body">Self-learning video analytics detect unusual activity in live feeds and tag incidents automatically.</div>
+        </div>
+        <div class="feature-cell" data-num="2">
+          <div class="feature-icon">🔫</div>
+          <div class="feature-title">Visible Firearm Detection</div>
+          <div class="feature-body">AI NVR 2 runs firearm detection analytics across both onboard and third-party camera feeds.</div>
+        </div>
+        <div class="feature-cell" data-num="3">
+          <div class="feature-icon">👤</div>
+          <div class="feature-title">Appearance Search</div>
+          <div class="feature-body">Find the same person across many cameras simultaneously — critical for perimeter tracking after a Raven trigger.</div>
+        </div>
+        <div class="feature-cell" data-num="4">
+          <div class="feature-icon">🏗️</div>
+          <div class="feature-title">Scale</div>
+          <div class="feature-body">AI NVR 2 supports up to 400 channels — capable of absorbing city-wide Flock camera feeds plus drone video.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">03</div>
+        <div class="section-title">Option 2: Weapon Detection on Drone Video</div>
+      </div>
+      <div class="card">
+        <p>The drone video feed, once airborne and on-scene, can be routed through a dedicated weapon detection layer — ZeroEyes, Actuate, or similar platforms — before hitting the command console. This adds behavioral context to what Raven initially flagged acoustically.</p>
+        <p>ZeroEyes applies AI-powered gun detection to live video streams in real time, alerting trained operators who verify before escalating to law enforcement. This is a proven, deployable overlay on any RTSP-compatible video source, including drone feeds.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: ARCHITECTURE -->
+  <div id="tab-architecture" class="tab-panel">
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <div class="section-title">Full Stack Architecture — Cleveland Context</div>
+      </div>
+      <div class="arch-table-wrap">
+        <table class="arch-table">
+          <thead>
+            <tr>
+              <th>Layer</th>
+              <th>Technology</th>
+              <th>Function</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Audio Detection</td>
+              <td>Flock Raven</td>
+              <td>Gunshot, distress, sideshow detection. 45-second alert window.</td>
+            </tr>
+            <tr>
+              <td>Acoustic Trigger</td>
+              <td>Flock Platform</td>
+              <td>Auto-dispatch drone + alert LPR cameras. Proximity analytics activated.</td>
+            </tr>
+            <tr>
+              <td>Aerial Response</td>
+              <td>Aerodome / Flock DFR</td>
+              <td>Eyes on scene in &lt;90 seconds. HD, thermal, night vision.</td>
+            </tr>
+            <tr>
+              <td>Video Analytics</td>
+              <td>Avigilon AI NVR / Appliance</td>
+              <td>Behavior classification, firearm detection, appearance search, person tracking.</td>
+            </tr>
+            <tr>
+              <td>LPR Correlation</td>
+              <td>Flock Falcon</td>
+              <td>Vehicle ID at perimeter. Cross-references NCIC, AMBER alerts, hot lists.</td>
+            </tr>
+            <tr>
+              <td>Command Integration</td>
+              <td>CommandCentral Aware</td>
+              <td>Unified operator view. Incident correlation across all data streams.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">02</div>
+        <div class="section-title">Data Flow Diagram</div>
+      </div>
+      <div class="card" style="padding: 2rem; overflow-x: auto;">
+        <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:500px;font-family:'IBM Plex Mono',monospace;">
+          <!-- Nodes -->
+          <rect x="10" y="70" width="100" height="44" rx="4" fill="#0d1219" stroke="#00c8ff" stroke-width="1.5"/>
+          <text x="60" y="89" text-anchor="middle" fill="#00c8ff" font-size="7" letter-spacing="1">RAVEN</text>
+          <text x="60" y="103" text-anchor="middle" fill="#5a7a96" font-size="6">AUDIO AI</text>
+
+          <rect x="150" y="70" width="100" height="44" rx="4" fill="#0d1219" stroke="#00c8ff" stroke-width="1.5"/>
+          <text x="200" y="89" text-anchor="middle" fill="#00c8ff" font-size="7" letter-spacing="1">FLOCK</text>
+          <text x="200" y="103" text-anchor="middle" fill="#5a7a96" font-size="6">TRIGGER ENGINE</text>
+
+          <rect x="290" y="20" width="100" height="44" rx="4" fill="#0d1219" stroke="#39ff14" stroke-width="1.5"/>
+          <text x="340" y="39" text-anchor="middle" fill="#39ff14" font-size="7" letter-spacing="1">AERODOME</text>
+          <text x="340" y="53" text-anchor="middle" fill="#5a7a96" font-size="6">DRONE DFR</text>
+
+          <rect x="290" y="120" width="100" height="44" rx="4" fill="#0d1219" stroke="#ff4d00" stroke-width="1.5"/>
+          <text x="340" y="139" text-anchor="middle" fill="#ff4d00" font-size="7" letter-spacing="1">FALCON LPR</text>
+          <text x="340" y="153" text-anchor="middle" fill="#5a7a96" font-size="6">VEHICLE ID</text>
+
+          <rect x="430" y="70" width="110" height="44" rx="4" fill="#0d1219" stroke="#00c8ff" stroke-width="1.5"/>
+          <text x="485" y="89" text-anchor="middle" fill="#00c8ff" font-size="7" letter-spacing="1">AVIGILON AI</text>
+          <text x="485" y="103" text-anchor="middle" fill="#5a7a96" font-size="6">BEHAVIOR CLASS.</text>
+
+          <rect x="580" y="70" width="100" height="44" rx="4" fill="#111820" stroke="#00c8ff" stroke-width="2"/>
+          <text x="630" y="89" text-anchor="middle" fill="#e8f4ff" font-size="7" letter-spacing="1">COMMAND</text>
+          <text x="630" y="103" text-anchor="middle" fill="#5a7a96" font-size="6">RTCC CONSOLE</text>
+
+          <!-- Arrows -->
+          <line x1="110" y1="92" x2="148" y2="92" stroke="#00c8ff" stroke-width="1" marker-end="url(#arr)"/>
+          <line x1="250" y1="80" x2="288" y2="50" stroke="#39ff14" stroke-width="1" marker-end="url(#arr2)"/>
+          <line x1="250" y1="104" x2="288" y2="134" stroke="#ff4d00" stroke-width="1" marker-end="url(#arr3)"/>
+          <line x1="390" y1="42" x2="428" y2="80" stroke="#00c8ff" stroke-width="1" stroke-dasharray="4,2" marker-end="url(#arr)"/>
+          <line x1="390" y1="142" x2="428" y2="104" stroke="#00c8ff" stroke-width="1" stroke-dasharray="4,2" marker-end="url(#arr)"/>
+          <line x1="540" y1="92" x2="578" y2="92" stroke="#00c8ff" stroke-width="1" marker-end="url(#arr)"/>
+
+          <defs>
+            <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#00c8ff"/>
+            </marker>
+            <marker id="arr2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#39ff14"/>
+            </marker>
+            <marker id="arr3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#ff4d00"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: FRICTION -->
+  <div id="tab-friction" class="tab-panel">
+    <div class="answer-block animate-in">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <div class="section-title">Key Friction Points</div>
+      </div>
+      <ul class="friction-list">
+        <li class="friction-item">
+          <div class="friction-marker">01</div>
+          <div class="friction-content">
+            <div class="friction-title">Data Silos</div>
+            <p>Flock operates its own closed cloud platform. Deep API integration with Avigilon VMS requires either a formally supported integration or a middleware layer — RTSP bridging and webhook forwarding are the most viable paths without a native connector.</p>
+          </div>
+        </li>
+        <li class="friction-item">
+          <div class="friction-marker">02</div>
+          <div class="friction-content">
+            <div class="friction-title">Drone Video Latency</div>
+            <p>Real-time behavior AI on drone feeds requires low-latency streaming. Workable, but needs QoS-prioritized network infrastructure. Cleveland's FirstNet/broadband backbone would need specific tuning for this use case.</p>
+          </div>
+        </li>
+        <li class="friction-item">
+          <div class="friction-marker">03</div>
+          <div class="friction-content">
+            <div class="friction-title">Legal Exposure — Eavesdropping Laws</div>
+            <p>Flock's Raven distress detection capability raises unresolved questions around state eavesdropping laws. Ohio's wiretap statutes require review before any deployment involving voice or distress audio monitoring. Contractual language with Flock must address this explicitly.</p>
+          </div>
+        </li>
+        <li class="friction-item">
+          <div class="friction-marker">04</div>
+          <div class="friction-content">
+            <div class="friction-title">NDAA / NDAA Compliance</div>
+            <p>Any drone system integrated into a city-funded public safety network must be NDAA-compliant (no Chinese-manufactured components). Aerodome drones meet this requirement; verify before any contract execution.</p>
+          </div>
+        </li>
+        <li class="friction-item">
+          <div class="friction-marker">05</div>
+          <div class="friction-content">
+            <div class="friction-title">FAA Waivers</div>
+            <p>Drone-as-First-Responder programs require FAA waivers for Beyond Visual Line of Sight (BVLOS) operations. The FAA has granted 410+ DFR waivers since May 2025 under a new streamlined process — this is a manageable but non-trivial procurement step.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- VERDICT (always visible) -->
+  <div class="verdict-block animate-in">
+    <div class="verdict-label">Assessment Complete</div>
+    <div class="verdict-text">
+      The Flock/Raven + Behavior AI stack is technically viable and partially deployed today. The Raven → Drone pipeline is live. Avigilon provides the behavior classification layer. The remaining work is integration — not invention.
+    </div>
+    <div style="margin-top: 1.5rem; font-family: var(--mono); font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase;">
+      Concept by The FixOurStreets216 Project &nbsp;//&nbsp; Cleveland, Ohio &nbsp;//&nbsp; 2026
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-brand">The <span>FixOurStreets216</span> Project</div>
+  <div class="footer-meta">
+    Municipal Consulting &amp; Digital Design<br>
+    Cleveland, Ohio · Intelligence Briefing Series
+  </div>
+</footer>
+
+<script>
+  // Tab switching
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+    // Re-trigger animations for the new tab
+    setTimeout(() => {
+      document.querySelectorAll('#tab-' + name + ' .animate-in').forEach((el, i) => {
+        el.classList.remove('visible');
+        setTimeout(() => el.classList.add('visible'), i * 100);
+      });
+    }, 10);
+  }
+
+  // Intersection Observer for scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+
+  // Initial trigger for visible elements
+  setTimeout(() => {
+    document.querySelectorAll('.animate-in').forEach((el, i) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight) {
+        setTimeout(() => el.classList.add('visible'), i * 120);
+      }
+    });
+  }, 100);
+</script>
+
+</body>
+</html>

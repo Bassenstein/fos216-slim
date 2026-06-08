@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cleveland PD — Surveillance Systems Intelligence Brief</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=IBM+Plex+Mono:wght@300;400;500&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #03080f;
+  --bg2: #060d1a;
+  --bg3: #091222;
+  --panel: #0b1628;
+  --panel2: #0e1c35;
+  --border: rgba(0,180,255,0.12);
+  --border2: rgba(0,180,255,0.25);
+  --cyan: #00d4ff;
+  --cyan2: #00a8cc;
+  --amber: #ffb800;
+  --green: #00ff9d;
+  --red: #ff3d3d;
+  --blue: #1a6fff;
+  --text: #c8daf0;
+  --text2: #6a8aaa;
+  --text3: #2d4a6a;
+  --motorola: #1a7fff;
+  --axon: #ff5a3d;
+  --genetec: #00d499;
+  --flock: #ffc24a;
+  --white: #e8f4ff;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scanline overlay */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* Grid bg */
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(0,180,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,180,255,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ── LAYOUT ── */
+.app { display:flex; height:100vh; position:relative; z-index:1; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  background: var(--bg2);
+  border-right: 1px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.sidebar-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.sidebar-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--cyan);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.sidebar-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--white);
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--text2);
+  margin-top: 6px;
+  letter-spacing: 0.08em;
+}
+
+.sidebar-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--green);
+  letter-spacing: 0.1em;
+}
+.sidebar-status::before {
+  content:'';
+  width:6px; height:6px;
+  background: var(--green);
+  border-radius:50%;
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity:1; }
+  50% { opacity:0.3; }
+}
+
+.nav { flex:1; overflow-y:auto; padding: 12px 0; }
+.nav::-webkit-scrollbar { width:3px; }
+.nav::-webkit-scrollbar-track { background: transparent; }
+.nav::-webkit-scrollbar-thumb { background: var(--border2); border-radius:2px; }
+
+.nav-section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  color: var(--text3);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 12px 20px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.nav-item:hover {
+  background: rgba(0,180,255,0.05);
+  border-left-color: var(--border2);
+}
+
+.nav-item.active {
+  background: rgba(0,212,255,0.08);
+  border-left-color: var(--cyan);
+}
+
+.nav-item-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--text3);
+  flex-shrink: 0;
+  padding-top: 2px;
+  min-width: 20px;
+}
+
+.nav-item.active .nav-item-num { color: var(--cyan); }
+
+.nav-item-text {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.nav-item.active .nav-item-text { color: var(--white); }
+
+.nav-item-tag {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tag-rtcc { background: rgba(26,111,255,0.2); color: var(--blue); border: 1px solid rgba(26,111,255,0.3); }
+.tag-lpr  { background: rgba(255,194,74,0.15); color: var(--flock); border: 1px solid rgba(255,194,74,0.3); }
+.tag-platform { background: rgba(0,212,255,0.12); color: var(--cyan); border: 1px solid rgba(0,212,255,0.25); }
+.tag-policy { background: rgba(0,255,157,0.12); color: var(--green); border: 1px solid rgba(0,255,157,0.25); }
+.tag-rec { background: rgba(255,184,0,0.12); color: var(--amber); border: 1px solid rgba(255,184,0,0.25); }
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.classification {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  color: var(--amber);
+  letter-spacing: 0.2em;
+  text-align: center;
+  border: 1px solid rgba(255,184,0,0.25);
+  padding: 4px 8px;
+  background: rgba(255,184,0,0.05);
+}
+
+/* ── MAIN CONTENT ── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+  position: relative;
+}
+
+.main::-webkit-scrollbar { width: 4px; }
+.main::-webkit-scrollbar-track { background: transparent; }
+.main::-webkit-scrollbar-thumb { background: var(--border2); }
+
+/* ── TOP BAR ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(3,8,15,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topbar-breadcrumb {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text2);
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topbar-breadcrumb span { color: var(--cyan); }
+
+.topbar-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 0.1em;
+}
+
+/* ── SECTION PAGES ── */
+.page { display:none; padding: 40px; max-width: 1100px; }
+.page.active { display:block; animation: fadeIn 0.3s ease; }
+
+@keyframes fadeIn {
+  from { opacity:0; transform: translateY(8px); }
+  to { opacity:1; transform: translateY(0); }
+}
+
+/* ── PAGE HEADER ── */
+.page-header { margin-bottom: 40px; }
+
+.page-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--cyan);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.page-tag::before {
+  content:'';
+  width: 24px; height: 1px;
+  background: var(--cyan);
+}
+
+.page-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(20px, 3vw, 32px);
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+}
+
+.page-title em {
+  font-style: normal;
+  color: var(--cyan);
+}
+
+.page-intro {
+  font-size: 15px;
+  color: var(--text2);
+  line-height: 1.7;
+  max-width: 720px;
+  border-left: 2px solid var(--border2);
+  padding-left: 16px;
+  font-weight: 300;
+}
+
+/* ── SECTION DIVIDER ── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 32px 0 20px;
+}
+
+.section-divider-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--cyan2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.section-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── CARDS ── */
+.card-grid { display: grid; gap: 16px; margin-bottom: 24px; }
+.card-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.card-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.card:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+}
+
+.card::before {
+  content:'';
+  position:absolute;
+  top:0; left:0; right:0;
+  height: 2px;
+  background: var(--cyan);
+  opacity: 0.4;
+}
+
+.card.motorola::before { background: var(--motorola); opacity:1; }
+.card.axon::before     { background: var(--axon); opacity:1; }
+.card.genetec::before  { background: var(--genetec); opacity:1; }
+.card.flock::before    { background: var(--flock); opacity:1; }
+.card.amber::before    { background: var(--amber); opacity:1; }
+.card.green::before    { background: var(--green); opacity:1; }
+.card.red::before      { background: var(--red); opacity:1; }
+
+.card-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.card.motorola .card-label { color: var(--motorola); }
+.card.axon .card-label     { color: var(--axon); }
+.card.genetec .card-label  { color: var(--genetec); }
+.card.flock .card-label    { color: var(--flock); }
+.card.amber .card-label    { color: var(--amber); }
+.card.green .card-label    { color: var(--green); }
+.card.red .card-label      { color: var(--red); }
+
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--white);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.card-body {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+.card-stat {
+  font-family: 'Orbitron', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.card.motorola .card-stat { color: var(--motorola); }
+.card.axon .card-stat     { color: var(--axon); }
+.card.genetec .card-stat  { color: var(--genetec); }
+.card.flock .card-stat    { color: var(--flock); }
+.card.amber .card-stat    { color: var(--amber); }
+.card.green .card-stat    { color: var(--green); }
+
+/* ── CALLOUT BOXES ── */
+.callout {
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.callout.info { border-color: rgba(0,212,255,0.3); background: rgba(0,212,255,0.04); }
+.callout.warn { border-color: rgba(255,184,0,0.3); background: rgba(255,184,0,0.04); }
+.callout.danger { border-color: rgba(255,61,61,0.3); background: rgba(255,61,61,0.04); }
+.callout.success { border-color: rgba(0,255,157,0.3); background: rgba(0,255,157,0.04); }
+
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.callout.info .callout-label    { color: var(--cyan); }
+.callout.warn .callout-label    { color: var(--amber); }
+.callout.danger .callout-label  { color: var(--red); }
+.callout.success .callout-label { color: var(--green); }
+
+.callout-text {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+/* ── FACT ITEMS ── */
+.fact-list { list-style: none; margin-bottom: 20px; }
+.fact-list li {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+  font-weight: 300;
+}
+.fact-list li:last-child { border-bottom: none; }
+.fact-list li::before {
+  content: '//';
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--cyan);
+  flex-shrink: 0;
+  padding-top: 2px;
+  letter-spacing: -0.05em;
+}
+
+/* ── COMPARISON ROWS ── */
+.compare-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 1fr;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.compare-row:first-child { border-top: 1px solid var(--border); }
+
+.compare-cell {
+  padding: 14px 16px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-right: 1px solid var(--border);
+}
+.compare-cell:last-child { border-right: none; }
+
+.compare-cell.label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--text2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  background: rgba(0,0,0,0.2);
+}
+
+/* ── STATUS PILLS ── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 2px;
+}
+.pill-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+
+.pill-green { background: rgba(0,255,157,0.1); border: 1px solid rgba(0,255,157,0.3); color: var(--green); }
+.pill-green .pill-dot { background: var(--green); }
+.pill-blue  { background: rgba(26,111,255,0.1); border: 1px solid rgba(26,111,255,0.3); color: var(--blue); }
+.pill-blue .pill-dot  { background: var(--blue); }
+.pill-amber { background: rgba(255,184,0,0.1); border: 1px solid rgba(255,184,0,0.3); color: var(--amber); }
+.pill-amber .pill-dot { background: var(--amber); }
+.pill-red   { background: rgba(255,61,61,0.1); border: 1px solid rgba(255,61,61,0.3); color: var(--red); }
+.pill-red .pill-dot   { background: var(--red); }
+.pill-cyan  { background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); color: var(--cyan); }
+.pill-cyan .pill-dot  { background: var(--cyan); }
+
+/* ── ACCORDION ── */
+.accordion { margin-bottom: 8px; }
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.accordion-header:hover { border-color: var(--border2); background: var(--panel2); }
+.accordion-header.open { border-color: var(--border2); border-bottom: none; border-radius: 3px 3px 0 0; }
+
+.accordion-icon {
+  width: 18px; height: 18px;
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--cyan);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.accordion-header.open .accordion-icon { transform: rotate(45deg); }
+
+.accordion-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex: 1;
+}
+.accordion-header.open .accordion-title { color: var(--white); }
+
+.accordion-body {
+  display: none;
+  padding: 20px 24px;
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-top: none;
+  border-radius: 0 0 3px 3px;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+  font-weight: 300;
+}
+.accordion-body.open { display: block; }
+
+/* ── QUOTE ── */
+.quote-block {
+  border-left: 3px solid var(--cyan);
+  padding: 16px 20px;
+  background: rgba(0,212,255,0.04);
+  margin: 20px 0;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.7;
+  font-style: italic;
+  font-weight: 300;
+}
+
+.quote-block cite {
+  display: block;
+  font-style: normal;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--cyan);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+/* ── LAYER TIMELINE ── */
+.layer-timeline { margin-bottom: 24px; }
+
+.layer-item {
+  display: flex;
+  gap: 16px;
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.layer-item::before {
+  content:'';
+  position: absolute;
+  left: 19px;
+  top: 36px;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+.layer-item:last-child::before { display:none; }
+
+.layer-num {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  color: var(--cyan);
+  flex-shrink: 0;
+  background: var(--panel);
+  position: relative;
+  z-index: 1;
+}
+
+.layer-content { flex: 1; padding-top: 6px; }
+
+.layer-content-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.layer-content-text {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* ── VENDOR COMPARISON TABLE ── */
+.vendor-compare {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  font-size: 12px;
+}
+
+.vendor-compare th {
+  background: var(--panel2);
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 2px solid var(--border2);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.vendor-compare th.moto { color: var(--motorola); }
+.vendor-compare th.axon { color: var(--axon); }
+.vendor-compare th.gene { color: var(--genetec); }
+.vendor-compare th.flo  { color: var(--flock); }
+
+.vendor-compare td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  line-height: 1.5;
+  vertical-align: top;
+}
+
+.vendor-compare tr:hover td { background: rgba(0,180,255,0.03); }
+
+.vendor-compare td:first-child {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── GOVERNANCE COMPACT ── */
+.compact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.compact-item {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 18px;
+  position: relative;
+}
+
+.compact-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--border2);
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  line-height: 1;
+}
+
+.compact-item-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.compact-item-text {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* ── SCORE BAR ── */
+.score-bar-wrap { margin-bottom: 16px; }
+.score-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.score-bar-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.score-bar-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--cyan);
+}
+.score-bar-track {
+  height: 6px;
+  background: var(--panel2);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1.5s cubic-bezier(0.25,1,0.5,1);
+}
+
+/* ── LPR NETWORK VISUAL ── */
+.network-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.network-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 24px;
+  text-align: center;
+}
+
+.network-bignum {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.network-bignum.flock-color { color: var(--flock); font-size: 42px; }
+.network-bignum.moto-color  { color: var(--motorola); font-size: 32px; }
+
+.network-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--text2);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.network-detail {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1000px) {
+  .sidebar { width: 240px; }
+}
+@media (max-width: 768px) {
+  .app { flex-direction: column; height: auto; }
+  .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border2); }
+  .main { height: auto; }
+  .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; }
+  .compact-grid { grid-template-columns: 1fr; }
+  .network-compare { grid-template-columns: 1fr; }
+  .page { padding: 24px 20px; }
+}
+
+/* ── HIGHLIGHT TEXT ── */
+strong { color: var(--white); font-weight: 600; }
+em.key { font-style:normal; color: var(--cyan); font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+
+/* ── RECOMMENDATION BANNER ── */
+.rec-banner {
+  background: linear-gradient(135deg, rgba(26,111,255,0.12), rgba(0,212,255,0.06));
+  border: 1px solid rgba(26,111,255,0.4);
+  border-radius: 4px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.rec-banner::after {
+  content: 'RECOMMENDED';
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  font-family: 'Orbitron', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: rgba(26,111,255,0.15);
+}
+
+.rec-banner-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--white);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+
+.rec-banner-text {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+  font-weight: 300;
+  max-width: 680px;
+}
+
+/* Mobile menu toggle */
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10000;
+  background: var(--cyan);
+  color: var(--bg);
+  border: none;
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+}
+@media (max-width: 768px) { .mobile-menu-btn { display:block; } }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">CDP Intelligence Brief</div>
+      <div class="sidebar-title">Cleveland Surveillance<br>Systems Analysis</div>
+      <div class="sidebar-sub">RTCC · LPR · DFR · GOVERNANCE</div>
+      <div class="sidebar-status">SYSTEM ACTIVE // JUNE 2026</div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section-label">Overview</div>
+
+      <div class="nav-item active" onclick="showPage('overview', this)">
+        <span class="nav-item-num">00</span>
+        <span class="nav-item-text">Executive Summary</span>
+        <span class="nav-item-tag tag-rec">Start</span>
+      </div>
+
+      <div class="nav-section-label">Current Systems</div>
+
+      <div class="nav-item" onclick="showPage('fusus', this)">
+        <span class="nav-item-num">01</span>
+        <span class="nav-item-text">Fusus & RTCC</span>
+        <span class="nav-item-tag tag-rtcc">RTCC</span>
+      </div>
+
+      <div class="nav-item" onclick="showPage('shotspotter', this)">
+        <span class="nav-item-num">02</span>
+        <span class="nav-item-text">ShotSpotter Integration</span>
+        <span class="nav-item-tag tag-rtcc">Audio</span>
+      </div>
+
+      <div class="nav-item" onclick="showPage('flock', this)">
+        <span class="nav-item-num">03</span>
+        <span class="nav-item-text">Flock LPR Network</span>
+        <span class="nav-item-tag tag-lpr">LPR</span>
+      </div>
+
+      <div class="nav-section-label">Platform Analysis</div>
+
+      <div class="nav-item" onclick="showPage('cca', this)">
+        <span class="nav-item-num">04</span>
+        <span class="nav-item-text">CommandCentral Aware</span>
+        <span class="nav-item-tag tag-platform">CCA</span>
+      </div>
+
+      <div class="nav-item" onclick="showPage('ecosystems', this)">
+        <span class="nav-item-num">05</span>
+        <span class="nav-item-text">4 Ecosystems Compared</span>
+        <span class="nav-item-tag tag-platform">Compare</span>
+      </div>
+
+      <div class="nav-item" onclick="showPage('layers', this)">
+        <span class="nav-item-num">06</span>
+        <span class="nav-item-text">9 Integration Layers</span>
+        <span class="nav-item-tag tag-platform">Arch</span>
+      </div>
+
+      <div class="nav-section-label">Strategy</div>
+
+      <div class="nav-item" onclick="showPage('lpr-strategy', this)">
+        <span class="nav-item-num">07</span>
+        <span class="nav-item-text">Flock vs Vigilant</span>
+        <span class="nav-item-tag tag-lpr">LPR</span>
+      </div>
+
+      <div class="nav-item" onclick="showPage('recommendation', this)">
+        <span class="nav-item-num">08</span>
+        <span class="nav-item-text">Full Recommendation</span>
+        <span class="nav-item-tag tag-rec">Strategy</span>
+      </div>
+
+      <div class="nav-section-label">Community</div>
+
+      <div class="nav-item" onclick="showPage('activists', this)">
+        <span class="nav-item-num">09</span>
+        <span class="nav-item-text">Activist Response</span>
+        <span class="nav-item-tag tag-policy">Policy</span>
+      </div>
+
+      <div class="nav-item" onclick="showPage('governance', this)">
+        <span class="nav-item-num">10</span>
+        <span class="nav-item-text">Governance Compact</span>
+        <span class="nav-item-tag tag-policy">Gov</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="classification">FOR OFFICIAL USE ONLY</div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-breadcrumb">
+        CDP // RTCC MODERNIZATION // <span id="breadcrumb-text">EXECUTIVE SUMMARY</span>
+      </div>
+      <div class="topbar-meta">SECTION <span id="breadcrumb-num">00</span> OF 10</div>
+    </div>
+
+    <!-- PAGE 00: OVERVIEW -->
+    <div class="page active" id="page-overview">
+      <div class="page-header">
+        <div class="page-tag">Intelligence Brief — Section 00</div>
+        <h1 class="page-title">Cleveland PD<br><em>Surveillance Systems</em><br>Executive Summary</h1>
+        <p class="page-intro">A comprehensive analysis of Cleveland Division of Police real-time crime center technology, platform comparisons, LPR strategy, and community governance frameworks. Ten sections covering every dimension of CDP's surveillance modernization.</p>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">Current State</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="card-grid card-grid-3">
+        <div class="card motorola">
+          <div class="card-label">Primary Platform</div>
+          <div class="card-title">CommandCentral Aware</div>
+          <div class="card-body">Motorola Solutions' RTCC platform — the recommended single pane of glass for CDP. Native integration with PremierOne CAD, APX radios, Avigilon cameras, BRINC drones, and Vigilant LPR.</div>
+        </div>
+        <div class="card flock">
+          <div class="card-label">LPR Network</div>
+          <div class="card-title">Flock Safety</div>
+          <div class="card-stat">2,700+</div>
+          <div class="card-body">City-owned cameras deployed. Plus 3,700+ enrolled business cameras through SAFE SMART CLE. The network is a strategic asset — <strong>do not remove</strong>.</div>
+        </div>
+        <div class="card amber">
+          <div class="card-label">Gunshot Detection</div>
+          <div class="card-title">ShotSpotter</div>
+          <div class="card-body">Acoustic gunshot detection feeding alerts into both Fusus and CommandCentral Aware via open API. Triggers automatic camera surfacing and drone dispatch in the detection zone.</div>
+        </div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">Key Findings</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <ul class="fact-list">
+        <li>Cleveland currently runs <strong>Fusus</strong> (owned by Axon) as its RTCC video platform — but already operates Motorola PremierOne CAD and APX radios, creating redundant middleware.</li>
+        <li><strong>CommandCentral Aware</strong> can replace Fusus entirely, aggregating all 2,700+ city cameras, community cameras, ShotSpotter, LPR, officer GPS, and CAD into one native interface.</li>
+        <li>Flock Safety's national LPR network is <strong>10x larger</strong> than the next competitor — removing those cameras would eliminate a critical investigative tool for cross-jurisdictional cases.</li>
+        <li>The optimal strategy is <strong>Flock hardware retained + Vigilant VehicleManager analytics + CommandCentral Aware</strong> as the unified display layer.</li>
+        <li>Community concerns about surveillance are legitimate and should be addressed through a formal <strong>governance compact</strong> — not by removing operational tools.</li>
+        <li>Motorola's <strong>BRINC drone integration</strong> via one-click dispatch from CCA represents the most significant response time improvement available to CDP.</li>
+      </ul>
+    </div>
+
+    <!-- PAGE 01: FUSUS -->
+    <div class="page" id="page-fusus">
+      <div class="page-header">
+        <div class="page-tag">Section 01 — Current Systems</div>
+        <h1 class="page-title">Fusus & the<br><em>Cleveland RTCC</em></h1>
+        <p class="page-intro">Cleveland's Real Time Crime Center currently uses Fusus — an Axon-owned video management and alert aggregation platform — as its primary RTCC interface. Here's what it does and where it falls short.</p>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">What Fusus Is</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="card-grid card-grid-2">
+        <div class="card">
+          <div class="card-label">Platform Owner</div>
+          <div class="card-title">Fusus by Axon</div>
+          <div class="card-body">Fusus is a software platform owned by Axon (formerly TASER International). It aggregates video feeds, LPR data, ShotSpotter alerts, and community cameras onto a map-based interface for RTCC operators.</div>
+        </div>
+        <div class="card">
+          <div class="card-label">SAFE SMART CLE</div>
+          <div class="card-title">Community Camera Program</div>
+          <div class="card-body">Cleveland's SAFE SMART CLE program uses Fusus CORE devices to connect privately-owned business cameras to the RTCC. Over 3,700 business cameras are enrolled. Camera owners retain control — police access only on nearby incident.</div>
+        </div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">The Honest Assessment</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">⚠ Critical Observation</div>
+        <div class="callout-text">At its operational core, Fusus functions as an expensive networked video management system with good marketing. The CORE device that connects private cameras is essentially an RTSP bridge — straightforward technology that's been available for years. Most of its functionality exists in mature, lower-cost VMS platforms like Genetec or Milestone.</div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">What Fusus Adds Over Basic VMS</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <ul class="fact-list">
+        <li><strong>Geospatial correlation</strong> — cameras appear as map pins tied to incident locations, so operators don't need to know camera IDs</li>
+        <li><strong>Event-driven automation</strong> — ShotSpotter triggers auto-surface nearby cameras rather than requiring manual lookup</li>
+        <li><strong>Multi-source aggregation</strong> — city cameras, private cameras, LPR, body cams, and drones in one interface</li>
+        <li><strong>Community camera onboarding</strong> — the SAFE SMART CLE enrollment model is genuinely well-executed</li>
+        <li><strong>CJIS-compliant storage</strong> via Amazon GovCloud with role-based access logging</li>
+      </ul>
+
+      <div class="callout danger">
+        <div class="callout-label">The Core Problem</div>
+        <div class="callout-text">Cleveland already runs <strong>Motorola PremierOne CAD</strong> and <strong>APX radios</strong>. Fusus sits between these native Motorola systems as middleware — adding latency, failure points, and subscription cost for functionality that CommandCentral Aware provides natively at no additional middleware layer.</div>
+      </div>
+    </div>
+
+    <!-- PAGE 02: SHOTSPOTTER -->
+    <div class="page" id="page-shotspotter">
+      <div class="page-header">
+        <div class="page-tag">Section 02 — Current Systems</div>
+        <h1 class="page-title">ShotSpotter<br><em>Integration Architecture</em></h1>
+        <p class="page-intro">ShotSpotter (now SoundThinking) acoustic gunshot detection integrates with both Fusus and CommandCentral Aware via open API, triggering an automated chain of responses from detection through drone deployment.</p>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">Integration Chain</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="layer-timeline">
+        <div class="layer-item">
+          <div class="layer-num">01</div>
+          <div class="layer-content">
+            <div class="layer-content-title">Acoustic Detection</div>
+            <div class="layer-content-text">ShotSpotter sensors triangulate gunfire in near real-time, providing an exact hit location rather than relying on 911 calls. This uncovers gunfire incidents that historically go unreported.</div>
+          </div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-num">02</div>
+          <div class="layer-content">
+            <div class="layer-content-title">API Alert Push</div>
+            <div class="layer-content-text">Geolocated alert pushes via open API into both CommandCentral Aware (CCA map pin) and PremierOne CAD simultaneously. No manual operator step required.</div>
+          </div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-num">03</div>
+          <div class="layer-content">
+            <div class="layer-content-title">Auto Camera Surface</div>
+            <div class="layer-content-text">CCA workflow automation rule surfaces all cameras within a configurable radius around the detection point. Operators see live video before a single officer arrives on scene.</div>
+          </div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-num">04</div>
+          <div class="layer-content">
+            <div class="layer-content-title">BRINC Drone Trigger</div>
+            <div class="layer-content-text">ShotSpotter alert triggers the nearest BRINC dock via one-click CCA workflow. Drone launches within seconds — arriving before responding officers, providing thermal overwatch of shell casing locations.</div>
+          </div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-num">05</div>
+          <div class="layer-content">
+            <div class="layer-content-title">Multi-Channel Delivery</div>
+            <div class="layer-content-text">Alert simultaneously reaches RTCC operators, APX radios of responding officers, in-car MDTs via PremierOne CAD, and district supervisor consoles — creating a shared real-time operational picture.</div>
+          </div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-num">06</div>
+          <div class="layer-content">
+            <div class="layer-content-title">LPR Corridor Activation</div>
+            <div class="layer-content-text">Flock LPR readers along likely escape corridors are queued for heightened alert monitoring. Any vehicle captured near the detection point is flagged and searched against hot lists automatically.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout success">
+        <div class="callout-label">Real-World Outcome</div>
+        <div class="callout-text">On the first operational use of the ShotSpotter-BRINC integration in a comparable city, the drone arrived so quickly that the thermal camera identified shell casing locations even though the shooters had already fled — providing evidence that would have been lost without aerial response.</div>
+      </div>
+    </div>
+
+    <!-- PAGE 03: FLOCK -->
+    <div class="page" id="page-flock">
+      <div class="page-header">
+        <div class="page-tag">Section 03 — Current Systems</div>
+        <h1 class="page-title">Flock Safety<br><em>LPR Network</em></h1>
+        <p class="page-intro">Cleveland's Flock Safety deployment represents a major operational asset. Understanding the network scale — and why it cannot be replicated by simply switching vendors — is essential to any platform decision.</p>
+      </div>
+
+      <div class="network-compare">
+        <div class="network-card">
+          <div class="network-bignum flock-color">90,000</div>
+          <div class="network-label">Flock Cameras Nationwide</div>
+          <div class="network-detail">Deployed across 5,000+ law enforcement agencies in all 50 states. Generating 20 billion+ monthly plate reads. Flock's network is <strong>10x larger</strong> than the next closest competitor.</div>
+        </div>
+        <div class="network-card">
+          <div class="network-bignum moto-color">35B</div>
+          <div class="network-label">Vigilant Historic Records</div>
+          <div class="network-detail">Motorola Vigilant's database of historic plate detections across 1,800+ government customers. Deep archive — but Flock generates more monthly reads than Vigilant's entire historic database.</div>
+        </div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">Why the Network Size Matters Operationally</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <ul class="fact-list">
+        <li><strong>Cross-jurisdictional cases</strong> — when a carjacking suspect crosses from Cleveland into Euclid, Parma, or Akron, Flock cameras in those cities read the plate and alert Cleveland detectives in real time. Vigilant cannot match this coverage density in Northeast Ohio.</li>
+        <li><strong>Amber Alerts</strong> — immediate statewide and national plate flagging the moment an alert is issued. The network depth directly impacts child recovery speed.</li>
+        <li><strong>Auto theft recovery</strong> — Cleveland has chronically high vehicle theft rates. Flock hot-list alerts on stolen plates across the regional network are one of the most direct recovery tools available.</li>
+        <li><strong>Pattern analysis</strong> — vehicles appearing repeatedly near crime scenes across different precincts before a crime is committed, caught by the network density before officers are even aware.</li>
+        <li><strong>Homicide investigations</strong> — tracing a suspect vehicle's movements in the hours before and after an incident across multiple jurisdictions using historic read data.</li>
+      </ul>
+
+      <div class="callout danger">
+        <div class="callout-label">Critical Finding</div>
+        <div class="callout-text">Removing Flock cameras would take a genuinely important investigative tool away from CPD — not a redundant one. The capital investment is already sunk, the network is enrolled, and the investigative value of the national network is irreplaceable by any other single vendor. <strong>The cameras stay.</strong></div>
+      </div>
+    </div>
+
+    <!-- PAGE 04: CCA -->
+    <div class="page" id="page-cca">
+      <div class="page-header">
+        <div class="page-tag">Section 04 — Platform Analysis</div>
+        <h1 class="page-title">CommandCentral<br><em>Aware</em></h1>
+        <p class="page-intro">Motorola Solutions' CommandCentral Aware is the recommended primary RTCC platform for Cleveland Division of Police. Here's the full capability breakdown and why it outperforms Fusus for an agency already in the Motorola ecosystem.</p>
+      </div>
+
+      <div class="rec-banner">
+        <div class="rec-banner-title">Recommended Primary Platform for CDP</div>
+        <div class="rec-banner-text">With Cleveland already running PremierOne CAD, APX radios, and VESTA 911 — all Motorola products — CommandCentral Aware provides native integration with zero API middleware, zero latency, and significantly lower long-term operational complexity than running Fusus as a parallel system.</div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">Key Advantages Over Fusus</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="card-grid card-grid-2">
+        <div class="card motorola">
+          <div class="card-label">Decisive Advantage</div>
+          <div class="card-title">APX Radio GPS — Native</div>
+          <div class="card-body">APX NEXT radios feed officer locations directly into CCA with a 3–4 second refresh rate. Every on-duty Cleveland officer appears as a live map icon. No other ecosystem can replicate this without separate middleware — because no other vendor makes Cleveland's radios.</div>
+        </div>
+        <div class="card motorola">
+          <div class="card-label">Decisive Advantage</div>
+          <div class="card-title">PremierOne CAD — Zero Latency</div>
+          <div class="card-body">Every CAD incident appears instantly on the CCA map with full details, unit assignments, and status — no API bridge, no latency, no failure points. Fusus requires a third-party CAD integration that introduces all three.</div>
+        </div>
+        <div class="card motorola">
+          <div class="card-label">AI Analytics</div>
+          <div class="card-title">Avigilon — Market Leader</div>
+          <div class="card-body">Avigilon's Appearance Search enables finding a suspect across all 2,700+ cameras by physical description. Unusual Motion Detection flags anomalous activity automatically. These capabilities are mature — Axon Vision was only launched in April 2026.</div>
+        </div>
+        <div class="card motorola">
+          <div class="card-label">DFR Integration</div>
+          <div class="card-title">BRINC One-Click Dispatch</div>
+          <div class="card-body">BRINC drone docks dispatch with one click from within CCA, or automatically via workflow rule on ShotSpotter alert. Live thermal and visual feed streams directly into the CCA map interface alongside all other data layers.</div>
+        </div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">Workflow Automation Rules</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <ul class="fact-list">
+        <li><strong>ShotSpotter fires</strong> → auto-surface cameras in 500ft radius + trigger nearest BRINC dock + push to district supervisor radio</li>
+        <li><strong>LPR hot-list hit</strong> → auto-query NCIC + surface nearest cameras to reader location + alert assigned detective</li>
+        <li><strong>Priority 1 call</strong> → surface nearest cameras to call location + display all officers within 1 mile</li>
+        <li><strong>Officer emergency button</strong> → immediately surface officer GPS + nearest cameras + alert all supervisors</li>
+        <li><strong>Vehicle pursuit initiated</strong> → activate aerial overwatch drone + surface LPR readers along likely escape corridors</li>
+        <li><strong>Geofence breach</strong> → alert designated supervisor + surface building floor plan + notify command staff</li>
+      </ul>
+    </div>
+
+    <!-- PAGE 05: ECOSYSTEMS -->
+    <div class="page" id="page-ecosystems">
+      <div class="page-header">
+        <div class="page-tag">Section 05 — Platform Analysis</div>
+        <h1 class="page-title">Four Ecosystem<br><em>Comparison</em></h1>
+        <p class="page-intro">A direct comparison of the four competing public safety ecosystems evaluated for Cleveland — Motorola Solutions, Axon Enterprise, Genetec, and Flock Safety.</p>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">Overall Ecosystem Score</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="score-bar-wrap">
+        <div class="score-bar-header">
+          <span class="score-bar-label" style="color:var(--motorola)">Motorola — CommandCentral Aware</span>
+          <span class="score-bar-value">89 / 100</span>
+        </div>
+        <div class="score-bar-track">
+          <div class="score-bar-fill" style="width:89%; background: var(--motorola);"></div>
+        </div>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-header">
+          <span class="score-bar-label" style="color:var(--axon)">Axon — Fusus / Axon 911 Ecosystem</span>
+          <span class="score-bar-value">81 / 100</span>
+        </div>
+        <div class="score-bar-track">
+          <div class="score-bar-fill" style="width:81%; background: var(--axon);"></div>
+        </div>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-header">
+          <span class="score-bar-label" style="color:var(--genetec)">Genetec — Security Center / Citigraf</span>
+          <span class="score-bar-value">67 / 100</span>
+        </div>
+        <div class="score-bar-track">
+          <div class="score-bar-fill" style="width:67%; background: var(--genetec);"></div>
+        </div>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-header">
+          <span class="score-bar-label" style="color:var(--flock)">Flock Safety — Falcon Platform</span>
+          <span class="score-bar-value">44 / 100</span>
+        </div>
+        <div class="score-bar-track">
+          <div class="score-bar-fill" style="width:44%; background: var(--flock);"></div>
+        </div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">Critical Capability Comparison</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div style="overflow-x:auto;">
+      <table class="vendor-compare">
+        <thead>
+          <tr>
+            <th>Capability</th>
+            <th class="moto">Motorola</th>
+            <th class="axon">Axon</th>
+            <th class="gene">Genetec</th>
+            <th class="flo">Flock</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>P25 Radio Infrastructure</td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>NATIVE</span></td>
+            <td><span class="pill pill-red"><span class="pill-dot"></span>NONE</span></td>
+            <td><span class="pill pill-red"><span class="pill-dot"></span>NONE</span></td>
+            <td><span class="pill pill-red"><span class="pill-dot"></span>NONE</span></td>
+          </tr>
+          <tr>
+            <td>CAD / Dispatch</td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>NATIVE</span></td>
+            <td><span class="pill pill-cyan"><span class="pill-dot"></span>NEW 2026</span></td>
+            <td><span class="pill pill-red"><span class="pill-dot"></span>NONE</span></td>
+            <td><span class="pill pill-red"><span class="pill-dot"></span>NONE</span></td>
+          </tr>
+          <tr>
+            <td>AI Video Analytics</td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>AVIGILON</span></td>
+            <td><span class="pill pill-cyan"><span class="pill-dot"></span>AXON VISION</span></td>
+            <td><span class="pill pill-blue"><span class="pill-dot"></span>FULL</span></td>
+            <td><span class="pill pill-amber"><span class="pill-dot"></span>LIMITED</span></td>
+          </tr>
+          <tr>
+            <td>DFR Drone Integration</td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>BRINC/CAPE</span></td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>SKYDIO</span></td>
+            <td><span class="pill pill-amber"><span class="pill-dot"></span>PARTIAL</span></td>
+            <td><span class="pill pill-blue"><span class="pill-dot"></span>RAVEN</span></td>
+          </tr>
+          <tr>
+            <td>LPR / ALPR Network</td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>VIGILANT</span></td>
+            <td><span class="pill pill-blue"><span class="pill-dot"></span>FLOCK API</span></td>
+            <td><span class="pill pill-blue"><span class="pill-dot"></span>CLOUDRUNNER</span></td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>DOMINANT</span></td>
+          </tr>
+          <tr>
+            <td>Body Cameras</td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>V700</span></td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>DOMINANT</span></td>
+            <td><span class="pill pill-red"><span class="pill-dot"></span>NONE</span></td>
+            <td><span class="pill pill-red"><span class="pill-dot"></span>NONE</span></td>
+          </tr>
+          <tr>
+            <td>Evidence Management</td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>PREMIERONE</span></td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>AXON EVIDENCE</span></td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>CLEARANCE</span></td>
+            <td><span class="pill pill-red"><span class="pill-dot"></span>NONE</span></td>
+          </tr>
+          <tr>
+            <td>AI Report Writing</td>
+            <td><span class="pill pill-red"><span class="pill-dot"></span>NONE</span></td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>DRAFT ONE</span></td>
+            <td><span class="pill pill-red"><span class="pill-dot"></span>NONE</span></td>
+            <td><span class="pill pill-red"><span class="pill-dot"></span>NONE</span></td>
+          </tr>
+          <tr>
+            <td>Counter-UAS (C-UAS)</td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>SKYSAFE</span></td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>DEDRONE</span></td>
+            <td><span class="pill pill-red"><span class="pill-dot"></span>NONE</span></td>
+            <td><span class="pill pill-red"><span class="pill-dot"></span>NONE</span></td>
+          </tr>
+          <tr>
+            <td>Open Architecture</td>
+            <td><span class="pill pill-amber"><span class="pill-dot"></span>PARTIAL</span></td>
+            <td><span class="pill pill-amber"><span class="pill-dot"></span>PARTIAL</span></td>
+            <td><span class="pill pill-green"><span class="pill-dot"></span>FULLY OPEN</span></td>
+            <td><span class="pill pill-amber"><span class="pill-dot"></span>PARTIAL</span></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Watch: Axon AI Velocity</div>
+        <div class="callout-text">Axon's <strong>Draft One</strong> AI report writing, <strong>Axon Vision</strong> (launched April 2026), and <strong>Axon 911</strong> (Carbyne/Prepared acquisitions) represent the fastest AI innovation velocity in the market. Motorola's gap on AI report writing is real. If Axon successfully scales its 911 platform, the competitive picture will shift by 2027–2028.</div>
+      </div>
+    </div>
+
+    <!-- PAGE 06: LAYERS -->
+    <div class="page" id="page-layers">
+      <div class="page-header">
+        <div class="page-tag">Section 06 — Architecture</div>
+        <h1 class="page-title">9-Layer<br><em>Integration Architecture</em></h1>
+        <p class="page-intro">The recommended Cleveland RTCC architecture built on CommandCentral Aware spans nine distinct integration layers — from the common operating picture down through multi-agency regional sharing.</p>
+      </div>
+
+      <div class="accordion">
+        <div class="accordion-header open" onclick="toggleAccordion(this)">
+          <div class="accordion-icon">+</div>
+          <div class="accordion-title">Layer 01 — Common Operating Picture</div>
+          <span class="pill pill-green"><span class="pill-dot"></span>NATIVE CCA</span>
+        </div>
+        <div class="accordion-body open">Esri-based geospatial map displaying all 2,700+ city cameras, ShotSpotter zones, LPR readers, officer GPS positions, zone car locations, active CAD incidents, BRINC drone positions, and enrolled business camera locations. Role-based operator views configured for RTCC detectives, civilian analysts, dispatch supervisors, command staff, and Fire/EMS — with sensitive units (SWAT, undercover, K9) permissioned for visibility control.</div>
+      </div>
+      <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-icon">+</div>
+          <div class="accordion-title">Layer 02 — Video Infrastructure</div>
+          <span class="pill pill-green"><span class="pill-dot"></span>AVIGILON + FLOCK</span>
+        </div>
+        <div class="accordion-body">City-owned Flock cameras stream via ONVIF/RTSP into CCA through Safety Hub edge devices. Avigilon AI analytics layer adds Appearance Search (find suspect across all cameras by description), Unusual Motion Detection, and native LPR at key intersections. Community cameras migrate from Fusus CORE to CommandCentral Community / Avigilon Blue. Building floor plans for schools, hospitals, stadiums, and transit stations available for incident overlays.</div>
+      </div>
+      <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-icon">+</div>
+          <div class="accordion-title">Layer 03 — Gunshot Detection</div>
+          <span class="pill pill-amber"><span class="pill-dot"></span>SHOTSPOTTER API</span>
+        </div>
+        <div class="accordion-body">ShotSpotter continues operating exactly as today but routes alerts natively into CCA via open API. Alert fires → geolocated pin on CCA map → workflow rule auto-surfaces cameras in configurable radius → alert pushes to VESTA 911, PremierOne CAD, and APX NEXT radios simultaneously → BRINC drone dispatch triggered. No Fusus middleware in the chain.</div>
+      </div>
+      <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-icon">+</div>
+          <div class="accordion-title">Layer 04 — CAD & Radio Integration</div>
+          <span class="pill pill-green"><span class="pill-dot"></span>NATIVE MOTOROLA</span>
+        </div>
+        <div class="accordion-body">PremierOne CAD incidents appear instantly on CCA map — zero latency, no middleware. APX NEXT GPS feeds officer locations at 3–4 second refresh. MCC 7500E radio console integrated for direct talkgroup communication from within CCA. VESTA 911 call-handling displays 911 call location pins on map in real time. Officer emergency button triggers immediate CCA supervisor alert.</div>
+      </div>
+      <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-icon">+</div>
+          <div class="accordion-title">Layer 05 — Drone as First Responder (DFR)</div>
+          <span class="pill pill-cyan"><span class="pill-dot"></span>BRINC + CAPE</span>
+        </div>
+        <div class="accordion-body">BRINC docks positioned at RTCC facility, all 5 district stations, high-density ShotSpotter corridors, Burke Lakefront, and major RTA stations. One-click dispatch from CCA or automatic via workflow rule. CAPE drone management stores encrypted tamper-proof audit trail. SkySafe airspace integration detects unauthorized drone flight paths in real time to deconflict agency UAVs from threats.</div>
+      </div>
+      <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-icon">+</div>
+          <div class="accordion-title">Layer 06 — LPR & Vehicle Intelligence</div>
+          <span class="pill pill-flock" style="background:rgba(255,194,74,0.1);border:1px solid rgba(255,194,74,0.3);color:var(--flock);font-family:'IBM Plex Mono';font-size:9px;padding:3px 9px;border-radius:2px;">FLOCK + VIGILANT</span>
+        </div>
+        <div class="accordion-body">Flock Safety LPR feeds hot-list alerts directly into CCA. Vigilant VehicleManager adds advanced investigative analytics: full/partial plate search, filtering by make/model/year/color, Common Plate Analysis (vehicle at multiple locations), and predictive movement modeling. Vigilant mobile app on patrol vehicles (L5M) enables mobile plate scanning feeding the same backend. NCIC hot-list auto-query on every detection.</div>
+      </div>
+      <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-icon">+</div>
+          <div class="accordion-title">Layer 07 — Workflow Automation</div>
+          <span class="pill pill-green"><span class="pill-dot"></span>CCA RULES ENGINE</span>
+        </div>
+        <div class="accordion-body">CCA IF/THEN rules engine with AND/OR operators automates: ShotSpotter → camera surface + BRINC launch. LPR hit → NCIC query + detective alert. Priority 1 call → camera surface + officer positions. Emergency button → supervisor alert + camera surface. Vehicle pursuit → aerial overwatch + LPR corridors. Geofence breach → supervisor alert + floor plan display.</div>
+      </div>
+      <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-icon">+</div>
+          <div class="accordion-title">Layer 08 — Evidence & Case Management</div>
+          <span class="pill pill-green"><span class="pill-dot"></span>PREMIERONE RECORDS</span>
+        </div>
+        <div class="accordion-body">Video clips, snapshots, and incident data export directly to PremierOne Records with full chain of custody documentation. V700 body cam GPS and livestream accessible in CCA via 4RE system. Eliminates Axon Evidence dependency. Prosecution disclosure handled natively within PremierOne workflow — prosecutor access provisioned without third-party evidence platform subscription.</div>
+      </div>
+      <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-icon">+</div>
+          <div class="accordion-title">Layer 09 — Multi-Agency & Regional Integration</div>
+          <span class="pill pill-blue"><span class="pill-dot"></span>PERMISSIONED ACCESS</span>
+        </div>
+        <div class="accordion-body">Cuyahoga County Sheriff (shared camera and LPR layer), NOACA regional GIS (traffic and infrastructure), Ohio Homeland Security (critical infrastructure overlays), FBI/ATF task forces (read-only incident access for joint operations), mutual aid agencies (temporary elevated access during declared emergencies). Esri data layers include traffic, weather, custom GIS, and NOACA regional planning data.</div>
+      </div>
+    </div>
+
+    <!-- PAGE 07: LPR STRATEGY -->
+    <div class="page" id="page-lpr-strategy">
+      <div class="page-header">
+        <div class="page-tag">Section 07 — Strategy</div>
+        <h1 class="page-title">Flock vs Vigilant<br><em>LPR Strategy</em></h1>
+        <p class="page-intro">Should Cleveland replace its Flock LPR cameras with Motorola/Vigilant hardware to achieve full ecosystem consolidation? The answer is nuanced — and probably not what you'd expect.</p>
+      </div>
+
+      <div class="card-grid card-grid-2">
+        <div class="card green">
+          <div class="card-label">Case For Replacing Flock</div>
+          <div class="card-title">True Native Integration</div>
+          <div class="card-body">Vigilant VehicleManager integrates natively with CCA, PremierOne CAD, and CommandCentral Records — no API bridges. Motorola's L-series camera hardware spans every deployment scenario. Advanced analytics include predictive vehicle movement modeling and Common Plate Analysis that Flock doesn't match at investigative depth.</div>
+        </div>
+        <div class="card red">
+          <div class="card-label">Case Against Replacing Flock</div>
+          <div class="card-title">The Network Gap Is Decisive</div>
+          <div class="card-body">Flock's 90,000 cameras generating 20B+ monthly reads vs. Vigilant's 1.5B agency-sharing detections. Cleveland's 2,700+ cameras are sunk capital already deployed and enrolled. The investigative value of Flock's national network for cross-jurisdictional cases cannot be replicated by switching vendors.</div>
+        </div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">The Optimal Strategy</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="callout success">
+        <div class="callout-label">Recommended Approach — Keep Both</div>
+        <div class="callout-text"><strong>Keep all 2,700+ Flock cameras in the ground.</strong> Feed Flock detections into <strong>Vigilant VehicleManager</strong> for investigative analytics. Display all LPR data in <strong>CommandCentral Aware</strong> via the native Vigilant-CCA integration. Retain Flock's national network access for cross-jurisdictional investigations (configuring data sharing to regional Ohio partners only). Add <strong>Vigilant mobile LPR</strong> on patrol vehicles (L5M) for mobile scanning feeding the same backend.<br><br>Result: Flock's unmatched national network depth <strong>plus</strong> Vigilant's superior investigative analytics <strong>plus</strong> native CCA display — at no additional hardware cost.</div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">Data Governance Configuration</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <ul class="fact-list">
+        <li>Configure Flock data sharing to <strong>named regional partners only</strong> — Cuyahoga County Sheriff, Ohio State Highway Patrol, neighboring municipal departments — not the full national network or federal agencies</li>
+        <li>Vigilant VehicleManager provides <strong>agency-defined data retention policies</strong> and detailed audit logs aligned to CJIS compliance standards</li>
+        <li>Both platforms are CJIS-compliant — the governance choice is which sharing configuration serves Cleveland's legal obligations and community commitments</li>
+        <li>Publish the data sharing configuration publicly as part of the governance compact — this directly addresses activist concerns without reducing operational capability</li>
+      </ul>
+    </div>
+
+    <!-- PAGE 08: RECOMMENDATION -->
+    <div class="page" id="page-recommendation">
+      <div class="page-header">
+        <div class="page-tag">Section 08 — Strategy</div>
+        <h1 class="page-title">Full Platform<br><em>Recommendation</em></h1>
+        <p class="page-intro">The complete strategic recommendation for Cleveland Division of Police RTCC modernization — phased migration, budget reallocation, and long-term ecosystem positioning.</p>
+      </div>
+
+      <div class="rec-banner">
+        <div class="rec-banner-title">Consolidate on Motorola Solutions — Phase Out Fusus</div>
+        <div class="rec-banner-text">With CommandCentral Aware handling camera aggregation, community cameras, ShotSpotter, CAD, radio, and workflow automation natively, Fusus is redundant middleware. The subscription cost should be redirected to BRINC DFR dock deployment across Cleveland's five districts.</div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">Migration Sequence</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="layer-timeline">
+        <div class="layer-item">
+          <div class="layer-num">P1</div>
+          <div class="layer-content">
+            <div class="layer-content-title">Immediate — Native Integration Activation</div>
+            <div class="layer-content-text">Activate full CCA integration with PremierOne CAD and APX NEXT radios. This is likely partially done already. Verify officer GPS telemetry is feeding into CCA map at full refresh rate. Activate VESTA 911 call-location pins on CCA.</div>
+          </div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-num">P2</div>
+          <div class="layer-content">
+            <div class="layer-content-title">Phase 1 — City Camera Migration</div>
+            <div class="layer-content-text">Migrate 2,700+ Flock Safety city cameras from Fusus middleware to CCA Safety Hub edge devices. Verify ONVIF/RTSP streaming quality. Configure Avigilon AI analytics on highest-priority camera nodes.</div>
+          </div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-num">P3</div>
+          <div class="layer-content">
+            <div class="layer-content-title">Phase 2 — Community Camera Migration</div>
+            <div class="layer-content-text">Migrate 3,700+ enrolled SAFE SMART CLE business cameras from Fusus CORE to CommandCentral Community / Avigilon Blue. Requires direct outreach to enrolled business partners. This is the most operationally complex migration step.</div>
+          </div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-num">P4</div>
+          <div class="layer-content">
+            <div class="layer-content-title">Phase 3 — Vigilant + DFR Deployment</div>
+            <div class="layer-content-text">Stand up Vigilant VehicleManager as investigative analytics backend for Flock LPR data. Deploy initial BRINC DFR docks at RTCC and district stations. Run 90-day pilot measuring response time delta and case impact.</div>
+          </div>
+        </div>
+        <div class="layer-item">
+          <div class="layer-num">P5</div>
+          <div class="layer-content">
+            <div class="layer-content-title">Phase 4 — Fusus Retirement</div>
+            <div class="layer-content-text">Once all cameras are migrated and CCA is fully operational, terminate Fusus subscription. Redirect annual subscription cost to BRINC dock expansion across remaining coverage gaps citywide.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">Watch Carefully Through 2027</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Axon Threat Assessment</div>
+        <div class="callout-text">Axon's rapid ecosystem expansion — Draft One AI reports, Axon Vision (April 2026), Axon 911 via Carbyne/Prepared — means the competitive gap is narrowing faster than 18 months ago. Motorola's critical gap is <strong>AI report writing</strong>. If Motorola does not release an equivalent to Draft One by 2027, the calculus on full ecosystem consolidation should be revisited. Monitor Axon's 911 platform at scale — if it succeeds, Axon becomes a full-stack competitor even for agencies with Motorola radios.</div>
+      </div>
+    </div>
+
+    <!-- PAGE 09: ACTIVISTS -->
+    <div class="page" id="page-activists">
+      <div class="page-header">
+        <div class="page-tag">Section 09 — Community</div>
+        <h1 class="page-title">Responding to<br><em>Surveillance Critics</em></h1>
+        <p class="page-intro">Activists who oppose surveillance technology but demand faster police response are holding two operationally conflicting positions. The city needs to name that contradiction honestly — then offer a real governance compact, not a dismissal.</p>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">The Core Contradiction</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="callout danger">
+        <div class="callout-label">The Honest Reality</div>
+        <div class="callout-text">Faster police response without surveillance technology requires one of three things: <strong>more officers, better luck, or accepting that some crimes won't be solved.</strong> Cleveland has chronic staffing shortages in CPD. You cannot simultaneously reduce technological force multipliers AND maintain response times with a shrinking patrol force. The surveillance infrastructure exists precisely because there aren't enough officers to physically cover 77 square miles of city.</div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">Where Activists Are Right</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="card-grid card-grid-3">
+        <div class="card green">
+          <div class="card-label">Legitimate Concern</div>
+          <div class="card-title">Data Governance</div>
+          <div class="card-body">The nationwide data sharing models of both Flock and Vigilant are real issues. Vehicle location data can flow to federal agencies including ICE without warrant. Cleveland has the ability to configure exactly who sees its data — and should do so publicly.</div>
+        </div>
+        <div class="card green">
+          <div class="card-label">Legitimate Concern</div>
+          <div class="card-title">Audit Trails</div>
+          <div class="card-body">Who accessed which cameras, when, and why should be logged, independently audited, and publicly reported. The answer to surveillance overreach isn't removing cameras — it's building accountability infrastructure around them.</div>
+        </div>
+        <div class="card green">
+          <div class="card-label">Legitimate Concern</div>
+          <div class="card-title">History of Misuse</div>
+          <div class="card-body">The history of surveillance abuse by American law enforcement is real and documented. Acknowledging this directly — rather than dismissing it — is the only position that builds durable public trust. The city should say so plainly.</div>
+        </div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">The Message in Plain Language</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="quote-block">
+        "We hear the concern about surveillance and we share the belief that police power needs accountability and limits. We're not asking you to trust us blindly — we're asking you to review the governance framework we're putting around these tools and tell us where it falls short. What we cannot do is remove technology that is literally the only reason some crime victims get justice in a city where we don't have enough officers to be everywhere at once. Faster response and zero surveillance aren't both available. We're offering faster response with accountable, transparent, limited surveillance — and we're open to making those limits tighter."
+        <cite>— Recommended City of Cleveland Public Statement</cite>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">What The City Should Never Do</div>
+        <div class="callout-text">Never tell activists that surveillance tools are harmless or that their concerns are unfounded. That destroys credibility and inflames the debate. The concerns are legitimate — acknowledge them, build real accountability around them, and make the operational case honestly. That is the only position that holds up over time.</div>
+      </div>
+    </div>
+
+    <!-- PAGE 10: GOVERNANCE -->
+    <div class="page" id="page-governance">
+      <div class="page-header">
+        <div class="page-tag">Section 10 — Community</div>
+        <h1 class="page-title">Governance<br><em>Compact</em></h1>
+        <p class="page-intro">Rather than fighting activists or capitulating to them, Cleveland should offer a concrete, enforceable governance compact with six specific commitments — each verifiable, each with real teeth.</p>
+      </div>
+
+      <div class="compact-grid">
+        <div class="compact-item">
+          <div class="compact-num">01</div>
+          <div class="compact-item-title">Published Data Retention Limits</div>
+          <div class="compact-item-text">Flock footage and LPR reads retained for a defined period (30, 60, or 90 days) with automatic deletion. Publicly documented retention schedule, audited annually and reported to City Council.</div>
+        </div>
+        <div class="compact-item">
+          <div class="compact-num">02</div>
+          <div class="compact-item-title">Civilian Oversight With Real Access</div>
+          <div class="compact-item-text">Not a rubber-stamp board — a body with actual authority to pull query logs, review system access records, and publish public quarterly reports on how technology is being used and by whom.</div>
+        </div>
+        <div class="compact-item">
+          <div class="compact-num">03</div>
+          <div class="compact-item-title">Configurable Data Sharing — Published</div>
+          <div class="compact-item-text">Cleveland commits publicly to sharing Flock LPR data only with named regional law enforcement partners (Cuyahoga County Sheriff, OSHP, regional municipal departments) — not the full national network or federal immigration enforcement.</div>
+        </div>
+        <div class="compact-item">
+          <div class="compact-num">04</div>
+          <div class="compact-item-title">No Facial Recognition — In Ordinance</div>
+          <div class="compact-item-text">Cleveland has already committed to no facial recognition technology. This commitment should be codified in municipal ordinance with enforcement mechanism — not just policy language that can be reversed by the next administration.</div>
+        </div>
+        <div class="compact-item">
+          <div class="compact-num">05</div>
+          <div class="compact-item-title">Quarterly Benefit Reporting</div>
+          <div class="compact-item-text">Publish quarterly data on what the technology is actually producing: stolen vehicles recovered, response time improvements, cases closed, crimes deterred at enrolled business locations. Public accountability for outcomes, not just inputs.</div>
+        </div>
+        <div class="compact-item">
+          <div class="compact-num">06</div>
+          <div class="compact-item-title">Sunset & Review Clauses</div>
+          <div class="compact-item-text">Every surveillance contract comes before City Council for renewal with a mandatory public performance review. The community retains the ability to course-correct. No contract auto-renews without public hearing.</div>
+        </div>
+      </div>
+
+      <div class="section-divider">
+        <span class="section-divider-label">What This Compact Accomplishes</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <ul class="fact-list">
+        <li>Addresses the most legitimate activist concerns with enforceable commitments — not just promises</li>
+        <li>Creates a public accountability record that builds trust over time as outcomes are documented</li>
+        <li>Retains full operational capability of the surveillance infrastructure — no tools are removed</li>
+        <li>Protects the city politically by making the governance framework visible and debatable before a controversy — not in response to one</li>
+        <li>Establishes Cleveland as a national model for accountable public safety technology deployment — a positive civic narrative rather than a defensive one</li>
+        <li>Gives Council members a concrete framework to defend to constituents who have surveillance concerns</li>
+      </ul>
+
+      <div class="callout success">
+        <div class="callout-label">Strategic Outcome</div>
+        <div class="callout-text">The governance compact isn't a concession to critics — it's the smartest long-term protection for the surveillance tools CDP needs. Accountability infrastructure is what makes public safety technology politically sustainable over time. Without it, every new camera contract becomes a Council fight. With it, the conversation shifts from "should we have cameras" to "are the cameras being used the way we agreed." That's a debate Cleveland can win.</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const breadcrumbs = {
+  'overview':       ['EXECUTIVE SUMMARY', '00'],
+  'fusus':          ['FUSUS & RTCC', '01'],
+  'shotspotter':    ['SHOTSPOTTER INTEGRATION', '02'],
+  'flock':          ['FLOCK LPR NETWORK', '03'],
+  'cca':            ['COMMANDCENTRAL AWARE', '04'],
+  'ecosystems':     ['4 ECOSYSTEMS COMPARED', '05'],
+  'layers':         ['9 INTEGRATION LAYERS', '06'],
+  'lpr-strategy':   ['FLOCK VS VIGILANT', '07'],
+  'recommendation': ['FULL RECOMMENDATION', '08'],
+  'activists':      ['ACTIVIST RESPONSE', '09'],
+  'governance':     ['GOVERNANCE COMPACT', '10'],
+};
+
+function showPage(id, navEl) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // Show target
+  document.getElementById('page-' + id).classList.add('active');
+
+  // Update nav active state
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  navEl.classList.add('active');
+
+  // Update breadcrumb
+  const bc = breadcrumbs[id];
+  document.getElementById('breadcrumb-text').textContent = bc[0];
+  document.getElementById('breadcrumb-num').textContent = bc[1];
+
+  // Scroll main to top
+  document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleAccordion(header) {
+  const body = header.nextElementSibling;
+  const isOpen = header.classList.contains('open');
+
+  if (isOpen) {
+    header.classList.remove('open');
+    body.classList.remove('open');
+  } else {
+    header.classList.add('open');
+    body.classList.add('open');
+  }
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  const pages = ['overview','fusus','shotspotter','flock','cca','ecosystems','layers','lpr-strategy','recommendation','activists','governance'];
+  const current = document.querySelector('.page.active');
+  if (!current) return;
+  const currentId = current.id.replace('page-','');
+  const idx = pages.indexOf(currentId);
+
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    if (idx < pages.length - 1) {
+      const nextId = pages[idx + 1];
+      const navItem = document.querySelectorAll('.nav-item')[idx + 1];
+      showPage(nextId, navItem);
+    }
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    if (idx > 0) {
+      const prevId = pages[idx - 1];
+      const navItem = document.querySelectorAll('.nav-item')[idx - 1];
+      showPage(prevId, navItem);
+    }
+  }
+});
+</script>
+</body>
+</html>

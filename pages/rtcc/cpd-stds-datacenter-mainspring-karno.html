@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPD STDS Data Center — Mainspring + KARNO Power Architecture</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+:root {
+  --bg: #f4f2ed;
+  --white: #ffffff;
+  --ink: #141414;
+  --ink2: #3a3a3a;
+  --ink3: #6a6a6a;
+  --border: #ddd8d0;
+  --border2: #c2bdb4;
+  --accent: #1a3a8f;
+  --mainspring: #0d5c3a;
+  --karno: #7a1f0a;
+  --green: #0d5c3a;
+  --red: #a01010;
+  --amber: #8a5500;
+  --teal: #0d4f5c;
+  --cpporange: #c25400;
+  --rule: #b5b0a8;
+  --h2green: #1a6b45;
+  --methanol: #2a5a8a;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.page { max-width: 920px; margin: 0 auto; padding: 52px 44px; }
+
+/* ─── COVER ─── */
+.cover {
+  border: 2px solid var(--ink);
+  padding: 52px;
+  margin-bottom: 48px;
+  background: var(--white);
+  position: relative;
+}
+.cover::before {
+  content: '';
+  position: absolute;
+  top: 7px; left: 7px; right: -7px; bottom: -7px;
+  border: 1px solid var(--border2);
+  z-index: -1;
+}
+.doc-class {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--mainspring);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 32px;
+}
+.cover-rev-badge {
+  display: inline-block;
+  background: var(--karno);
+  color: #fff;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 3px 10px;
+  margin-bottom: 16px;
+}
+.cover-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(26px, 4.5vw, 46px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  margin-bottom: 12px;
+}
+.cover-title em {
+  font-style: normal;
+  color: var(--mainspring);
+  border-bottom: 3px solid var(--mainspring);
+}
+.cover-sub {
+  font-size: 15px;
+  color: var(--ink2);
+  font-weight: 300;
+  margin-bottom: 32px;
+  max-width: 580px;
+}
+.cover-meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+.meta-cell label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: var(--ink3);
+  display: block;
+  margin-bottom: 4px;
+}
+.meta-cell span { font-size: 12px; font-weight: 500; }
+
+/* ─── POWER PHILOSOPHY BANNER ─── */
+.philosophy-band {
+  border-left: 6px solid var(--mainspring);
+  padding: 20px 24px;
+  background: var(--white);
+  border: 1px solid var(--border2);
+  border-left: 5px solid var(--mainspring);
+  margin-bottom: 32px;
+}
+.philosophy-band h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--mainspring);
+}
+.philosophy-band p {
+  font-size: 13px;
+  color: var(--ink2);
+  margin-bottom: 0;
+  line-height: 1.7;
+}
+
+/* ─── VENDOR CARDS ─── */
+.vendor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.vendor-card {
+  border: 1px solid var(--border2);
+  background: var(--white);
+  overflow: hidden;
+}
+.vendor-header {
+  padding: 12px 16px;
+  color: #fff;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.vh-mainspring { background: var(--mainspring); }
+.vh-karno { background: var(--karno); }
+.vh-cpp { background: var(--cpporange); }
+.vendor-body { padding: 14px 16px; }
+.vendor-body p { font-size: 12px; color: var(--ink2); margin-bottom: 8px; line-height: 1.6; }
+.vendor-spec {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 0.5px solid var(--border);
+  font-size: 11px;
+}
+.vendor-spec:last-child { border-bottom: none; }
+.vendor-spec span:first-child { color: var(--ink3); }
+.vendor-spec span:last-child { font-family: 'DM Mono', monospace; font-weight: 500; color: var(--ink); }
+
+/* ─── SECTION ─── */
+.section { margin-bottom: 44px; }
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ink);
+}
+.sec-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--mainspring); letter-spacing: 2px; flex-shrink: 0; }
+.sec-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+
+.subsec { margin-bottom: 24px; padding-left: 16px; border-left: 2px solid var(--border); }
+.subsec-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+p { margin-bottom: 12px; color: var(--ink2); font-size: 13px; line-height: 1.75; }
+
+/* ─── SPEC TABLE ─── */
+.spec-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+.spec-table th {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--ink3);
+  text-align: left;
+  padding: 8px 12px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border2);
+  border-top: 1px solid var(--border2);
+}
+.spec-table td {
+  padding: 9px 12px;
+  border-bottom: 0.5px solid var(--border);
+  color: var(--ink2);
+  vertical-align: top;
+}
+.spec-table td:first-child { font-weight: 500; color: var(--ink); width: 30%; }
+.spec-table tr:hover td { background: rgba(13,92,58,0.025); }
+.ms-row td { background: rgba(13,92,58,0.03); }
+.karno-row td { background: rgba(122,31,10,0.03); }
+.cpp-row td { background: rgba(194,84,0,0.03); }
+
+/* ─── FUEL MATRIX ─── */
+.fuel-matrix {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  font-size: 11px;
+}
+.fuel-matrix th {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 8px 10px;
+  background: var(--ink);
+  color: #fff;
+  text-align: center;
+}
+.fuel-matrix th:first-child { text-align: left; }
+.fuel-matrix td {
+  padding: 8px 10px;
+  border-bottom: 0.5px solid var(--border);
+  text-align: center;
+}
+.fuel-matrix td:first-child { text-align: left; font-weight: 500; color: var(--ink); }
+.fuel-matrix .yes { color: var(--green); font-weight: 700; font-size: 13px; }
+.fuel-matrix .partial { color: var(--amber); font-size: 11px; }
+.fuel-matrix .no { color: var(--border2); font-size: 13px; }
+.fuel-matrix .primary { background: rgba(13,92,58,0.07); }
+
+/* ─── POWER FLOW ─── */
+.power-flow-diagram {
+  background: var(--white);
+  border: 1px solid var(--border2);
+  padding: 28px 24px;
+  margin-bottom: 24px;
+}
+
+/* ─── BUDGET ─── */
+.budget-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+.budget-table th {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #fff;
+  padding: 10px 14px;
+  text-align: left;
+}
+.budget-table th.mainspring-hdr { background: var(--mainspring); }
+.budget-table th.karno-hdr { background: var(--karno); }
+.budget-table th.total-hdr { background: var(--ink); }
+.budget-table td { padding: 9px 14px; border-bottom: 0.5px solid var(--border); font-size: 12px; }
+.budget-table td:last-child { text-align: right; font-family: 'DM Mono', monospace; }
+.budget-table .cat { font-weight: 500; color: var(--ink); }
+.budget-table .item { color: var(--ink2); padding-left: 28px; }
+.budget-table .subtotal td { background: var(--bg); font-weight: 500; border-top: 1px solid var(--border2); }
+.budget-table .total td { background: var(--ink); color: #fff; font-weight: 500; }
+.budget-table .delta td { background: rgba(13,92,58,0.06); color: var(--mainspring); font-weight: 500; }
+.budget-table .savings td { background: rgba(13,92,58,0.12); color: var(--mainspring); font-weight: 700; border-top: 2px solid var(--mainspring); }
+
+/* ─── CALLOUT ─── */
+.callout {
+  border-left: 3px solid;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: var(--white);
+}
+.callout.mainspring { border-color: var(--mainspring); }
+.callout.karno { border-color: var(--karno); }
+.callout.warn { border-color: var(--amber); }
+.callout.good { border-color: var(--green); }
+.callout.cpp { border-color: var(--cpporange); }
+.callout-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.callout.mainspring .callout-label { color: var(--mainspring); }
+.callout.karno .callout-label { color: var(--karno); }
+.callout.warn .callout-label { color: var(--amber); }
+.callout.good .callout-label { color: var(--green); }
+.callout.cpp .callout-label { color: var(--cpporange); }
+.callout p { margin-bottom: 0; font-size: 12px; }
+
+/* ─── FUEL PRIORITY DIAGRAM ─── */
+.fuel-priority {
+  display: flex;
+  gap: 0;
+  margin-bottom: 24px;
+  border: 1px solid var(--border2);
+  overflow: hidden;
+}
+.fp-tier {
+  flex: 1;
+  padding: 14px 16px;
+  border-right: 1px solid var(--border2);
+  text-align: center;
+}
+.fp-tier:last-child { border-right: none; }
+.fp-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  display: block;
+}
+.fp-fuel {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 4px;
+}
+.fp-desc { font-size: 10px; color: var(--ink3); line-height: 1.4; }
+.fp-1 { background: rgba(26,107,69,0.08); }
+.fp-2 { background: rgba(42,90,138,0.08); }
+.fp-3 { background: rgba(26,58,143,0.06); }
+.fp-4 { background: rgba(194,84,0,0.08); }
+.fp-1 .fp-num { color: var(--h2green); }
+.fp-2 .fp-num { color: var(--methanol); }
+.fp-3 .fp-num { color: var(--mainspring); }
+.fp-4 .fp-num { color: var(--cpporange); }
+.fp-1 .fp-fuel { color: var(--h2green); }
+.fp-2 .fp-fuel { color: var(--methanol); }
+.fp-3 .fp-fuel { color: var(--mainspring); }
+.fp-4 .fp-fuel { color: var(--cpporange); }
+
+/* ─── STAT BAND ─── */
+.stat-band {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--border2);
+  border: 1px solid var(--border2);
+  margin-bottom: 32px;
+}
+.stat-cell { background: var(--white); padding: 14px 12px; text-align: center; }
+.stat-val { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+.stat-val.ms { color: var(--mainspring); }
+.stat-val.kr { color: var(--karno); }
+.stat-val.good { color: var(--h2green); }
+.stat-lbl { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--ink3); letter-spacing: 1px; }
+
+/* ─── COMPARISON TABLE ─── */
+.compare-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 12px; }
+.compare-table th {
+  padding: 10px 14px;
+  color: #fff;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-align: left;
+}
+.compare-table th.old { background: #5a5a5a; }
+.compare-table th.new { background: var(--mainspring); }
+.compare-table td { padding: 8px 14px; border-bottom: 0.5px solid var(--border); }
+.compare-table .better td:last-child { color: var(--green); font-weight: 500; }
+.compare-table .worse td:last-child { color: var(--red); }
+.compare-table .row-label { font-weight: 500; color: var(--ink); background: var(--bg); }
+.compare-table .row-label td { font-size: 10px; font-family: 'DM Mono', monospace; letter-spacing: 1px; color: var(--ink3); padding: 6px 14px; }
+
+/* ─── HIGHLIGHT RULE ─── */
+.highlight-rule { background: var(--mainspring); color: #fff; padding: 12px 20px; margin-bottom: 20px; font-size: 12px; font-weight: 500; }
+
+/* ─── PAGE DIV ─── */
+.page-div {
+  border-top: 1px solid var(--rule);
+  margin: 40px 0;
+  position: relative;
+}
+.page-div::after {
+  content: attr(data-label);
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg);
+  padding: 0 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink3);
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+/* ─── MICROGRID DIAGRAM ─── */
+.microgrid-wrap { background: var(--white); border: 1px solid var(--border2); padding: 24px; margin-bottom: 24px; }
+
+/* ─── EMISSIONS TABLE ─── */
+.emissions-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 11px;
+}
+.emissions-bar .label { width: 160px; flex-shrink: 0; color: var(--ink2); }
+.emissions-bar .bar-wrap { flex: 1; background: rgba(0,0,0,0.05); height: 14px; border-radius: 2px; overflow: hidden; }
+.emissions-bar .bar-fill { height: 100%; border-radius: 2px; }
+.emissions-bar .val { width: 80px; text-align: right; font-family: 'DM Mono', monospace; flex-shrink: 0; }
+
+footer {
+  border-top: 2px solid var(--ink);
+  padding-top: 20px;
+  margin-top: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+footer p { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--ink3); letter-spacing: 1px; margin: 0; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- COVER -->
+<div class="cover">
+  <div class="doc-class">CONFIDENTIAL — FOR OFFICIAL USE ONLY · REVISION 2.0 · POWER ARCHITECTURE UPDATE</div>
+  <div class="cover-rev-badge">REVISION 2.0 — REPLACES DIESEL GENERATOR SPEC (REV 1.0)</div>
+  <div class="cover-title">CPD STDS Data Center<br><em>Mainspring + KARNO</em><br>Power Architecture</div>
+  <div class="cover-sub">Fuel-Flexible Primary Generation Specification — Mainspring LGen Arrays + Hyliion KARNO Power Modules · Natural Gas / Methanol / Hydrogen Primary · CPP Grid Standby · ArtCraft Building, Cleveland, Ohio</div>
+  <div class="cover-meta">
+    <div class="meta-cell">
+      <label>PRIMARY GENERATION</label>
+      <span>Mainspring LGen<br>Hyliion KARNO</span>
+    </div>
+    <div class="meta-cell">
+      <label>FUEL HIERARCHY</label>
+      <span>H₂ → Methanol → NG<br>CPP grid = backup only</span>
+    </div>
+    <div class="meta-cell">
+      <label>TOTAL ON-SITE CAPACITY</label>
+      <span>750 kW continuous<br>900 kW peak burst</span>
+    </div>
+    <div class="meta-cell">
+      <label>REVISION DATE</label>
+      <span>May 2026<br>Supersedes Rev 1.0</span>
+    </div>
+  </div>
+</div>
+
+<!-- STAT BAND -->
+<div class="stat-band">
+  <div class="stat-cell"><div class="stat-val ms">500 kW</div><div class="stat-lbl">MAINSPRING LGEN ARRAY</div></div>
+  <div class="stat-cell"><div class="stat-val kr">200 kW</div><div class="stat-lbl">KARNO MODULES (×2)</div></div>
+  <div class="stat-cell"><div class="stat-val good">≥97%</div><div class="stat-lbl">NOx REDUCTION vs DIESEL</div></div>
+  <div class="stat-cell"><div class="stat-val">30%</div><div class="stat-lbl">ITC FEDERAL TAX CREDIT</div></div>
+  <div class="stat-cell"><div class="stat-val">3-FUEL</div><div class="stat-lbl">NG · METHANOL · H₂</div></div>
+</div>
+
+<!-- PHILOSOPHY -->
+<div class="philosophy-band">
+  <h3>Power Architecture Philosophy — Grid-Independent, City-Sovereign</h3>
+  <p>This revision replaces the Cummins diesel generator specified in Rev 1.0 with a dual-technology, fuel-flexible primary generation system: Mainspring Energy Linear Generators as baseload/prime power, and Hyliion KARNO Power Modules as dispatchable peaker and N+1 redundancy. The Cleveland Public Power (CPP) grid connection is retained but demoted to cold standby — the data center operates grid-independent 24/7. This eliminates fuel storage risk, eliminates diesel exhaust permitting, enables zero-carbon operation as hydrogen becomes available on the Dominion Energy Ohio gas grid, and aligns with the City of Cleveland's 2030 carbon neutrality commitment. The ArtCraft building's existing natural gas service from Dominion Energy Ohio provides the primary fuel pathway, with methanol and hydrogen blend-in capability through the Mainspring and KARNO control systems' real-time fuel switching.</p>
+</div>
+
+<!-- VENDOR CARDS -->
+<div class="vendor-grid">
+  <div class="vendor-card">
+    <div class="vendor-header vh-mainspring">Mainspring Energy — LGen</div>
+    <div class="vendor-body">
+      <p>Factory-built linear generator. Flameless, low-temperature electrochemical compression. No combustion. Two moving parts. No oil required.</p>
+      <div class="vendor-spec"><span>Unit output</span><span>250 kW per module</span></div>
+      <div class="vendor-spec"><span>Array size</span><span>2× units = 500 kW</span></div>
+      <div class="vendor-spec"><span>Elec. efficiency</span><span>>45% (NG/biogas)</span></div>
+      <div class="vendor-spec"><span>CHP efficiency</span><span>>80% total</span></div>
+      <div class="vendor-spec"><span>NOx emissions</span><span>&lt;0.02 lb/MWh</span></div>
+      <div class="vendor-spec"><span>Fuel switch</span><span>Real-time, under load</span></div>
+      <div class="vendor-spec"><span>Black start</span><span>Yes — island capable</span></div>
+      <div class="vendor-spec"><span>Footprint</span><span>~130 sq ft per unit</span></div>
+    </div>
+  </div>
+  <div class="vendor-card">
+    <div class="vendor-header vh-karno">Hyliion KARNO</div>
+    <div class="vendor-body">
+      <p>Stirling-cycle linear generator. Flameless oxidation. Heat-engine architecture — truly fuel-agnostic; no hardware changes for any fuel.</p>
+      <div class="vendor-spec"><span>Unit output</span><span>200 kW per module</span></div>
+      <div class="vendor-spec"><span>Array size</span><span>2× units = 400 kW (N+1)</span></div>
+      <div class="vendor-spec"><span>Elec. efficiency</span><span>Up to 50%</span></div>
+      <div class="vendor-spec"><span>Fuel count</span><span>20+ fuel types</span></div>
+      <div class="vendor-spec"><span>NOx emissions</span><span>Ultra-low; no aftertreat.</span></div>
+      <div class="vendor-spec"><span>Fuel switch</span><span>Live, no recalibration</span></div>
+      <div class="vendor-spec"><span>800V DC native</span><span>NVIDIA AI DC ready</span></div>
+      <div class="vendor-spec"><span>CHP capable</span><span>Yes — waste heat capture</span></div>
+    </div>
+  </div>
+  <div class="vendor-card">
+    <div class="vendor-header vh-cpp">Cleveland Public Power (Standby)</div>
+    <div class="vendor-body">
+      <p>CPP grid connection retained as cold standby and export path only. The data center does not rely on grid power for normal operations.</p>
+      <div class="vendor-spec"><span>Role</span><span>COLD STANDBY ONLY</span></div>
+      <div class="vendor-spec"><span>Interconnect</span><span>Service Entrance 480V</span></div>
+      <div class="vendor-spec"><span>Auto-transfer</span><span>ATS &lt;100ms switchover</span></div>
+      <div class="vendor-spec"><span>Export capable</span><span>Yes — VPP / demand resp.</span></div>
+      <div class="vendor-spec"><span>Grid priority</span><span>Lowest (4th in hierarchy)</span></div>
+      <div class="vendor-spec"><span>Trigger condition</span><span>Both LGen + KARNO offline</span></div>
+      <div class="vendor-spec"><span>UPS buffer</span><span>Eaton 9395 bridging</span></div>
+      <div class="vendor-spec"><span>CPP tier</span><span>Critical facility SLA</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="page-div" data-label="FUEL ARCHITECTURE"></div>
+
+<!-- ─── SECTION 1: FUEL HIERARCHY ─── -->
+<div class="section">
+  <div class="section-header">
+    <span class="sec-num">01</span>
+    <span class="sec-title">Fuel Hierarchy & Switching Logic</span>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Four-Tier Fuel Priority Stack</div>
+    <p>Both the Mainspring LGen and KARNO systems operate from the same multi-fuel supply manifold. The building management system (BMS) monitors fuel availability and quality in real time, directing both generator platforms to the highest-priority available fuel simultaneously. Fuel transitions occur live, under load, with zero interruption to power output.</p>
+
+    <div class="fuel-priority">
+      <div class="fp-tier fp-1">
+        <span class="fp-num">PRIORITY 1</span>
+        <span class="fp-fuel">Green Hydrogen (H₂)</span>
+        <span class="fp-desc">Blend via Dominion Energy Ohio H₂ pilot · 100% H₂ ready (both platforms) · zero carbon emissions</span>
+      </div>
+      <div class="fp-tier fp-2">
+        <span class="fp-num">PRIORITY 2</span>
+        <span class="fp-fuel">Methanol</span>
+        <span class="fp-desc">On-site storage tank (ISO tank) · e-methanol or bio-methanol pathway · near-zero NOx · no SOx</span>
+      </div>
+      <div class="fp-tier fp-3">
+        <span class="fp-num">PRIORITY 3</span>
+        <span class="fp-fuel">Natural Gas (NG)</span>
+        <span class="fp-desc">Dominion Energy Ohio utility gas · ArtCraft building existing 4" main · 5–15 psig · always available</span>
+      </div>
+      <div class="fp-tier fp-4">
+        <span class="fp-num">PRIORITY 4</span>
+        <span class="fp-fuel">CPP Grid (Standby)</span>
+        <span class="fp-desc">Only triggered if all on-site generation offline · ATS auto-transfer &lt;100ms · bridged by UPS</span>
+      </div>
+    </div>
+
+    <div class="callout mainspring">
+      <div class="callout-label">MAINSPRING FUEL SWITCHING NOTE</div>
+      <p>Mainspring LGen units transition between natural gas, biogas, and hydrogen blends in real time without downtime. The Northport, NY hydrogen deployment (expected operational September 2026) validates 100% H₂ operation commercially. The CPD system can begin on natural gas and transition to hydrogen blends as Dominion Energy Ohio expands its H₂ injection program on the Northeast Ohio distribution system, requiring zero hardware modification.</p>
+    </div>
+
+    <div class="callout karno">
+      <div class="callout-label">KARNO FUEL SWITCHING NOTE</div>
+      <p>The KARNO flameless oxidation architecture is compatible with fuels ranging from ammonia (slow flame) to hydrogen (fast flame) without any hardware modification. Demonstrated live switching between natural gas, nitrogen-rich syngas, and majority-hydrogen blends with no recalibration or shutdown. The KARNO's native 800V DC output architecture is aligned with NVIDIA's AI data center power specification — enabling direct DC coupling to GPU rack power supplies and eliminating one AC/DC conversion stage.</p>
+    </div>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Fuel Compatibility Matrix</div>
+    <table class="fuel-matrix">
+      <tr>
+        <th>Fuel Type</th>
+        <th>Mainspring LGen</th>
+        <th>Hyliion KARNO</th>
+        <th>CPP Grid (reference)</th>
+        <th>On-Site Storage</th>
+      </tr>
+      <tr class="primary">
+        <td>Natural Gas (NG)</td>
+        <td class="yes">✓ Primary</td>
+        <td class="yes">✓ Primary</td>
+        <td class="no">N/A</td>
+        <td>Utility main — no storage</td>
+      </tr>
+      <tr class="primary">
+        <td>Methanol (CH₃OH)</td>
+        <td class="yes">✓ Qualified</td>
+        <td class="yes">✓ Qualified</td>
+        <td class="no">N/A</td>
+        <td>10,000-gal ISO tank (roof)</td>
+      </tr>
+      <tr class="primary">
+        <td>Green Hydrogen (H₂)</td>
+        <td class="yes">✓ 100% capable</td>
+        <td class="yes">✓ 100% capable</td>
+        <td class="no">N/A</td>
+        <td>Low-pressure tube trailer dock</td>
+      </tr>
+      <tr>
+        <td>H₂ / NG blend</td>
+        <td class="yes">✓ Any ratio</td>
+        <td class="yes">✓ Any ratio</td>
+        <td class="no">N/A</td>
+        <td>Blended at manifold</td>
+      </tr>
+      <tr>
+        <td>Biogas / RNG</td>
+        <td class="yes">✓ Direct</td>
+        <td class="yes">✓ Direct</td>
+        <td class="no">N/A</td>
+        <td>Grid-supplied if available</td>
+      </tr>
+      <tr>
+        <td>Propane (LPG)</td>
+        <td class="yes">✓ Qualified</td>
+        <td class="yes">✓ Qualified</td>
+        <td class="no">N/A</td>
+        <td>Emergency backup only</td>
+      </tr>
+      <tr>
+        <td>Ammonia (NH₃)</td>
+        <td class="partial">Future roadmap</td>
+        <td class="yes">✓ Compatible</td>
+        <td class="no">N/A</td>
+        <td>Not planned — Phase 2+</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Methanol Storage & Supply System</div>
+    <p>Methanol serves as a renewable liquid energy carrier that dramatically reduces on-site storage complexity compared to hydrogen (no cryogenic or high-pressure storage required). A single 10,000-gallon ISO storage tank installed on the ArtCraft building roof or adjacent ground-level pad provides approximately 14 days of autonomous operation at full load. E-methanol (produced from green hydrogen + captured CO₂) or bio-methanol supply contracts can be established with local distributors operating through the Port of Cleveland's liquid bulk terminal infrastructure.</p>
+
+    <table class="spec-table">
+      <tr><th>Parameter</th><th>Specification</th><th>Notes</th></tr>
+      <tr><td>Tank capacity</td><td>10,000 US gallons (methanol)</td><td>Rooftop or ground-level ISO tank</td></tr>
+      <tr><td>Autonomy at full load</td><td>~14 days (350 kW continuous draw)</td><td>Based on 62,000 BTU/gal methanol LHV</td></tr>
+      <tr><td>Resupply frequency</td><td>Weekly tanker delivery</td><td>Port of Cleveland liquid bulk source</td></tr>
+      <tr><td>Safety classification</td><td>NFPA Class IB flammable liquid</td><td>Simpler permitting than H₂ / diesel</td></tr>
+      <tr><td>Tank specification</td><td>Steel double-wall, secondary containment</td><td>EPA 40 CFR Part 280 compliant</td></tr>
+      <tr><td>Supply connection</td><td>Low-pressure metered feed to both LGen + KARNO</td><td>Shared fuel manifold with NG and H₂</td></tr>
+      <tr><td>Future: e-methanol</td><td>Drop-in replacement, same infrastructure</td><td>Net-zero carbon pathway</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="page-div" data-label="POWER SYSTEM DESIGN"></div>
+
+<!-- ─── SECTION 2: POWER ARCHITECTURE ─── -->
+<div class="section">
+  <div class="section-header">
+    <span class="sec-num">02</span>
+    <span class="sec-title">Power System Architecture</span>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Generation Array — Capacity & Redundancy</div>
+    <table class="spec-table">
+      <tr><th>Generator</th><th>Qty</th><th>Unit kW</th><th>Total kW</th><th>Role</th></tr>
+      <tr class="ms-row"><td>Mainspring LGen 250</td><td>2</td><td>250 kW</td><td>500 kW</td><td>Prime / baseload</td></tr>
+      <tr class="karno-row"><td>Hyliion KARNO 200</td><td>2</td><td>200 kW</td><td>400 kW available</td><td>Peaker + N+1 redundancy</td></tr>
+      <tr><td>Active KARNO (1 running)</td><td>1</td><td>200 kW</td><td>200 kW dispatch</td><td>Load follow + hot standby</td></tr>
+      <tr><td><strong>Total active generation</strong></td><td></td><td></td><td><strong>700 kW</strong></td><td><strong>vs 450kW IT load = +56% headroom</strong></td></tr>
+      <tr class="cpp-row"><td>CPP grid (standby only)</td><td>1</td><td>480V service</td><td>Unlimited</td><td>Cold standby — emergency only</td></tr>
+    </table>
+
+    <div class="callout good">
+      <div class="callout-label">REDUNDANCY ARCHITECTURE</div>
+      <p>Normal operation: 2× Mainspring LGen (500 kW) + 1× KARNO (200 kW) = 700 kW active. IT load: 350–450 kW. If one Mainspring unit fails, the second KARNO auto-starts within 10 seconds: 250 kW (LGen-B) + 200 kW (KARNO-A) + 200 kW (KARNO-B) = 650 kW — still above the 450 kW design IT load with margin. If both Mainspring units fail, 2× KARNO = 400 kW, sufficient for the 350 kW base IT load. CPP grid engages only if the entire on-site fleet goes offline simultaneously — a 1-in-10,000-hour probability given each unit's MTBF.</p>
+    </div>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Power Flow — Microgrid Architecture</div>
+    <div class="microgrid-wrap">
+      <svg viewBox="0 0 820 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+
+        <!-- FUEL SOURCES - top row -->
+        <rect x="20" y="20" width="110" height="44" fill="rgba(26,107,69,0.08)" stroke="#1a6b45" stroke-width="1"/>
+        <text x="75" y="40" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#1a6b45">GREEN H₂</text>
+        <text x="75" y="54" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#1a6b45">PRIORITY 1</text>
+
+        <rect x="145" y="20" width="110" height="44" fill="rgba(42,90,138,0.08)" stroke="#2a5a8a" stroke-width="1"/>
+        <text x="200" y="40" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#2a5a8a">METHANOL</text>
+        <text x="200" y="54" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#2a5a8a">PRIORITY 2</text>
+
+        <rect x="270" y="20" width="110" height="44" fill="rgba(13,92,58,0.06)" stroke="#0d5c3a" stroke-width="1"/>
+        <text x="325" y="40" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#0d5c3a">NATURAL GAS</text>
+        <text x="325" y="54" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#0d5c3a">PRIORITY 3</text>
+
+        <!-- Fuel manifold -->
+        <rect x="20" y="80" width="360" height="30" fill="rgba(100,100,100,0.08)" stroke="#888" stroke-width="1"/>
+        <text x="200" y="99" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#555">MULTI-FUEL MANIFOLD · BMS CONTROLLED · REAL-TIME SWITCHING</text>
+
+        <!-- Arrows fuel to manifold -->
+        <line x1="75" y1="64" x2="75" y2="80" stroke="#1a6b45" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="200" y1="64" x2="200" y2="80" stroke="#2a5a8a" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="325" y1="64" x2="325" y2="80" stroke="#0d5c3a" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Mainspring LGen block -->
+        <rect x="20" y="130" width="170" height="70" fill="rgba(13,92,58,0.07)" stroke="#0d5c3a" stroke-width="1.5"/>
+        <text x="105" y="152" text-anchor="middle" font-family="DM Mono, monospace" font-size="9" fill="#0d5c3a" font-weight="bold">MAINSPRING LGEN</text>
+        <text x="105" y="166" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#0d5c3a">LGen-A: 250 kW</text>
+        <text x="105" y="178" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#0d5c3a">LGen-B: 250 kW</text>
+        <text x="105" y="190" text-anchor="middle" font-family="DM Mono, monospace" font-size="9" fill="#0d5c3a" font-weight="bold">= 500 kW</text>
+
+        <!-- KARNO block -->
+        <rect x="210" y="130" width="170" height="70" fill="rgba(122,31,10,0.07)" stroke="#7a1f0a" stroke-width="1.5"/>
+        <text x="295" y="152" text-anchor="middle" font-family="DM Mono, monospace" font-size="9" fill="#7a1f0a" font-weight="bold">HYLIION KARNO</text>
+        <text x="295" y="166" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#7a1f0a">KARNO-A: 200 kW (active)</text>
+        <text x="295" y="178" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#7a1f0a">KARNO-B: 200 kW (standby)</text>
+        <text x="295" y="190" text-anchor="middle" font-family="DM Mono, monospace" font-size="9" fill="#7a1f0a" font-weight="bold">= 200 kW active</text>
+
+        <!-- CPP standby -->
+        <rect x="20" y="130" width="0" height="0"/>
+        <rect x="580" y="20" width="130" height="94" fill="rgba(194,84,0,0.06)" stroke="#c25400" stroke-width="1" stroke-dasharray="5,3"/>
+        <text x="645" y="48" text-anchor="middle" font-family="DM Mono, monospace" font-size="9" fill="#c25400" font-weight="bold">CPP GRID</text>
+        <text x="645" y="62" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c25400">COLD STANDBY</text>
+        <text x="645" y="76" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c25400">ATS &lt;100ms</text>
+        <text x="645" y="90" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c25400">Priority 4 only</text>
+        <text x="645" y="104" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c25400">(UPS bridged)</text>
+
+        <!-- Arrows manifold to generators -->
+        <line x1="105" y1="110" x2="105" y2="130" stroke="#0d5c3a" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="295" y1="110" x2="295" y2="130" stroke="#7a1f0a" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Microgrid bus -->
+        <rect x="20" y="220" width="540" height="28" fill="rgba(26,58,143,0.08)" stroke="#1a3a8f" stroke-width="1.5"/>
+        <text x="290" y="238" text-anchor="middle" font-family="DM Mono, monospace" font-size="9" fill="#1a3a8f" font-weight="bold">480V MICROGRID BUS · 700 kW · LOAD-FOLLOWING · ISLAND CAPABLE</text>
+
+        <!-- LGen + KARNO to bus -->
+        <line x1="105" y1="200" x2="105" y2="220" stroke="#0d5c3a" stroke-width="2" marker-end="url(#arr)"/>
+        <line x1="295" y1="200" x2="295" y2="220" stroke="#7a1f0a" stroke-width="2" marker-end="url(#arr)"/>
+        <!-- CPP to bus (dashed - standby) -->
+        <line x1="645" y1="114" x2="645" y2="234" stroke="#c25400" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arr)"/>
+        <line x1="645" y1="234" x2="560" y2="234" stroke="#c25400" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arr)"/>
+
+        <!-- UPS -->
+        <rect x="20" y="268" width="170" height="44" fill="rgba(26,58,143,0.06)" stroke="#1a3a8f" stroke-width="1"/>
+        <text x="105" y="288" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#1a3a8f">UPS A+B · 2× Eaton 9395</text>
+        <text x="105" y="300" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#1a3a8f">200kVA each · Li-Ion bridge</text>
+
+        <!-- IT LOAD -->
+        <rect x="300" y="268" width="260" height="44" fill="rgba(20,20,20,0.06)" stroke="#333" stroke-width="1.5"/>
+        <text x="430" y="288" text-anchor="middle" font-family="DM Mono, monospace" font-size="9" fill="#1a1a1a" font-weight="bold">IT LOAD — 350–450 kW</text>
+        <text x="430" y="302" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#555">GPU racks · compute · network · cooling</text>
+
+        <!-- CHP waste heat -->
+        <rect x="600" y="268" width="140" height="44" fill="rgba(194,84,0,0.08)" stroke="#c25400" stroke-width="1"/>
+        <text x="670" y="288" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c25400">CHP WASTE HEAT</text>
+        <text x="670" y="302" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c25400">→ ArtCraft HVAC assist</text>
+
+        <!-- Bus to loads -->
+        <line x1="105" y1="248" x2="105" y2="268" stroke="#1a3a8f" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="430" y1="248" x2="430" y2="268" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+        <line x1="580" y1="248" x2="670" y2="268" stroke="#c25400" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+
+        <!-- Labels -->
+        <text x="20" y="370" font-family="DM Mono, monospace" font-size="7" fill="#b5b0a8">MAINSPRING + KARNO MICROGRID · CPD STDS DATA CENTER · ARTCRAFT BLDG · NOT TO SCALE</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">CHP — Combined Heat & Power Integration</div>
+    <p>Both the Mainspring LGen and KARNO Power Modules are CHP-capable, capturing waste heat from the generation process. The Mainspring system achieves greater than 80% total thermal efficiency in CHP mode. At the ArtCraft building, recovered heat (approximately 200–300 kW thermal) can offset building HVAC load in winter months, reducing the data center's cooling parasitic draw and improving overall site PUE to an estimated 1.15 — well below the 1.35 target of the diesel architecture.</p>
+
+    <table class="spec-table">
+      <tr><th>CHP Parameter</th><th>Mainspring LGen (×2)</th><th>KARNO (×1 active)</th></tr>
+      <tr><td>Electrical output</td><td>500 kW</td><td>200 kW</td></tr>
+      <tr><td>Thermal efficiency</td><td>>80% total (CHP mode)</td><td>CHP capable — heat-engine arch.</td></tr>
+      <tr><td>Recoverable heat</td><td>~180–220 kW thermal</td><td>~60–80 kW thermal</td></tr>
+      <tr><td>Heat use</td><td>ArtCraft HVAC preheat</td><td>Supplemental HVAC / data center cooling assist</td></tr>
+      <tr><td>PUE improvement</td><td>~0.12 reduction vs baseline</td><td>Additive benefit</td></tr>
+      <tr><td>Estimated PUE</td><td colspan="2">≤1.18 (combined CHP credit)</td></tr>
+    </table>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">UPS — Role Change from Rev 1.0</div>
+    <p>In Rev 1.0, the UPS system bridged from CPP grid to diesel generator start (typically 8–15 seconds). In this architecture, the UPS bridges two different transitions: (1) any single on-site generator unit failure until the standby unit ramps (approximately 10 seconds for KARNO cold start), and (2) the very rare full on-site generation failure until CPP ATS transfer completes (under 100ms via static transfer switch). The UPS specification is therefore reduced from the 2× 250kVA units in Rev 1.0 to 2× 200kVA, as bridging time requirements are shorter.</p>
+
+    <table class="spec-table">
+      <tr><th>Parameter</th><th>Rev 1.0 (Diesel)</th><th>Rev 2.0 (Mainspring + KARNO)</th></tr>
+      <tr><td>UPS unit rating</td><td>2× 250kVA Eaton 9395</td><td>2× 200kVA Eaton 9355 Li-Ion</td></tr>
+      <tr><td>Bridge purpose</td><td>Grid → diesel start (8–15s)</td><td>Gen failure → standby start (≤10s)</td></tr>
+      <tr><td>Required runtime</td><td>10 minutes @ full load</td><td>2 minutes @ full load (gen-to-gen)</td></tr>
+      <tr><td>CPP ATS trigger</td><td>Primary switchover</td><td>Last resort only (Priority 4)</td></tr>
+      <tr><td>Battery chemistry</td><td>VRLA lead-acid option</td><td>Li-Iron Phosphate (LiFePO4)</td></tr>
+      <tr><td>CapEx delta</td><td>$370,000</td><td>$280,000 (−$90,000 savings)</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="page-div" data-label="EMISSIONS & SUSTAINABILITY"></div>
+
+<!-- ─── SECTION 3: EMISSIONS ─── -->
+<div class="section">
+  <div class="section-header">
+    <span class="sec-num">03</span>
+    <span class="sec-title">Emissions Profile & Sustainability</span>
+  </div>
+
+  <div class="highlight-rule">NOx emissions comparison — data center power generation at 450 kW continuous load</div>
+
+  <div class="emissions-bar">
+    <div class="label">Diesel generator (Rev 1.0)</div>
+    <div class="bar-wrap"><div class="bar-fill" style="width:100%;background:#a01010;"></div></div>
+    <div class="val" style="color:#a01010">~8.5 tons/yr</div>
+  </div>
+  <div class="emissions-bar">
+    <div class="label">Natural gas ICE genset</div>
+    <div class="bar-wrap"><div class="bar-fill" style="width:52%;background:#c25400;"></div></div>
+    <div class="val" style="color:#c25400">~4.4 tons/yr</div>
+  </div>
+  <div class="emissions-bar">
+    <div class="label">Mainspring LGen on NG</div>
+    <div class="bar-wrap"><div class="bar-fill" style="width:3%;background:#0d5c3a;"></div></div>
+    <div class="val" style="color:#0d5c3a">&lt;0.25 tons/yr</div>
+  </div>
+  <div class="emissions-bar">
+    <div class="label">KARNO on NG</div>
+    <div class="bar-wrap"><div class="bar-fill" style="width:2%;background:#7a1f0a;"></div></div>
+    <div class="val" style="color:#7a1f0a">Ultra-low (no aftertreat)</div>
+  </div>
+  <div class="emissions-bar">
+    <div class="label">Both platforms on Green H₂</div>
+    <div class="bar-wrap"><div class="bar-fill" style="width:0.5%;background:#1a6b45;"></div></div>
+    <div class="val" style="color:#1a6b45">Zero CO₂ · trace H₂O</div>
+  </div>
+
+  <p style="margin-top:16px">The Mainspring LGen produces near-zero NOx (less than 0.02 lb/MWh) without aftertreatment, meeting South Coast AQMD and Ohio EPA air quality standards out of the box. This eliminates the selective catalytic reduction (SCR) systems required for diesel and natural gas ICE generators, simplifying permitting and reducing maintenance. The KARNO's flameless oxidation process similarly requires no aftertreatment. Ohio EPA air permit for this system will be a minor facility permit rather than the major source review required for diesel installations of equivalent capacity.</p>
+
+  <div class="callout good">
+    <div class="callout-label">CITY OF CLEVELAND 2030 CARBON COMMITMENT</div>
+    <p>This power architecture directly supports Cleveland's Sustainable Cleveland 2030 Action Plan. On natural gas today: approximately 97% lower NOx than diesel, and approximately 35% lower CO₂ than grid power (Ohio grid still coal/gas heavy). On methanol blend: near-zero NOx, carbon-neutral if bio-methanol sourced. On green hydrogen: fully net-zero operation. The infrastructure requires zero hardware changes to transition between these fuels as availability and economics evolve. The federal Investment Tax Credit (ITC) of 30% applies to both Mainspring LGen and KARNO installations through 2032.</p>
+  </div>
+</div>
+
+<div class="page-div" data-label="REVISED BUDGET"></div>
+
+<!-- ─── SECTION 4: BUDGET ─── -->
+<div class="section">
+  <div class="section-header">
+    <span class="sec-num">04</span>
+    <span class="sec-title">Revised Power System Capital Budget</span>
+  </div>
+
+  <table class="budget-table">
+    <tr>
+      <th class="total-hdr" style="width:50%">Line Item</th>
+      <th class="total-hdr">Notes</th>
+      <th class="total-hdr" style="width:14%">Cost</th>
+    </tr>
+
+    <tr><td class="cat" colspan="3">A. Mainspring Energy LGen Array (Primary Baseload)</td></tr>
+    <tr><td class="item">2× Mainspring LGen 250kW units</td><td>Factory-built; delivered + commissioned</td><td>$680,000</td></tr>
+    <tr><td class="item">Fuel manifold — NG / methanol / H₂ tri-fuel</td><td>BMS-controlled; pressure regulation; safety interlocks</td><td>$85,000</td></tr>
+    <tr><td class="item">Grid-tie inverter + metering (CPP interconnect)</td><td>IEEE 1547-2018; export capable</td><td>$48,000</td></tr>
+    <tr><td class="item">Mainspring 10-year service contract</td><td>Factory maintenance SLA; parts + labor</td><td>$145,000</td></tr>
+    <tr><td class="item">Federal ITC credit (30%) — applied</td><td>Mainspring ITC-eligible through 2032</td><td>−$245,400</td></tr>
+    <tr class="subtotal"><td>Mainspring Subtotal (net of ITC)</td><td></td><td>$712,600</td></tr>
+
+    <tr><td class="cat" colspan="3">B. Hyliion KARNO Power Modules (Peaker + Redundancy)</td></tr>
+    <tr><td class="item">2× KARNO 200kW Power Modules</td><td>Each: 200 kW · 800V DC native output</td><td>$580,000</td></tr>
+    <tr><td class="item">KARNO control system + BMS integration</td><td>Multi-fuel logic; Mainspring coordination</td><td>$62,000</td></tr>
+    <tr><td class="item">800V DC bus to GPU rack power supplies</td><td>Direct DC coupling; eliminates AC/DC stage</td><td>$95,000</td></tr>
+    <tr><td class="item">KARNO 5-year service contract</td><td>Hyliion maintenance agreement</td><td>$85,000</td></tr>
+    <tr><td class="item">Federal ITC credit (30%) — applied</td><td>KARNO ITC-eligible through 2032</td><td>−$198,900</td></tr>
+    <tr class="subtotal"><td>KARNO Subtotal (net of ITC)</td><td></td><td>$623,100</td></tr>
+
+    <tr><td class="cat" colspan="3">C. Methanol & Hydrogen Infrastructure</td></tr>
+    <tr><td class="item">10,000-gal methanol ISO storage tank</td><td>Double-wall steel; secondary containment</td><td>$88,000</td></tr>
+    <tr><td class="item">Methanol supply piping + metering</td><td>SS316 piping; flow control; safety valves</td><td>$42,000</td></tr>
+    <tr><td class="item">H₂ tube trailer dock + pressure regulation</td><td>Low-pressure H₂ receiving; 350-bar down to 15 psig</td><td>$65,000</td></tr>
+    <tr><td class="item">H₂ gas detection system</td><td>UL Listed LEL sensors; exhaust ventilation interlocks</td><td>$28,000</td></tr>
+    <tr><td class="item">Ohio EPA air permit (minor source)</td><td>Minor source filing; consultant fees</td><td>$18,000</td></tr>
+    <tr class="subtotal"><td>Fuel Infrastructure Subtotal</td><td></td><td>$241,000</td></tr>
+
+    <tr><td class="cat" colspan="3">D. UPS System (Revised from Rev 1.0)</td></tr>
+    <tr><td class="item">2× Eaton 9355 200kVA Li-Ion UPS</td><td>Reduced from 250kVA — shorter bridge req'd</td><td>$280,000</td></tr>
+    <tr><td class="item">PDU A+B; ATS (static); switchgear</td><td>Eaton ePDU G3; Eaton 3000 static ATS</td><td>$118,000</td></tr>
+    <tr><td class="item">Electrical installation (licensed — IBEW Local 38)</td><td>Labor; conduit; metering; CPP interconnect</td><td>$175,000</td></tr>
+    <tr class="subtotal"><td>Power Distribution Subtotal</td><td></td><td>$573,000</td></tr>
+
+    <tr><td class="cat" colspan="3">E. BMS / Microgrid Control</td></tr>
+    <tr><td class="item">Microgrid energy management system (EMS)</td><td>AutoGrid or Generac GEMS; fuel switching logic</td><td>$95,000</td></tr>
+    <tr><td class="item">DCIM — Vertiv Environet Elite (power analytics)</td><td>Real-time gen + IT load dashboards</td><td>$35,000</td></tr>
+    <tr class="subtotal"><td>Controls Subtotal</td><td></td><td>$130,000</td></tr>
+
+    <tr class="total"><td>TOTAL POWER SYSTEM CAPITAL</td><td>Net of federal ITC credits</td><td>$2,279,700</td></tr>
+
+    <tr class="delta"><td>Rev 1.0 Diesel Power System (for comparison)</td><td>Cummins 750kVA + 2× UPS 250kVA + electrical</td><td>$1,573,000</td></tr>
+
+    <tr class="savings"><td>Net premium for Mainspring + KARNO architecture</td><td>Before ITC — $1.49M premium · After ITC — $707K premium</td><td>+$706,700 net</td></tr>
+  </table>
+
+  <div class="callout good">
+    <div class="callout-label">7-YEAR OPERATING COST ADVANTAGE</div>
+    <p>The Mainspring + KARNO system eliminates diesel fuel costs (~$185,000/year at 72-hr emergency tank annual test cycles and standby runs), eliminates annual diesel fuel maintenance ($28,000/year), and earns approximately $45,000/year in demand response revenue from the CPP grid through its export-capable microgrid interconnection. Over 7 years, this is approximately $1.8M in operating savings — more than offsetting the net CapEx premium of $706,700. 7-year TCO for Rev 2.0 power system: $2.28M CapEx + $3.2M OpEx (fuel + maintenance) = $5.48M vs Rev 1.0 at $1.57M CapEx + $4.9M OpEx = $6.47M. <strong>Net 7-year savings: approximately $990,000.</strong></p>
+  </div>
+</div>
+
+<!-- ─── SECTION 5: COMPARISON ─── -->
+<div class="section">
+  <div class="section-header">
+    <span class="sec-num">05</span>
+    <span class="sec-title">Rev 1.0 vs Rev 2.0 — Architecture Comparison</span>
+  </div>
+
+  <table class="compare-table">
+    <tr>
+      <th style="width:28%;background:#333">Parameter</th>
+      <th class="old" style="width:36%">Rev 1.0 — Diesel Generator</th>
+      <th class="new" style="width:36%">Rev 2.0 — Mainspring + KARNO</th>
+    </tr>
+    <tr class="better">
+      <td>Primary generation</td>
+      <td>Cummins C750D5 diesel (750kVA)</td>
+      <td>Mainspring LGen 500kW + KARNO 200kW</td>
+    </tr>
+    <tr class="better">
+      <td>Fuel source</td>
+      <td>Diesel only (one fuel, stored on-site)</td>
+      <td>NG / Methanol / H₂ — real-time switching</td>
+    </tr>
+    <tr class="better">
+      <td>Normal operation</td>
+      <td>CPP grid primary; diesel = emergency only</td>
+      <td>On-site generation primary; CPP = cold standby</td>
+    </tr>
+    <tr class="better">
+      <td>Grid independence</td>
+      <td>Grid-dependent 99% of the time</td>
+      <td>Grid-independent 24/7 normal operation</td>
+    </tr>
+    <tr class="better">
+      <td>NOx emissions</td>
+      <td>~8.5 tons/yr at full load</td>
+      <td>&lt;0.25 tons/yr (NG); zero on H₂</td>
+    </tr>
+    <tr class="better">
+      <td>Air permitting</td>
+      <td>Major source review (Ohio EPA)</td>
+      <td>Minor source permit only</td>
+    </tr>
+    <tr class="better">
+      <td>Carbon pathway</td>
+      <td>Locked into diesel — no clean fuel path</td>
+      <td>NG → methanol → green H₂ — no hardware change</td>
+    </tr>
+    <tr class="better">
+      <td>Federal ITC credit</td>
+      <td>Not eligible</td>
+      <td>30% ITC — $444,300 in credits</td>
+    </tr>
+    <tr class="better">
+      <td>Demand response revenue</td>
+      <td>None — emergency-only asset</td>
+      <td>~$45,000/yr CPP demand response export</td>
+    </tr>
+    <tr class="better">
+      <td>CHP waste heat capture</td>
+      <td>Not applicable — diesel backup</td>
+      <td>200–300 kW thermal → HVAC offset</td>
+    </tr>
+    <tr class="better">
+      <td>Data center PUE</td>
+      <td>≤1.35 target</td>
+      <td>≤1.18 (CHP + precision cooling credit)</td>
+    </tr>
+    <tr class="better">
+      <td>NVIDIA 800V DC compatibility</td>
+      <td>No — AC conversion required</td>
+      <td>Yes — KARNO native 800V DC output</td>
+    </tr>
+    <tr>
+      <td>CapEx premium</td>
+      <td>$1,573,000</td>
+      <td>$2,280,000 ($707K net premium after ITC)</td>
+    </tr>
+    <tr class="better">
+      <td>7-year TCO</td>
+      <td>$6,470,000</td>
+      <td>$5,480,000 (−$990,000 savings)</td>
+    </tr>
+  </table>
+</div>
+
+<footer>
+  <p>CPD STDS DATA CENTER · POWER ARCHITECTURE REV 2.0 · MAINSPRING + KARNO · CONFIDENTIAL</p>
+  <p>CITY OF CLEVELAND — DEPARTMENT OF PUBLIC SAFETY · © 2026</p>
+</footer>
+
+</div>
+</body>
+</html>

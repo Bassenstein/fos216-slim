@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPD Integrated RTCC — Reveal + Motorola + Dedicated Data Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@200;300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #070a0f;
+  --bg2:       #0c1018;
+  --surface:   #111720;
+  --surface2:  #161e2a;
+  --border:    #1e2a3a;
+  --border2:   #253346;
+
+  /* Brand colors */
+  --reveal:    #00d4ff;
+  --reveal-d:  rgba(0,212,255,0.08);
+  --reveal-g:  rgba(0,212,255,0.3);
+
+  --moto:      #ff5a1a;
+  --moto-d:    rgba(255,90,26,0.08);
+  --moto-g:    rgba(255,90,26,0.3);
+
+  --dc:        #a78bfa;
+  --dc-d:      rgba(167,139,250,0.08);
+  --dc-g:      rgba(167,139,250,0.3);
+
+  --atak:      #34d399;
+  --atak-d:    rgba(52,211,153,0.08);
+
+  --alert:     #fbbf24;
+  --red:       #f87171;
+  --green:     #4ade80;
+
+  --text:      #dde4ee;
+  --muted:     #5a6a80;
+  --faint:     #2a3545;
+
+  --mono: 'Share Tech Mono', monospace;
+  --head: 'Exo 2', sans-serif;
+  --body: 'Rajdhani', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ─── SCANLINE / GRID TEXTURE ─── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,212,255,0.018) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,212,255,0.018) 40px);
+  pointer-events: none;
+}
+
+/* ─── CORNER DECORATIONS ─── */
+.corner-tl, .corner-br {
+  position: fixed;
+  width: 60px; height: 60px;
+  z-index: 1; pointer-events: none;
+}
+.corner-tl { top: 0; left: 0; border-top: 2px solid var(--reveal); border-left: 2px solid var(--reveal); }
+.corner-br { bottom: 0; right: 0; border-bottom: 2px solid var(--moto); border-right: 2px solid var(--moto); }
+
+/* ─── LAYOUT ─── */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 60px 36px 100px;
+}
+
+/* ─── HEADER ─── */
+.doc-header {
+  border-bottom: 1px solid var(--border2);
+  padding-bottom: 36px;
+  margin-bottom: 56px;
+}
+
+.doc-header .eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 14px;
+}
+.doc-header .eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 40px; height: 1px;
+  background: var(--muted);
+}
+
+h1.doc-title {
+  font-family: var(--head);
+  font-weight: 800;
+  font-size: clamp(32px, 4.5vw, 62px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 18px;
+}
+h1.doc-title .t-reveal { color: var(--reveal); }
+h1.doc-title .t-moto   { color: var(--moto); }
+h1.doc-title .t-dc     { color: var(--dc); }
+
+.doc-subtitle {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 700px;
+  font-weight: 400;
+}
+
+/* ─── SECTION ─── */
+.section { margin-top: 64px; }
+
+.sec-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+h2.sec-title {
+  font-family: var(--head);
+  font-weight: 700;
+  font-size: clamp(20px, 2.5vw, 32px);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+h2.sec-title .accent-reveal { color: var(--reveal); }
+h2.sec-title .accent-moto   { color: var(--moto); }
+h2.sec-title .accent-dc     { color: var(--dc); }
+
+.sec-body {
+  font-size: 15px;
+  color: #8fa0b8;
+  line-height: 1.75;
+  max-width: 900px;
+  margin-bottom: 28px;
+}
+
+/* ─── ARCHITECTURE DIAGRAM ─── */
+.arch-diagram {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 40px 32px;
+  margin-top: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.arch-diagram::before {
+  content: 'SYSTEM ARCHITECTURE';
+  position: absolute;
+  top: 16px; right: 20px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: var(--faint);
+}
+
+/* Three-column arch layout */
+.arch-cols {
+  display: grid;
+  grid-template-columns: 1fr 52px 1fr 52px 1fr;
+  gap: 0;
+  align-items: stretch;
+}
+
+.arch-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.arch-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.conn-line {
+  flex: 1;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, var(--border2), transparent);
+}
+.conn-arrow {
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--muted);
+}
+.conn-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  text-align: center;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  line-height: 1.2;
+}
+
+/* Arch boxes */
+.arch-box {
+  border-radius: 4px;
+  padding: 14px 16px;
+  border: 1px solid;
+  position: relative;
+}
+.arch-box.reveal  { border-color: rgba(0,212,255,0.35); background: var(--reveal-d); }
+.arch-box.moto    { border-color: rgba(255,90,26,0.35);  background: var(--moto-d); }
+.arch-box.dc      { border-color: rgba(167,139,250,0.35); background: var(--dc-d); }
+.arch-box.shared  { border-color: rgba(52,211,153,0.35); background: var(--atak-d); }
+.arch-box.neutral { border-color: var(--border2); background: var(--surface2); }
+
+.arch-box-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.arch-box.reveal  .arch-box-label { color: var(--reveal); }
+.arch-box.moto    .arch-box-label { color: var(--moto); }
+.arch-box.dc      .arch-box-label { color: var(--dc); }
+.arch-box.shared  .arch-box-label { color: var(--atak); }
+.arch-box.neutral .arch-box-label { color: var(--muted); }
+
+.arch-box-title {
+  font-family: var(--head);
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.arch-box-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.arch-col-header {
+  text-align: center;
+  padding: 10px;
+  border-radius: 4px;
+  font-family: var(--head);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.arch-col-header.reveal { background: rgba(0,212,255,0.12); color: var(--reveal); border: 1px solid rgba(0,212,255,0.25); }
+.arch-col-header.moto   { background: rgba(255,90,26,0.12);  color: var(--moto);   border: 1px solid rgba(255,90,26,0.25); }
+.arch-col-header.dc     { background: rgba(167,139,250,0.12); color: var(--dc);    border: 1px solid rgba(167,139,250,0.25); }
+
+/* ─── DATA FLOW DIAGRAM (horizontal) ─── */
+.flow-diagram {
+  margin-top: 32px;
+  position: relative;
+}
+
+.flow-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 16px;
+}
+
+.flow-node {
+  flex: 0 0 auto;
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-family: var(--head);
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.flow-node.reveal  { background: var(--reveal-d); border: 1px solid rgba(0,212,255,0.4); color: var(--reveal); }
+.flow-node.moto    { background: var(--moto-d);   border: 1px solid rgba(255,90,26,0.4); color: var(--moto); }
+.flow-node.dc      { background: var(--dc-d);     border: 1px solid rgba(167,139,250,0.4); color: var(--dc); }
+.flow-node.neutral { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); }
+.flow-node.output  { background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.4); color: var(--green); }
+
+.flow-arrow {
+  flex: 1;
+  position: relative;
+  height: 2px;
+  background: var(--border2);
+  margin: 0 4px;
+  min-width: 24px;
+}
+.flow-arrow::after {
+  content: '▶';
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.flow-arrow .flow-label {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ─── CARDS GRID ─── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 22px 22px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border2); }
+.card.reveal { border-top: 3px solid var(--reveal); }
+.card.moto   { border-top: 3px solid var(--moto); }
+.card.dc     { border-top: 3px solid var(--dc); }
+.card.shared { border-top: 3px solid var(--atak); }
+
+.card-icon {
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.card-title {
+  font-family: var(--head);
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.card-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  margin-bottom: 10px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+.card-tag.reveal  { background: var(--reveal-d); color: var(--reveal); border: 1px solid rgba(0,212,255,0.3); }
+.card-tag.moto    { background: var(--moto-d);   color: var(--moto);   border: 1px solid rgba(255,90,26,0.3); }
+.card-tag.dc      { background: var(--dc-d);      color: var(--dc);    border: 1px solid rgba(167,139,250,0.3); }
+.card-tag.shared  { background: var(--atak-d);    color: var(--atak);  border: 1px solid rgba(52,211,153,0.3); }
+
+.card-body {
+  font-size: 13.5px;
+  color: #6a7f98;
+  line-height: 1.6;
+}
+
+/* ─── SPEC TABLE ─── */
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 24px;
+  font-size: 13.5px;
+}
+.spec-table thead th {
+  font-family: var(--head);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--border2);
+  text-align: left;
+  color: var(--muted);
+}
+.spec-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+.spec-table tbody tr:hover { background: var(--surface2); }
+.spec-table tbody td {
+  padding: 12px 16px;
+  vertical-align: top;
+  line-height: 1.5;
+}
+.spec-table .td-spec { font-weight: 600; color: var(--text); }
+.spec-table .td-val  { color: var(--muted); font-size: 13px; }
+.spec-table .td-why  { color: #4a6080; font-size: 12px; }
+
+.cat-header td {
+  background: var(--surface2);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  color: var(--muted);
+}
+
+/* ─── DATA FLOW SECTION (tabbed scenarios) ─── */
+.scenario-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--border);
+}
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 10px 20px;
+  font-family: var(--head);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+.tab-btn.active       { color: #fff; border-bottom-color: var(--reveal); }
+.tab-btn.active.moto  { border-bottom-color: var(--moto); }
+.tab-btn.active.dc    { border-bottom-color: var(--dc); }
+
+.tab-panel { display: none; padding-top: 28px; }
+.tab-panel.active { display: block; }
+
+/* ─── FLOW STEPS ─── */
+.flow-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.flow-step {
+  display: flex;
+  gap: 20px;
+  position: relative;
+}
+.flow-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 44px;
+  bottom: 0;
+  width: 2px;
+  background: var(--border2);
+}
+
+.step-num {
+  flex: 0 0 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  z-index: 1;
+}
+.step-num.reveal { background: rgba(0,212,255,0.15); color: var(--reveal); border: 1px solid rgba(0,212,255,0.4); }
+.step-num.moto   { background: rgba(255,90,26,0.15);  color: var(--moto);  border: 1px solid rgba(255,90,26,0.4); }
+.step-num.dc     { background: rgba(167,139,250,0.15); color: var(--dc);   border: 1px solid rgba(167,139,250,0.4); }
+.step-num.shared { background: rgba(52,211,153,0.15); color: var(--atak); border: 1px solid rgba(52,211,153,0.4); }
+.step-num.out    { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.4); }
+
+.step-content {
+  padding-bottom: 28px;
+  flex: 1;
+}
+.step-title {
+  font-family: var(--head);
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.step-desc {
+  font-size: 13.5px;
+  color: #5a7090;
+  line-height: 1.6;
+}
+.step-detail {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.step-pill {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 2px;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  background: var(--surface2);
+}
+
+/* ─── COMPLIANCE CALLOUT ─── */
+.compliance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+.comp-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--dc);
+  border-radius: 0 4px 4px 0;
+  padding: 14px 16px;
+}
+.comp-item .comp-title {
+  font-family: var(--head);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--dc);
+  margin-bottom: 4px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.comp-item .comp-body {
+  font-size: 12.5px;
+  color: #4a6080;
+  line-height: 1.55;
+}
+
+/* ─── STAFFING TABLE ─── */
+.staff-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 24px;
+}
+.staff-cell {
+  background: var(--surface);
+  padding: 20px 20px;
+}
+.staff-role {
+  font-family: var(--head);
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.staff-count {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.staff-count.reveal { color: var(--reveal); text-shadow: 0 0 20px var(--reveal-g); }
+.staff-count.moto   { color: var(--moto);   text-shadow: 0 0 20px var(--moto-g); }
+.staff-count.dc     { color: var(--dc);     text-shadow: 0 0 20px var(--dc-g); }
+.staff-count.green  { color: var(--green); }
+.staff-desc {
+  font-size: 12px;
+  color: #4a6080;
+  line-height: 1.55;
+}
+
+/* ─── COST ESTIMATE ─── */
+.cost-section {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 24px;
+}
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+}
+.cost-row:last-child { border-bottom: none; }
+.cost-row.header {
+  background: var(--surface2);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 22px;
+}
+.cost-row.total {
+  background: var(--surface2);
+  border-top: 2px solid var(--border2);
+}
+.cost-label { font-size: 14px; color: var(--text); font-weight: 500; }
+.cost-vendor { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.cost-amount { font-family: var(--mono); font-size: 15px; font-weight: 700; }
+.cost-amount.reveal { color: var(--reveal); }
+.cost-amount.moto   { color: var(--moto); }
+.cost-amount.dc     { color: var(--dc); }
+.cost-amount.total  { color: #fff; font-size: 18px; }
+
+/* ─── FOOTER ─── */
+.doc-footer {
+  margin-top: 80px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-text {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+  letter-spacing: 0.1em;
+  line-height: 1.9;
+}
+
+@media (max-width: 900px) {
+  .arch-cols { grid-template-columns: 1fr; }
+  .arch-connector { display: none; }
+  .staff-grid { grid-template-columns: 1fr 1fr; }
+  .scenario-tabs { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<div class="corner-tl"></div>
+<div class="corner-br"></div>
+
+<div class="wrap">
+
+<!-- ═══════ HEADER ═══════ -->
+<div class="doc-header">
+  <div class="eyebrow">Cleveland Division of Police · Integrated Intelligence Infrastructure Proposal · May 2026</div>
+  <h1 class="doc-title">
+    <span class="t-reveal">Reveal</span> + <span class="t-moto">Motorola</span><br>
+    + <span class="t-dc">CPD Data Center</span><br>
+    Integrated RTCC Architecture
+  </h1>
+  <p class="doc-subtitle">A unified blueprint for deploying Reveal Technology's tactical edge platform, Motorola CommandCentral Aware's command infrastructure, and a dedicated CJIS-compliant CPD data center as a single, converged Real-Time Crime Center ecosystem.</p>
+</div>
+
+
+<!-- ═══════ SECTION 1: ANSWER — CAN THEY INTEGRATE? ═══════ -->
+<div class="section">
+  <div class="sec-label">Section 01 · Integration Assessment</div>
+  <h2 class="sec-title">Yes — <span class="accent-reveal">They Can Integrate</span>, and the Case Is Compelling</h2>
+  <p class="sec-body">
+    Reveal Technology and Motorola CommandCentral Aware are not competing for the same architectural layer — they operate at opposite ends of the intelligence chain. Motorola owns the city-wide command infrastructure (CAD, 911, camera aggregation, unit tracking, cross-agency comms). Reveal owns the tactical edge (3D terrain, biometrics, offline AI, ATAK). A CPD-dedicated on-premise data center is the substrate that binds both — hosting Motorola's on-prem components, storing Reveal's geo-tagged encounter data, maintaining CJIS-compliant video archives, and providing the compute backbone for AI analytics across both platforms. The three elements are mutually reinforcing: each one is stronger because the other two exist.
+  </p>
+</div>
+
+
+<!-- ═══════ SECTION 2: ARCHITECTURE DIAGRAM ═══════ -->
+<div class="section">
+  <div class="sec-label">Section 02 · System Architecture</div>
+  <h2 class="sec-title"><span class="accent-dc">Three-Layer</span> Integrated Stack</h2>
+
+  <div class="arch-diagram">
+    <div class="arch-cols">
+
+      <!-- COL 1: REVEAL -->
+      <div class="arch-col">
+        <div class="arch-col-header reveal">Reveal Technology · Field Edge</div>
+
+        <div class="arch-box reveal">
+          <div class="arch-box-label">Farsight · Geoint</div>
+          <div class="arch-box-title">Drone Intelligence</div>
+          <div class="arch-box-desc">CPD DJI/Skydio fleet → Farsight processes video into 3D terrain models offline in &lt;10 min. Outputs: 3D tiles, LOS maps, HLZ analysis, AI route plans.</div>
+        </div>
+
+        <div class="arch-box reveal">
+          <div class="arch-box-label">Identifi · Biometrics</div>
+          <div class="arch-box-title">Field Identity Ops</div>
+          <div class="arch-box-desc">Officer Android devices → Facial, iris, fingerprint, ID OCR. Offline watchlist matching. Geo-tagged encounter records pushed to DC when connected.</div>
+        </div>
+
+        <div class="arch-box reveal">
+          <div class="arch-box-label">ATAK Export</div>
+          <div class="arch-box-title">TAK Network Bridge</div>
+          <div class="arch-box-desc">Farsight terrain tiles and Identifi contact data exported via ATAK protocol to CPD command center and federal task force partners (FBI, USMS, ATF).</div>
+        </div>
+      </div>
+
+      <!-- CONNECTOR 1→2 -->
+      <div class="arch-connector">
+        <div class="conn-line"></div>
+        <div class="conn-arrow">⇄</div>
+        <div class="conn-label">API / ATAK / ETL</div>
+        <div class="conn-line"></div>
+      </div>
+
+      <!-- COL 2: DATA CENTER -->
+      <div class="arch-col">
+        <div class="arch-col-header dc">CPD Data Center · Core</div>
+
+        <div class="arch-box dc">
+          <div class="arch-box-label">Compute Layer</div>
+          <div class="arch-box-title">AI / Analytics Engine</div>
+          <div class="arch-box-desc">On-prem GPU cluster processes Reveal 3D data, video AI (Avigilon), ShotSpotter alerts, LPR correlations. Runs ML models for predictive patrol and pattern detection.</div>
+        </div>
+
+        <div class="arch-box dc">
+          <div class="arch-box-label">Storage Layer · CJIS</div>
+          <div class="arch-box-title">Data Repository</div>
+          <div class="arch-box-desc">AES-256 encrypted NAS/SAN: BWC video, Identifi encounter records, LPR archives, CAD logs, RMS data, Farsight 3D model tiles. All data classified per CJIS SP v6.0.</div>
+        </div>
+
+        <div class="arch-box dc">
+          <div class="arch-box-label">Network / Security</div>
+          <div class="arch-box-title">CJIS-Compliant Fabric</div>
+          <div class="arch-box-desc">Dual-ISP fiber, N+1 UPS, dedicated PSAP MPLS ring. Zero-trust architecture: MFA, role-based access, FIPS-140 encryption, 24/7 SOC monitoring. SOC 2 Type II audited.</div>
+        </div>
+
+        <div class="arch-box dc">
+          <div class="arch-box-label">Connectivity Hub</div>
+          <div class="arch-box-title">Integration Middleware</div>
+          <div class="arch-box-desc">REST/GraphQL API gateway bridges Reveal outputs → Motorola COP. ATAK server ingests Farsight tiles and biometric alerts. Data lake feeds both platforms.</div>
+        </div>
+      </div>
+
+      <!-- CONNECTOR 2→3 -->
+      <div class="arch-connector">
+        <div class="conn-line"></div>
+        <div class="conn-arrow">⇄</div>
+        <div class="conn-label">REST API / ESRI WMS / CAD Feed</div>
+        <div class="conn-line"></div>
+      </div>
+
+      <!-- COL 3: MOTOROLA -->
+      <div class="arch-col">
+        <div class="arch-col-header moto">CommandCentral Aware · Command</div>
+
+        <div class="arch-box moto">
+          <div class="arch-box-label">Common Operating Picture</div>
+          <div class="arch-box-title">RTCC Main Display</div>
+          <div class="arch-box-desc">Esri map: unit GPS, 911 calls, CAD incidents, LPR hits, ShotSpotter events, camera feeds, Reveal 3D overlays — all unified. 190,000+ cloud cameras accessible.</div>
+        </div>
+
+        <div class="arch-box moto">
+          <div class="arch-box-label">Missions · AI Assist</div>
+          <div class="arch-box-title">Investigative Workspace</div>
+          <div class="arch-box-desc">Each incident gets a Mission: replayable timeline, AI-assisted data aggregation, analyst activity logging. DOJ-compatible audit trail for consent decree reporting.</div>
+        </div>
+
+        <div class="arch-box moto">
+          <div class="arch-box-label">CAD / 911 / Radio</div>
+          <div class="arch-box-title">Dispatch Backbone</div>
+          <div class="arch-box-desc">VESTA 911 integration, PremierOne CAD, APX NEXT radio location, BWC auto-activation on emergency button. Full dispatch lifecycle from call receipt to resolution.</div>
+        </div>
+
+        <div class="arch-box shared">
+          <div class="arch-box-label">External Partners</div>
+          <div class="arch-box-title">Agency Interop</div>
+          <div class="arch-box-desc">FBI, Cuyahoga County Sheriff, OHSP, USMS on shared CommandCentral network. Reveal ATAK data appears on federal TAK COP simultaneously.</div>
+        </div>
+      </div>
+
+    </div><!-- /arch-cols -->
+  </div><!-- /arch-diagram -->
+</div>
+
+
+<!-- ═══════ SECTION 3: DATA FLOW SCENARIOS ═══════ -->
+<div class="section">
+  <div class="sec-label">Section 03 · Operational Data Flows</div>
+  <h2 class="sec-title">How Data Moves Through the <span class="accent-reveal">Integrated</span> System</h2>
+  <p class="sec-body">Three representative CPD scenarios showing how intelligence originates at the edge, flows through the data center, surfaces in the command center, and drives field response — in real time.</p>
+
+  <div class="scenario-tabs">
+    <button class="tab-btn active" onclick="showTab('tab-swat')">SWAT Barricade</button>
+    <button class="tab-btn" onclick="showTab('tab-shot')">ShotSpotter Event</button>
+    <button class="tab-btn" onclick="showTab('tab-event')">Large Event Security</button>
+  </div>
+
+  <!-- SWAT SCENARIO -->
+  <div class="tab-panel active" id="tab-swat">
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-num reveal">01</div>
+        <div class="step-content">
+          <div class="step-title">CPD Drone Deployed Over Scene</div>
+          <div class="step-desc">DJI Matrice 4TD launched within 4 minutes of barricade call. Farsight (Reveal) begins processing drone video feed on officer's Android tablet — no network connection required.</div>
+          <div class="step-detail">
+            <span class="step-pill">Reveal Farsight</span>
+            <span class="step-pill">DJI Matrice 4TD</span>
+            <span class="step-pill">Offline Edge Processing</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num reveal">02</div>
+        <div class="step-content">
+          <div class="step-title">3D Terrain Model Generated — 8 Minutes</div>
+          <div class="step-desc">Farsight produces interactive 3D model of the structure and surrounding block. SWAT commander identifies suspect line-of-sight from all windows, optimal approach corridors, and HLZ for MedFlight — shared to all SWAT tablets.</div>
+          <div class="step-detail">
+            <span class="step-pill">3D Model Tiles</span>
+            <span class="step-pill">LOS Analysis</span>
+            <span class="step-pill">HLZ Identification</span>
+            <span class="step-pill">Tablet Distribution</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num dc">03</div>
+        <div class="step-content">
+          <div class="step-title">Data Center Ingests Farsight Tiles via ATAK Server</div>
+          <div class="step-desc">When SWAT LTE connects, CPD Data Center's ATAK server receives the 3D terrain tiles and LOS data. Middleware converts to Esri WMS layer and pushes to Motorola CommandCentral COP within 90 seconds.</div>
+          <div class="step-detail">
+            <span class="step-pill">CPD Data Center</span>
+            <span class="step-pill">ATAK Server</span>
+            <span class="step-pill">Esri WMS Conversion</span>
+            <span class="step-pill">API Gateway</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num moto">04</div>
+        <div class="step-content">
+          <div class="step-title">Command Center Sees Tactical Picture on COP</div>
+          <div class="step-desc">Incident Commander in the RTCC views the Farsight 3D overlay on CommandCentral's Esri map alongside fixed camera feeds, officer GPS locations, and CAD incident details — all in one screen. Mission workspace auto-generates replayable timeline.</div>
+          <div class="step-detail">
+            <span class="step-pill">CommandCentral COP</span>
+            <span class="step-pill">3D Overlay on Esri</span>
+            <span class="step-pill">Unit Tracking</span>
+            <span class="step-pill">Missions Timeline</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num out">05</div>
+        <div class="step-content">
+          <div class="step-title">Outcome: Decisive Action, Full Audit Record</div>
+          <div class="step-desc">SWAT breaches from the blind-spot corridor identified by Farsight LOS analysis. No casualties. Incident Commander and DOJ monitor receive a complete Mission timeline — drone data, officer positions, command decisions — stored in CPD Data Center for 7 years per CJIS retention policy.</div>
+          <div class="step-detail">
+            <span class="step-pill">Zero Casualties</span>
+            <span class="step-pill">DOJ Audit Record</span>
+            <span class="step-pill">CJIS-Retained 7yr</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOTSPOTTER SCENARIO -->
+  <div class="tab-panel" id="tab-shot">
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-num moto">01</div>
+        <div class="step-content">
+          <div class="step-title">ShotSpotter Detects Gunshots — Kinsman Rd</div>
+          <div class="step-desc">ShotSpotter acoustic sensor array triangulates 3 rounds fired. Alert pushed to CommandCentral Aware within 45 seconds with GPS coordinates, timestamp, shot count.</div>
+          <div class="step-detail">
+            <span class="step-pill">ShotSpotter GSR</span>
+            <span class="step-pill">CommandCentral Alert</span>
+            <span class="step-pill">45-Second Notification</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num moto">02</div>
+        <div class="step-content">
+          <div class="step-title">RTCC Analyst Activates Nearest Cameras</div>
+          <div class="step-desc">Automated workflow in CommandCentral pulls PTZ camera feeds within 300m of shot location. Analyst reviews live feeds and historical 60-second pre-event buffer. LPR alert scans for hotlisted vehicles in the zone.</div>
+          <div class="step-detail">
+            <span class="step-pill">Automated Camera Pull</span>
+            <span class="step-pill">Pre-Event Buffer</span>
+            <span class="step-pill">LPR Hot-List Scan</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num dc">03</div>
+        <div class="step-content">
+          <div class="step-title">Data Center AI Correlates Intelligence</div>
+          <div class="step-desc">CPD Data Center AI engine cross-references: ShotSpotter location with prior incident heat map, LPR reads in the last 30 min, Identifi encounter records from prior patrol contacts in that block, and open warrant database.</div>
+          <div class="step-detail">
+            <span class="step-pill">Heat Map Correlation</span>
+            <span class="step-pill">Identifi Records Query</span>
+            <span class="step-pill">Warrant Cross-Reference</span>
+            <span class="step-pill">Predictive Model</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num reveal">04</div>
+        <div class="step-content">
+          <div class="step-title">Drone Deployed — Farsight Tracks Suspect Corridor</div>
+          <div class="step-desc">Nearest CPD drone launched. Farsight AI route-planning identifies likely escape routes based on the 3D terrain model of the neighborhood generated during a prior patrol flight. Officers receive optimal intercept positions.</div>
+          <div class="step-detail">
+            <span class="step-pill">Reveal Farsight</span>
+            <span class="step-pill">Escape Route Prediction</span>
+            <span class="step-pill">Intercept Positioning</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num out">05</div>
+        <div class="step-content">
+          <div class="step-title">Suspect Identified via Identifi at Stop</div>
+          <div class="step-desc">Officer intercepts suspect on foot. Identifi facial recognition matches to active warrant in under 15 seconds. Arrest made. Full event record — ShotSpotter alert through arrest — stored in CPD Data Center. Missions timeline provided to prosecutors.</div>
+          <div class="step-detail">
+            <span class="step-pill">Identifi Match — 15 sec</span>
+            <span class="step-pill">Active Warrant Confirmed</span>
+            <span class="step-pill">Prosecutorial Record</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LARGE EVENT SCENARIO -->
+  <div class="tab-panel" id="tab-event">
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-num reveal">01</div>
+        <div class="step-content">
+          <div class="step-title">Pre-Event: Farsight 3D Models Rocket Arena</div>
+          <div class="step-desc">72 hours before event, CPD drone executes authorized overpass of Rocket Mortgage FieldHouse exterior. Farsight generates 3D model. Security team identifies LOS vulnerabilities, optimal sniper positions, and AI-planned crowd evacuation routes. Stored in CPD DC.</div>
+          <div class="step-detail">
+            <span class="step-pill">Farsight Pre-Mission</span>
+            <span class="step-pill">3D Venue Model</span>
+            <span class="step-pill">Evacuation Route AI</span>
+            <span class="step-pill">Stored to DC</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num reveal">02</div>
+        <div class="step-content">
+          <div class="step-title">Event Day: Identifi Checkpoints Activated</div>
+          <div class="step-desc">Officers at perimeter access points run Identifi touchless facial/fingerprint checks on flagged individuals. Watchlist includes known threats, excluded persons, and active warrants. All contacts geo-tagged and synced to CPD DC in real time.</div>
+          <div class="step-detail">
+            <span class="step-pill">Identifi Checkpoints</span>
+            <span class="step-pill">Real-Time Watchlist</span>
+            <span class="step-pill">Geo-Tagged Logging</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num moto">03</div>
+        <div class="step-content">
+          <div class="step-title">CommandCentral RTCC: Unified Event COP</div>
+          <div class="step-desc">Farsight 3D model pre-loaded as Esri overlay. Live camera feeds from inside and outside venue. Officer GPS positions. Radio comms monitored. Identifi contact alerts appear on map. Motorola Critical Connect links CPD, Cuyahoga Sheriff, FBI, Secret Service on shared network.</div>
+          <div class="step-detail">
+            <span class="step-pill">Farsight Overlay Active</span>
+            <span class="step-pill">190K+ Camera Network</span>
+            <span class="step-pill">Multi-Agency Link</span>
+            <span class="step-pill">Critical Connect</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num dc">04</div>
+        <div class="step-content">
+          <div class="step-title">DC AI Monitors for Anomaly in Real Time</div>
+          <div class="step-desc">CPD Data Center AI analyzes camera feed density, movement patterns, and crowd flow against baseline model from prior events. Flags anomalies — unusual congregations, abandoned objects, persons moving against crowd flow — to RTCC analyst within seconds.</div>
+          <div class="step-detail">
+            <span class="step-pill">Crowd Flow AI</span>
+            <span class="step-pill">Anomaly Detection</span>
+            <span class="step-pill">Real-Time Alerting</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num out">05</div>
+        <div class="step-content">
+          <div class="step-title">Post-Event: Full Audit Package Auto-Generated</div>
+          <div class="step-desc">CPD DC packages a complete event record: all Identifi contacts, Missions timeline from CommandCentral, camera footage, officer positions, anomaly alerts. Delivered to Event Commander and available to DOJ monitor. Sets new standard for CPD event documentation.</div>
+          <div class="step-detail">
+            <span class="step-pill">Auto After-Action Report</span>
+            <span class="step-pill">DOJ-Ready Package</span>
+            <span class="step-pill">CJIS Archived</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════ SECTION 4: DATA CENTER SPECIFICATIONS ═══════ -->
+<div class="section">
+  <div class="sec-label">Section 04 · CPD Data Center Specifications</div>
+  <h2 class="sec-title">Dedicated <span class="accent-dc">CPD Data Center</span> — CJIS-Compliant Design</h2>
+  <p class="sec-body">A CPD-dedicated on-premise (or co-located CJIS-compliant) data center is the operational anchor of this architecture. It stores all criminal justice information on sovereign infrastructure, supports both platforms simultaneously, and meets or exceeds FBI CJIS Security Policy v6.0 requirements.</p>
+
+  <table class="spec-table">
+    <thead>
+      <tr>
+        <th style="width:22%">Specification</th>
+        <th style="width:25%">Requirement</th>
+        <th style="width:28%">Rationale</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="cat-header"><td colspan="3">PHYSICAL INFRASTRUCTURE</td></tr>
+      <tr>
+        <td class="td-spec">Facility Footprint</td>
+        <td class="td-val">2,500–4,000 sq ft dedicated</td>
+        <td class="td-why">Server room, RTCC floor, SOC, UPS/generator room, secure entry vestibule</td>
+      </tr>
+      <tr>
+        <td class="td-spec">Power</td>
+        <td class="td-val">N+1 UPS + 500kW diesel generator (72hr fuel)</td>
+        <td class="td-why">PSAP-equivalent uptime required. Must survive extended grid outages</td>
+      </tr>
+      <tr>
+        <td class="td-spec">Cooling</td>
+        <td class="td-val">Precision CRAC units, N+1 redundancy</td>
+        <td class="td-why">GPU cluster and dense storage generate significant heat load</td>
+      </tr>
+      <tr>
+        <td class="td-spec">Physical Access Control</td>
+        <td class="td-val">Multi-factor: biometric + badge + PIN per zone</td>
+        <td class="td-why">CJIS SP § 5.9 — physical access controls, visitor escort, access logs required</td>
+      </tr>
+      <tr class="cat-header"><td colspan="3">COMPUTE & STORAGE</td></tr>
+      <tr>
+        <td class="td-spec">Compute</td>
+        <td class="td-val">Hyperconverged cluster (VMware/Nutanix), GPU nodes for AI</td>
+        <td class="td-why">Runs video analytics (Avigilon), Farsight 3D processing, ML models, middleware services</td>
+      </tr>
+      <tr>
+        <td class="td-spec">Primary Storage</td>
+        <td class="td-val">≥500TB usable NAS (expandable to 2PB)</td>
+        <td class="td-why">BWC video at scale (≈4TB/camera/year), LPR archives, 3D map tiles, RMS records</td>
+      </tr>
+      <tr>
+        <td class="td-spec">Backup / DR</td>
+        <td class="td-val">Off-site CJIS-compliant colocation replication</td>
+        <td class="td-why">CJIS SP requires backup and recovery capability; RPO &lt;4hr, RTO &lt;8hr</td>
+      </tr>
+      <tr>
+        <td class="td-spec">Encryption</td>
+        <td class="td-val">AES-256 at rest, TLS 1.3 in transit, FIPS-140 modules</td>
+        <td class="td-why">CJIS SP § 5.10 mandatory. All CJI encrypted at all times</td>
+      </tr>
+      <tr class="cat-header"><td colspan="3">NETWORK & SECURITY</td></tr>
+      <tr>
+        <td class="td-spec">Internet Connectivity</td>
+        <td class="td-val">Dual-path fiber (diverse ISPs), 10Gbps+</td>
+        <td class="td-why">Motorola Azure cloud link, Reveal ATAK sync, external partner feeds, 911 PSAP ring</td>
+      </tr>
+      <tr>
+        <td class="td-spec">Internal Network</td>
+        <td class="td-val">Segmented VLANs: CJIS / public / IoT / management</td>
+        <td class="td-why">CJI must be physically and logically separated from non-CJI data per CJIS SP</td>
+      </tr>
+      <tr>
+        <td class="td-spec">Security Operations</td>
+        <td class="td-val">24/7 SOC, SIEM, SOAR, IDS/IPS</td>
+        <td class="td-why">CJIS SP § 5.3 — continuous audit, intrusion detection, incident response plan required</td>
+      </tr>
+      <tr>
+        <td class="td-spec">Authentication</td>
+        <td class="td-val">MFA mandatory for all CJI access, Zero Trust</td>
+        <td class="td-why">CJIS SP § 5.6 — advanced authentication required for remote access to CJI</td>
+      </tr>
+      <tr class="cat-header"><td colspan="3">COMPLIANCE & CERTIFICATIONS</td></tr>
+      <tr>
+        <td class="td-spec">CJIS Compliance</td>
+        <td class="td-val">FBI CJIS Security Policy v6.0 full compliance</td>
+        <td class="td-why">Mandatory for any facility storing CJI including fingerprints, criminal histories, biometric data</td>
+      </tr>
+      <tr>
+        <td class="td-spec">Audit Standards</td>
+        <td class="td-val">SOC 2 Type II, ISO 27001</td>
+        <td class="td-why">Required for Motorola CommandCentral integration; also aligns with DOJ consent decree oversight</td>
+      </tr>
+      <tr>
+        <td class="td-spec">Data Retention</td>
+        <td class="td-val">BWC: 180 days min / Incident video: 7 years</td>
+        <td class="td-why">Ohio Revised Code + CPD consent decree retention policy requirements</td>
+      </tr>
+      <tr>
+        <td class="td-spec">Personnel</td>
+        <td class="td-val">All DC staff: FBI background check + CJIS Security Awareness Training</td>
+        <td class="td-why">CJIS SP § 5.12 — personnel security screening is non-negotiable for CJI access</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ═══════ SECTION 5: INTEGRATION POINTS ═══════ -->
+<div class="section">
+  <div class="sec-label">Section 05 · Technical Integration Points</div>
+  <h2 class="sec-title">How <span class="accent-reveal">Reveal</span> Talks to <span class="accent-moto">Motorola</span> via the Data Center</h2>
+  <p class="sec-body">Five specific technical bridges that allow the platforms to function as a unified system rather than parallel silos.</p>
+
+  <div class="card-grid">
+    <div class="card reveal">
+      <div class="card-icon">🗺️</div>
+      <div class="card-title">ATAK → Esri WMS Bridge</div>
+      <div class="card-tag reveal">Farsight → CommandCentral</div>
+      <div class="card-body">CPD Data Center runs an ATAK server that receives Farsight terrain tile exports. A middleware converter transforms ATAK tile packages into Esri WMS layers that CommandCentral Aware can natively consume as a custom GIS overlay — placing SWAT's 3D tactical picture directly on the RTCC analyst's screen.</div>
+    </div>
+    <div class="card reveal">
+      <div class="card-icon">🧬</div>
+      <div class="card-title">Identifi → RMS Sync</div>
+      <div class="card-tag reveal">Biometrics → Records</div>
+      <div class="card-body">When Identifi field contacts reconnect to CPD LTE/WiFi, geo-tagged biometric encounter records push via REST API to CPD Data Center. Records are cross-referenced against PremierOne RMS and appended to subject files — giving detectives a complete contact history with GPS timestamps.</div>
+    </div>
+    <div class="card moto">
+      <div class="card-icon">📡</div>
+      <div class="card-title">CommandCentral → DC Video Archive</div>
+      <div class="card-tag moto">Video → Storage</div>
+      <div class="card-body">Motorola's Safety Hub edge appliances ingest community partner cameras (businesses, schools, city CCTV). Rather than relying solely on Motorola's Azure cloud, CPD Data Center acts as a local video archive — maintaining CJIS-compliant on-prem storage of all investigative video evidence with zero-copy evidentiary integrity.</div>
+    </div>
+    <div class="card moto">
+      <div class="card-icon">🚨</div>
+      <div class="card-title">ShotSpotter → AI Enrichment → COP</div>
+      <div class="card-tag moto">Sensor → Analytics → Display</div>
+      <div class="card-body">ShotSpotter alerts enter CommandCentral in real time. CPD Data Center AI layer simultaneously runs a correlation job: prior incidents at that location, active warrants in the zone, Identifi contact history, LPR reads in the last hour. Enriched intelligence card surfaces in the analyst's Missions workspace within 30 seconds of the alert.</div>
+    </div>
+    <div class="card shared">
+      <div class="card-icon">🔗</div>
+      <div class="card-title">ATAK Mutual Federation</div>
+      <div class="card-tag shared">CPD + FBI + USMS + ATF</div>
+      <div class="card-body">CPD Data Center hosts a TAK Server that federates with federal agency TAK networks. Reveal Farsight data and Identifi biometric alerts visible on CPD RTCC are simultaneously pushed to FBI HRT and USMS tactical operations centers — creating a true joint operations common picture without requiring a shared Motorola subscription.</div>
+    </div>
+    <div class="card dc">
+      <div class="card-icon">🧠</div>
+      <div class="card-title">Unified Data Lake for AI</div>
+      <div class="card-tag dc">Cross-Platform Analytics</div>
+      <div class="card-body">CPD Data Center's data lake ingests from both platforms: Reveal encounter records + 3D terrain data + Motorola CAD/RMS/video + LPR + ShotSpotter. ML models trained on this unified dataset produce predictive patrol recommendations, crime pattern alerts, and resource allocation insights that neither platform could generate independently.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════ SECTION 6: RTCC FLOOR DESIGN ═══════ -->
+<div class="section">
+  <div class="sec-label">Section 06 · RTCC Operations Floor</div>
+  <h2 class="sec-title">CPD <span class="accent-moto">Real-Time Crime Center</span> — Staffing & Workstations</h2>
+  <p class="sec-body">A fully integrated RTCC requires a purpose-built operations floor with distinct analyst roles corresponding to each intelligence layer.</p>
+
+  <div class="staff-grid">
+    <div class="staff-cell">
+      <div class="staff-role">RTCC Shift Supervisor</div>
+      <div class="staff-count green">1</div>
+      <div class="staff-desc">Oversees all active Missions in CommandCentral. Coordinates cross-agency comms. Authorizes drone deployment and Identifi checkpoint activation. Senior sworn officer.</div>
+    </div>
+    <div class="staff-cell">
+      <div class="staff-role">CommandCentral Analysts</div>
+      <div class="staff-count moto">2–3</div>
+      <div class="staff-desc">Monitor COP, manage camera feeds, respond to ShotSpotter/LPR alerts, maintain Missions workspace for active incidents, communicate intelligence to field units in real time.</div>
+    </div>
+    <div class="staff-cell">
+      <div class="staff-role">Geoint / Farsight Operator</div>
+      <div class="staff-count reveal">1</div>
+      <div class="staff-desc">Manages drone deployment coordination, monitors Farsight 3D data ingestion, maintains ATAK server, converts terrain tiles for COP display, provides LOS analysis to tactical teams.</div>
+    </div>
+    <div class="staff-cell">
+      <div class="staff-role">Biometrics / Identifi Admin</div>
+      <div class="staff-count reveal">1</div>
+      <div class="staff-desc">Maintains Identifi watchlists, reviews geo-tagged encounter data for patterns, coordinates with detectives on biometric hits, manages RMS sync from field contacts.</div>
+    </div>
+    <div class="staff-cell">
+      <div class="staff-role">DC Systems / Network Ops</div>
+      <div class="staff-count dc">1–2</div>
+      <div class="staff-desc">Monitors data center health, manages API integrations, maintains SOC posture, handles middleware and data lake pipelines. CJIS-cleared IT staff only.</div>
+    </div>
+    <div class="staff-cell">
+      <div class="staff-role">Total Per Shift</div>
+      <div class="staff-count green" style="font-size:36px;">6–8</div>
+      <div class="staff-desc">Three shifts × 6–8 = 18–24 FTE for 24/7/365 RTCC coverage. Sworn officers, civilian analysts, and CJIS-cleared IT staff. DOJ consent decree-compatible staffing model.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════ SECTION 7: COMPLIANCE ═══════ -->
+<div class="section">
+  <div class="sec-label">Section 07 · Regulatory Compliance</div>
+  <h2 class="sec-title"><span class="accent-dc">Compliance</span> Framework — CJIS, FedRAMP, Consent Decree</h2>
+
+  <div class="compliance-grid">
+    <div class="comp-item">
+      <div class="comp-title">FBI CJIS SP v6.0</div>
+      <div class="comp-body">Governs all CJI storage, access, encryption, audit logging, personnel screening. Every component of this stack — Reveal, Motorola, and the DC — must meet or exceed CJIS SP requirements. Motorola is already CJIS-compliant on Azure; DC handles on-prem CJIS obligations.</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-title">FedRAMP / StateRAMP</div>
+      <div class="comp-body">Motorola CommandCentral is deployable in FedRAMP and StateRAMP authorized cloud environments. CPD Data Center, as a CJIS-compliant on-prem facility, can host Motorola components locally, providing CPD full data sovereignty over criminal justice information.</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-title">DOJ Consent Decree</div>
+      <div class="comp-body">Motorola's Missions audit trail and BWC auto-activation directly satisfy use-of-force documentation requirements. Reveal's Identifi geo-tagged encounter logs satisfy stop accountability obligations. The DC's 7-year retention policy satisfies evidence preservation requirements for litigation.</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-title">Reveal DoD ATO</div>
+      <div class="comp-body">Reveal's Farsight and Identifi hold DoD network Authority to Operate — enabling CPD participation in federal task force operations on classified networks. The ATAK federation link between CPD DC and federal TAK servers is ATO-covered.</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-title">SOC 2 Type II / ISO 27001</div>
+      <div class="comp-body">CPD Data Center should target SOC 2 Type II audit within 18 months of operation — aligning with Motorola's own audit framework and satisfying oversight requirements from City Council, City Council's IT committee, and the DOJ monitoring team.</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-title">Ohio Public Records Law</div>
+      <div class="comp-body">BWC and RTCC footage subject to Ohio Public Records Act (ORC § 149.43). CPD DC must implement automated redaction workflows for FOIA responses — commercial AI redaction tools (e.g., Motorola Redaction Studio) integrate directly into the evidence workflow.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════ SECTION 8: SKYDIO X10 HIVE ═══════ -->
+<div class="section">
+  <div class="sec-label">Section 08 · Drone-as-First-Responder · CPD Headquarters Hive</div>
+  <h2 class="sec-title"><span style="color:#38bdf8;">Skydio X10</span> Hive — <span class="accent-dc">3 Drones · 3 Docks · HQ Rooftop</span></h2>
+  <p class="sec-body">
+    Three Skydio X10 drones paired with three Dock for X10 autonomous launch stations installed on the CPD Justice Center headquarters rooftop form a <strong style="color:#38bdf8;">Drone-as-First-Responder (DFR) hive</strong> — the aerial layer of the integrated RTCC stack. Airborne in 20 seconds from any CommandCentral dispatch, feeding live 4K thermal video directly into the Motorola COP and Reveal Farsight pipeline before the first patrol unit arrives on scene.
+  </p>
+
+  <!-- SKYDIO SPEC CARDS -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;">
+
+    <!-- X10 DRONE CARD -->
+    <div style="background:var(--surface);border:1px solid #38bdf840;border-top:3px solid #38bdf8;border-radius:4px;overflow:hidden;">
+      <div style="padding:18px 22px 12px;border-bottom:1px solid var(--border);">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.25em;color:#38bdf8;margin-bottom:6px;">SKYDIO · AMERICAN-MADE · NDAA COMPLIANT</div>
+        <div style="font-family:var(--head);font-weight:800;font-size:26px;color:#fff;letter-spacing:0.03em;">X10 Drone</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Gen 2 Frame · Public Safety Configuration · VT300-Z Sensor Package</div>
+      </div>
+      <div style="padding:16px 22px;">
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);width:48%;">Max Takeoff Weight</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">5.49 lbs (2.49 kg)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Flight Time</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">Up to 40 minutes</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Max Speed</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">45 mph</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Thermal Camera</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">Teledyne FLIR Boson+ 640×512</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Visual Cameras</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">64MP narrow · 50MP wide · 48MP telephoto (190mm)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Processor</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">NVIDIA Jetson Orin GPU onboard</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Navigation</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">6× 32MP nav cams · 360° obstacle avoidance</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">NightSense</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">Zero-light autonomous nav (IR + visible)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Connectivity</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">Connect Fusion: 5G/LTE + P2P radio (7.5 mi)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Encryption</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">AES-256 · control link + video</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">ADS-B</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">Integrated In receiver · BVLOS ready</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Remote ID</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">FAA-compliant · real-time broadcast</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Operating Temp</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">-4°F to 113°F · Cleveland 4-season capable</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">GPS-Denied Ops</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">Visual Inertial Odometry — full autonomy</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 0;color:var(--muted);">Compliance</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">NDAA · Blue UAS · DoD ATO eligible</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- DOCK CARD -->
+    <div style="background:var(--surface);border:1px solid #a78bfa40;border-top:3px solid var(--dc);border-radius:4px;overflow:hidden;">
+      <div style="padding:18px 22px 12px;border-bottom:1px solid var(--border);">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.25em;color:var(--dc);margin-bottom:6px;">SKYDIO · AUTONOMOUS LAUNCH &amp; RECOVERY STATION</div>
+        <div style="font-family:var(--head);font-weight:800;font-size:26px;color:#fff;letter-spacing:0.03em;">Dock for X10</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Rooftop-Mounted · Weatherproof · 24/7 Autonomous Operations</div>
+      </div>
+      <div style="padding:16px 22px;">
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);width:48%;">Launch Time</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;"><span style="color:#4ade80;font-weight:700;">20 seconds</span> — fully autonomous</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Weather Rating</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">IP56 · 160 mph wind rated (bolted) · rain/snow ops</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Flight Conditions</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">Rain + winds to 28 mph · day or night</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Temperature Range</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">-4°F to 122°F ops · -40°F standby</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Climate Control</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">Built-in HVAC — drone protected year-round</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Connectivity</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">Skydio Connect External Radio + 5G/LTE fusion</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">BVLOS Ready</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">ADS-B In · weather sensors · radar input support</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Remote Pre-flight</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">Embedded dock cameras — inspect without on-site crew</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Software</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">DFR Command · Remote Ops · browser-based dispatch</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">CAD Integration</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">Dispatch-driven auto-routing from CommandCentral</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Video Output</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">ReadyLinks → CommandCentral COP · Fusus · Axon</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Hive Deconfliction</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">Built-in multi-drone airspace deconfliction system</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">Persistent Coverage</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">3-dock hive: continuous on-station rotation as batteries cycle</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 0;color:var(--muted);">Security</td>
+            <td style="padding:7px 0;color:var(--text);font-weight:600;">SOC 2 Type II compliant · enterprise-grade data protection</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIVE CONFIGURATION -->
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:28px 28px 22px;margin-bottom:24px;">
+    <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.25em;color:var(--muted);margin-bottom:14px;">CPD HEADQUARTERS · JUSTICE CENTER ROOFTOP · HIVE CONFIGURATION</div>
+
+    <!-- 3-dock visual -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
+      <div style="background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.3);border-radius:4px;padding:16px;text-align:center;">
+        <div style="font-size:28px;margin-bottom:6px;">🚁</div>
+        <div style="font-family:var(--head);font-weight:700;font-size:15px;color:#38bdf8;margin-bottom:2px;">X10 #1 · DOCK A</div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--muted);margin-bottom:8px;">PRIMARY RESPONSE</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.55;">Active patrol / ShotSpotter primary. Auto-launches on any CAD priority-1 dispatch within 2-mile radius. Farsight live feed to RTCC.</div>
+      </div>
+      <div style="background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.3);border-radius:4px;padding:16px;text-align:center;">
+        <div style="font-size:28px;margin-bottom:6px;">🚁</div>
+        <div style="font-family:var(--head);font-weight:700;font-size:15px;color:var(--dc);margin-bottom:2px;">X10 #2 · DOCK B</div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--muted);margin-bottom:8px;">SECONDARY / RELIEF</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.55;">Launches when X10 #1 battery depletes to maintain on-station continuity. Simultaneously available for a second independent incident. SWAT tactical support.</div>
+      </div>
+      <div style="background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.3);border-radius:4px;padding:16px;text-align:center;">
+        <div style="font-size:28px;margin-bottom:6px;">🚁</div>
+        <div style="font-family:var(--head);font-weight:700;font-size:15px;color:var(--atak);margin-bottom:2px;">X10 #3 · DOCK C</div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--muted);margin-bottom:8px;">RESERVE / PERIMETER</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.55;">Hot standby for large events, dignitary protection, or simultaneous multi-incident coverage. Provides perimeter surveillance while X10 #1/#2 engage active scenes.</div>
+      </div>
+    </div>
+
+    <!-- Hive capability metrics -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:3px;overflow:hidden;">
+      <div style="background:var(--surface2);padding:14px 16px;text-align:center;">
+        <div style="font-family:var(--head);font-weight:800;font-size:28px;color:#38bdf8;line-height:1;">20s</div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--muted);margin-top:4px;">DOCK-TO-AIRBORNE</div>
+      </div>
+      <div style="background:var(--surface2);padding:14px 16px;text-align:center;">
+        <div style="font-family:var(--head);font-weight:800;font-size:28px;color:#4ade80;line-height:1;">24/7</div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--muted);margin-top:4px;">HIVE AVAILABILITY</div>
+      </div>
+      <div style="background:var(--surface2);padding:14px 16px;text-align:center;">
+        <div style="font-family:var(--head);font-weight:800;font-size:28px;color:#fbbf24;line-height:1;">3× </div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--muted);margin-top:4px;">SIMULTANEOUS MISSIONS</div>
+      </div>
+      <div style="background:var(--surface2);padding:14px 16px;text-align:center;">
+        <div style="font-family:var(--head);font-weight:800;font-size:28px;color:var(--dc);line-height:1;">7.5mi</div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--muted);margin-top:4px;">P2P CONTROL RANGE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTEGRATION NOTES -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+    <div class="arch-box moto">
+      <div class="arch-box-label">CommandCentral Integration</div>
+      <div class="arch-box-title">Dispatch-Driven Launch</div>
+      <div class="arch-box-desc">CommandCentral CAD fires a DFR Command trigger on any priority-1 call. The nearest available X10 auto-launches without operator intervention. Live thermal + 4K feed appears on RTCC analyst screen within 90 seconds of dispatch — before first patrol unit arrives.</div>
+    </div>
+    <div class="arch-box reveal">
+      <div class="arch-box-label">Farsight Integration</div>
+      <div class="arch-box-title">Aerial → 3D Pipeline</div>
+      <div class="arch-box-desc">X10 video feeds directly into Farsight's photogrammetry engine. For extended incidents (barricade, SWAT, search), the drone builds a 3D terrain model in real time. Output is pushed via ATAK to SWAT tablets and converted to Esri WMS for CommandCentral COP overlay.</div>
+    </div>
+    <div class="arch-box dc">
+      <div class="arch-box-label">Data Center Integration</div>
+      <div class="arch-box-title">CJIS Video Archive</div>
+      <div class="arch-box-desc">All X10 mission footage streams to CPD Data Center via DFR Command API. AES-256 encrypted at rest. Stored as evidentiary-grade video with chain-of-custody metadata, incident ID linkage, and GPS track overlay. Retained per Ohio public records law and consent decree policy.</div>
+    </div>
+  </div>
+
+  <!-- ROOFTOP INSTALLATION NOTE -->
+  <div style="margin-top:16px;padding:16px 20px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.25);border-radius:4px;font-size:13px;color:var(--muted);line-height:1.65;">
+    <strong style="color:var(--alert);">⚡ Installation Note — Justice Center Rooftop:</strong> Three Dock for X10 units require rooftop structural assessment, dedicated electrical circuits (each dock: 120V/20A), CAT6 ethernet for wired backhaul, and Skydio Connect External Radio antenna mounts at rooftop perimeter for maximum P2P range across Downtown Cleveland and the lakefront corridor. FAA BVLOS waiver required for autonomous beyond-visual-line-of-sight operations — Skydio's Regulatory Services team manages this process with a 4-month lead time. CPD must designate an FAA Part 107-certified Remote Pilot in Command (RPIC) per shift for BVLOS compliance.
+  </div>
+
+  <!-- PRICING -->
+  <div style="margin-top:20px;background:var(--surface);border:1px solid var(--border2);border-radius:4px;overflow:hidden;">
+    <div style="background:var(--surface2);padding:10px 20px;font-family:var(--mono);font-size:9px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;">Skydio X10 Hive — CPD HQ · Indicative Pricing</div>
+    <div class="cost-row">
+      <div><div class="cost-label">3× Skydio X10 Drones (VT300-Z sensor package)</div><div style="font-size:12px;color:var(--muted)">64MP narrow · 48MP telephoto · FLIR Boson+ thermal · NVIDIA Jetson Orin · NightSense</div></div>
+      <div class="cost-vendor">Skydio</div>
+      <div class="cost-amount" style="color:#38bdf8;">~$60K–75K</div>
+    </div>
+    <div class="cost-row">
+      <div><div class="cost-label">3× Dock for X10 — Autonomous Launch Stations</div><div style="font-size:12px;color:var(--muted)">Incl. Connect External Radio, HVAC, weather sensors, ADS-B In, dock camera per unit</div></div>
+      <div class="cost-vendor">Skydio</div>
+      <div class="cost-amount" style="color:#38bdf8;">~$150K–180K</div>
+    </div>
+    <div class="cost-row">
+      <div><div class="cost-label">DFR Command Software License</div><div style="font-size:12px;color:var(--muted)">Browser-based fleet management, AR overlays, automated dispatch routing, CommandCentral integration</div></div>
+      <div class="cost-vendor">Skydio</div>
+      <div class="cost-amount" style="color:#38bdf8;">~$30K–45K / yr</div>
+    </div>
+    <div class="cost-row">
+      <div><div class="cost-label">Dock Installation + Training</div><div style="font-size:12px;color:var(--muted)">Rooftop structural, electrical, CAT6, antenna mounts · 3-day in-person DFR training (4 students per dock)</div></div>
+      <div class="cost-vendor">Skydio + General Contractor</div>
+      <div class="cost-amount" style="color:#38bdf8;">~$45K–70K</div>
+    </div>
+    <div class="cost-row">
+      <div><div class="cost-label">Annual Maintenance + Service Plan</div><div style="font-size:12px;color:var(--muted)">Skydio-managed maintenance schedule · parts coverage · repair SLA · propeller/battery consumables</div></div>
+      <div class="cost-vendor">Skydio</div>
+      <div class="cost-amount" style="color:#38bdf8;">~$40K–60K / yr</div>
+    </div>
+    <div class="cost-row">
+      <div><div class="cost-label">FAA BVLOS Waiver Application</div><div style="font-size:12px;color:var(--muted)">Skydio Regulatory Services · ConOps, Safety Case, FAA submission · single multi-site waiver package</div></div>
+      <div class="cost-vendor">Skydio Regulatory Services</div>
+      <div class="cost-amount" style="color:#38bdf8;">~$15K–25K</div>
+    </div>
+    <div class="cost-row" style="background:rgba(56,189,248,0.05);border-top:2px solid rgba(56,189,248,0.25);">
+      <div><div class="cost-label" style="font-weight:700;color:#38bdf8;font-size:15px;">Skydio Hive — Total Capital (3 drones + 3 docks + install)</div><div style="font-size:12px;color:var(--muted)">One-time procurement and installation</div></div>
+      <div></div>
+      <div class="cost-amount" style="color:#38bdf8;font-size:17px;">~$270K–350K CapEx</div>
+    </div>
+    <div class="cost-row" style="background:rgba(56,189,248,0.03);">
+      <div><div class="cost-label" style="font-weight:700;color:#38bdf8;font-size:15px;">Skydio Hive — Annual Operating Cost</div><div style="font-size:12px;color:var(--muted)">Software, maintenance, consumables</div></div>
+      <div></div>
+      <div class="cost-amount" style="color:#38bdf8;font-size:17px;">~$70K–105K / yr</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════ SECTION 9: COST ESTIMATE ═══════ -->
+<div class="section">
+  <div class="sec-label">Section 09 · Preliminary Cost Estimate</div>
+  <h2 class="sec-title">Indicative <span class="accent-dc">Capital & Operating</span> Cost Framework — Full Stack</h2>
+  <p class="sec-body">Order-of-magnitude estimates for planning purposes. Actual costs subject to CPD procurement process, competitive RFP, and final scope definition. Federal COPS grants, BJA Technology Program grants, and Ohio SCCG funding are applicable.</p>
+
+  <div class="cost-section">
+    <div class="cost-row header"><span>CATEGORY</span><span>VENDOR / SOURCE</span><span>EST. COST</span></div>
+
+    <div class="cost-row">
+      <div><div class="cost-label">CommandCentral Aware — Enterprise License</div><div style="font-size:12px;color:var(--muted)">Annual SaaS subscription, full module suite, 63,000+ user tier</div></div>
+      <div class="cost-vendor">Motorola Solutions</div>
+      <div class="cost-amount moto">$1.2M–1.8M / yr</div>
+    </div>
+    <div class="cost-row">
+      <div><div class="cost-label">APX NEXT Radios + BWC + LPR</div><div style="font-size:12px;color:var(--muted)">Hardware fleet for patrol and RTCC integration</div></div>
+      <div class="cost-vendor">Motorola Solutions</div>
+      <div class="cost-amount moto">$3.5M–5M CapEx</div>
+    </div>
+    <div class="cost-row">
+      <div><div class="cost-label">Farsight Platform License</div><div style="font-size:12px;color:var(--muted)">Agency-wide deployment, drone-agnostic</div></div>
+      <div class="cost-vendor">Reveal Technology</div>
+      <div class="cost-amount reveal">$180K–350K / yr</div>
+    </div>
+    <div class="cost-row">
+      <div><div class="cost-label">Identifi Platform License + IDsled Hardware</div><div style="font-size:12px;color:var(--muted)">Per-device licenses, IDsled biometric sleds for 200 officers</div></div>
+      <div class="cost-vendor">Reveal Technology</div>
+      <div class="cost-amount reveal">$400K–700K CapEx + $120K / yr</div>
+    </div>
+    <div class="cost-row">
+      <div><div class="cost-label">CPD Data Center — Facility Build-Out</div><div style="font-size:12px;color:var(--muted)">3,000 sq ft: structural, power, cooling, physical security, CJIS hardening</div></div>
+      <div class="cost-vendor">General Contractor + IT Integrator</div>
+      <div class="cost-amount dc">$2.5M–4M CapEx</div>
+    </div>
+    <div class="cost-row">
+      <div><div class="cost-label">CPD DC — Compute, Storage, Network</div><div style="font-size:12px;color:var(--muted)">Hyperconverged cluster, GPU nodes, 500TB+ NAS, dual-ISP, SOC tooling</div></div>
+      <div class="cost-vendor">Dell / HPE / Cisco / Palo Alto</div>
+      <div class="cost-amount dc">$1.8M–3M CapEx</div>
+    </div>
+    <div class="cost-row">
+      <div><div class="cost-label">CPD DC — Annual Operations</div><div style="font-size:12px;color:var(--muted)">CJIS-cleared IT staff, SOC subscription, maintenance, power, colocation DR</div></div>
+      <div class="cost-vendor">CPD IT / Managed CJIS SOC</div>
+      <div class="cost-amount dc">$600K–1M / yr</div>
+    </div>
+    <div class="cost-row">
+      <div><div class="cost-label">RTCC Floor Build-Out + Workstations</div><div style="font-size:12px;color:var(--muted)">Video wall, analyst stations, supervisor position, network cabling</div></div>
+      <div class="cost-vendor">A/V Integrator</div>
+      <div class="cost-amount" style="color:var(--alert);">$800K–1.4M CapEx</div>
+    </div>
+    <div class="cost-row">
+      <div><div class="cost-label">ShotSpotter Expansion + Integration</div><div style="font-size:12px;color:var(--muted)">Coverage expansion across highest-violence CPD districts</div></div>
+      <div class="cost-vendor">SoundThinking (ShotSpotter)</div>
+      <div class="cost-amount" style="color:var(--alert);">$600K–1M / yr</div>
+    </div>
+    <div class="cost-row" style="background:rgba(56,189,248,0.04);border-left:3px solid #38bdf8;">
+      <div><div class="cost-label">3× Skydio X10 + 3× Dock for X10 — HQ Hive</div><div style="font-size:12px;color:var(--muted)">Drones, docks, installation, FAA waiver, BVLOS setup · CPD Justice Center rooftop</div></div>
+      <div class="cost-vendor" style="color:#38bdf8;">Skydio</div>
+      <div class="cost-amount" style="color:#38bdf8;">$270K–350K CapEx</div>
+    </div>
+    <div class="cost-row" style="background:rgba(56,189,248,0.04);border-left:3px solid #38bdf8;">
+      <div><div class="cost-label">Skydio DFR Command + Maintenance (Annual)</div><div style="font-size:12px;color:var(--muted)">Software license, service plan, propellers, batteries, consumables</div></div>
+      <div class="cost-vendor" style="color:#38bdf8;">Skydio</div>
+      <div class="cost-amount" style="color:#38bdf8;">$70K–105K / yr</div>
+    </div>
+
+    <div class="cost-row total">
+      <div><div class="cost-label" style="font-size:16px;font-weight:700;color:#fff;">Total Estimated Capital Investment</div><div style="font-size:12px;color:var(--muted);">One-time build-out, hardware procurement, and drone hive installation</div></div>
+      <div></div>
+      <div class="cost-amount total">~$9.5M–14.5M</div>
+    </div>
+    <div class="cost-row total" style="border-top:none;">
+      <div><div class="cost-label" style="font-size:16px;font-weight:700;color:#fff;">Total Estimated Annual Operating Cost</div><div style="font-size:12px;color:var(--muted);">Licenses, subscriptions, staffing, maintenance — all platforms</div></div>
+      <div></div>
+      <div class="cost-amount total">~$2.8M–4.2M / yr</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════ FOOTER ═══════ -->
+<div class="doc-footer">
+  <div class="footer-text">
+    PREPARED FOR: Cleveland Division of Police<br>
+    DOCUMENT TYPE: Integrated Architecture Concept Brief<br>
+    CLASSIFICATION: FOR PLANNING PURPOSES ONLY — NOT A PROCUREMENT DOCUMENT
+  </div>
+  <div class="footer-text" style="text-align:right;">
+    Reveal Technology · revealtech.ai · Bozeman MT<br>
+    Motorola Solutions CommandCentral Aware<br>
+    Skydio X10 + Dock for X10 · skydio.com<br>
+    CJIS Security Policy v6.0 · FBI CJIS Division<br>
+    Prepared: May 2026
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

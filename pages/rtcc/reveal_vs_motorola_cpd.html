@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reveal Technology vs. CommandCentral Aware — CPD Capability Matrix</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #22262f;
+    --reveal-primary: #00c8ff;
+    --reveal-dim: rgba(0,200,255,0.12);
+    --reveal-glow: rgba(0,200,255,0.35);
+    --moto-primary: #e8521a;
+    --moto-dim: rgba(232,82,26,0.12);
+    --moto-glow: rgba(232,82,26,0.35);
+    --both-primary: #a78bfa;
+    --both-dim: rgba(167,139,250,0.10);
+    --neither: #3a3f4a;
+    --text: #e2e8f0;
+    --text-muted: #6b7280;
+    --text-faint: #374151;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* === GRID TEXTURE === */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+
+  /* === HEADER === */
+  .header {
+    margin-bottom: 52px;
+  }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 1px;
+    background: var(--text-muted);
+  }
+
+  h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(36px, 5vw, 64px);
+    line-height: 1.0;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+
+  h1 .reveal-word { color: var(--reveal-primary); }
+  h1 .moto-word { color: var(--moto-primary); }
+
+  .subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 640px;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+
+  /* === VENDOR LEGEND === */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin: 40px 0 48px;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .dot-reveal { background: var(--reveal-primary); }
+  .dot-moto   { background: var(--moto-primary); }
+  .dot-both   { background: var(--both-primary); }
+
+  .legend-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+  .badge-yes-r  { background: var(--reveal-dim);  color: var(--reveal-primary);  border: 1px solid var(--reveal-primary); }
+  .badge-yes-m  { background: var(--moto-dim);    color: var(--moto-primary);    border: 1px solid var(--moto-primary); }
+  .badge-yes-b  { background: var(--both-dim);    color: var(--both-primary);    border: 1px solid var(--both-primary); }
+  .badge-no     { background: transparent;         color: var(--text-faint);      border: 1px solid var(--border); }
+  .badge-partial { background: rgba(234,179,8,0.10); color: var(--yellow); border: 1px solid rgba(234,179,8,0.4); }
+
+  /* === SECTION HEADER === */
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    margin: 52px 0 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-faint);
+    padding-bottom: 2px;
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .section-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    font-style: italic;
+  }
+
+  /* === TABLE === */
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0;
+    table-layout: fixed;
+  }
+
+  .matrix-table thead th {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  .th-capability { width: 32%; color: var(--text-muted); }
+  .th-reveal     { width: 16%; color: var(--reveal-primary); }
+  .th-moto       { width: 16%; color: var(--moto-primary); }
+  .th-advantage  { width: 11%; color: var(--both-primary); }
+  .th-notes      { width: 25%; color: var(--text-muted); }
+
+  .matrix-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s ease;
+  }
+
+  .matrix-table tbody tr:hover {
+    background: var(--surface);
+  }
+
+  .matrix-table tbody td {
+    padding: 13px 16px;
+    font-size: 13.5px;
+    vertical-align: middle;
+    line-height: 1.5;
+  }
+
+  .td-capability {
+    font-weight: 500;
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  .td-capability .cap-sub {
+    display: block;
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+
+  .td-badge { text-align: left; }
+
+  .td-advantage {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  .adv-reveal  { color: var(--reveal-primary); }
+  .adv-moto    { color: var(--moto-primary); }
+  .adv-both    { color: var(--both-primary); }
+  .adv-neither { color: var(--text-faint); }
+
+  .td-notes {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  .td-notes .cpd-tag {
+    display: inline-block;
+    background: rgba(34,197,94,0.10);
+    border: 1px solid rgba(34,197,94,0.25);
+    color: var(--green);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 2px;
+    margin-bottom: 4px;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+
+  /* === VENDOR COLUMNS with subtle bg stripe === */
+  .col-reveal { background: rgba(0,200,255,0.015); }
+  .col-moto   { background: rgba(232,82,26,0.015); }
+
+  /* === SUMMARY SCORECARD === */
+  .scorecard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    margin-top: 56px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .score-cell {
+    background: var(--surface);
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .score-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .score-vendor {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+  }
+  .score-vendor.reveal { color: var(--reveal-primary); }
+  .score-vendor.moto   { color: var(--moto-primary); }
+  .score-vendor.both   { color: var(--both-primary); }
+
+  .score-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .score-number.reveal { color: var(--reveal-primary); text-shadow: 0 0 24px var(--reveal-glow); }
+  .score-number.moto   { color: var(--moto-primary);   text-shadow: 0 0 24px var(--moto-glow); }
+  .score-number.both   { color: var(--both-primary); }
+
+  .score-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 300;
+    line-height: 1.5;
+    max-width: 280px;
+  }
+
+  /* === STRATEGIC RECO === */
+  .reco-section {
+    margin-top: 56px;
+  }
+
+  .reco-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+
+  .reco-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .reco-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+  }
+
+  .reco-card.highlight-reveal { border-left: 3px solid var(--reveal-primary); }
+  .reco-card.highlight-moto   { border-left: 3px solid var(--moto-primary); }
+  .reco-card.highlight-both   { border-left: 3px solid var(--both-primary); }
+  .reco-card.highlight-cpd    { border-left: 3px solid var(--green); }
+
+  .reco-card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .reco-card-title.reveal { color: var(--reveal-primary); }
+  .reco-card-title.moto   { color: var(--moto-primary); }
+  .reco-card-title.both   { color: var(--both-primary); }
+  .reco-card-title.cpd    { color: var(--green); }
+
+  .reco-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  .reco-card ul {
+    margin-top: 8px;
+    padding-left: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .reco-card ul li {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 300;
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .reco-card ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+
+  /* === FOOTER === */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-left {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+    line-height: 1.8;
+  }
+
+  .footer-right {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+    text-align: right;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 900px) {
+    .reco-grid { grid-template-columns: 1fr; }
+    .scorecard { grid-template-columns: 1fr; }
+    .th-notes, .td-notes { display: none; }
+    .th-advantage, .td-advantage { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="eyebrow">Cleveland Division of Police · Public Safety Technology Assessment</div>
+    <h1>
+      <span class="reveal-word">Reveal</span> Technology<br>
+      vs. <span class="moto-word">CommandCentral</span> Aware
+    </h1>
+    <p class="subtitle">Tactical edge intelligence and biometrics (Reveal) vs. enterprise command center situational awareness (Motorola) — a capability-by-capability analysis for CPD deployment planning.</p>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot dot-reveal"></div> Reveal Technology advantage / capability</div>
+    <div class="legend-item"><div class="legend-dot dot-moto"></div> CommandCentral Aware advantage / capability</div>
+    <div class="legend-item"><div class="legend-dot dot-both"></div> Shared / overlapping capability</div>
+    <div style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <span class="legend-badge badge-yes-r">REVEAL</span>
+      <span class="legend-badge badge-yes-m">MOTOROLA</span>
+      <span class="legend-badge badge-yes-b">BOTH</span>
+      <span class="legend-badge badge-partial">PARTIAL</span>
+      <span class="legend-badge badge-no">NO</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 1: SITUATIONAL AWARENESS
+  ════════════════════════════════════════════ -->
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <div>
+      <div class="section-title">Situational Awareness &amp; Common Operating Picture</div>
+      <div class="section-desc">Real-time environmental intelligence — who is where, what is happening, and what does the terrain look like</div>
+    </div>
+  </div>
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th class="th-capability">Capability</th>
+        <th class="th-reveal">Reveal Tech</th>
+        <th class="th-moto">CmdCentral Aware</th>
+        <th class="th-advantage">Edge</th>
+        <th class="th-notes">CPD Relevance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-capability">Real-time 3D terrain modeling
+          <span class="cap-sub">Generate 3D maps from drone footage for tactical planning</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes"><span class="cpd-tag">SWAT / CRITICAL INCIDENT</span>Enables CPD SWAT to model building interiors, suspect positions, and approach routes before breach</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Line-of-sight analysis
+          <span class="cap-sub">Visualize what any point in terrain can or cannot see</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes">Critical for sniper placement, perimeter containment, and identifying blind spots during barricaded suspect incidents</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Esri GIS map integration
+          <span class="cap-sub">Layer traffic, weather, floor plans, custom data</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-partial">PARTIAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes">Motorola's Esri integration is deep, persistent, and city-wide; Reveal's mapping is mission-specific and generated on-device from drone data</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Fixed camera feed aggregation
+          <span class="cap-sub">CCTV, traffic, partner feeds in one view</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes"><span class="cpd-tag">RTCC</span>Motorola aggregates 190,000+ cloud-connected cameras. Central to CPD's Real-Time Crime Center model</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Live drone video integration
+          <span class="cap-sub">Feed airborne drone footage into command picture</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-b">BOTH</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-b">BOTH</span></td>
+        <td class="td-advantage adv-both">SHARED</td>
+        <td class="td-notes">Motorola ingests drone feeds into COP; Reveal processes drone footage into actionable 3D intelligence — different modalities, complementary value</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Offline / comms-denied operation
+          <span class="cap-sub">Full functionality without network connectivity</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes">Reveal runs entirely on-device. Motorola requires cloud/network. Critical for tunnel, underground, or RF-contested environments in Cleveland's industrial zones</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Helicopter Landing Zone (HLZ) analysis
+          <span class="cap-sub">AI-assisted landing zone identification for MedFlight/air support</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes">Directly applicable for Cuyahoga County MedFlight coordination near lakefront, Burke corridor, and industrial areas</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 2: IDENTITY & BIOMETRICS
+  ════════════════════════════════════════════ -->
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <div>
+      <div class="section-title">Identity Verification &amp; Biometrics</div>
+      <div class="section-desc">Field-level and command-level tools for verifying, identifying, and tracking individuals</div>
+    </div>
+  </div>
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th class="th-capability">Capability</th>
+        <th class="th-reveal">Reveal Tech</th>
+        <th class="th-moto">CmdCentral Aware</th>
+        <th class="th-advantage">Edge</th>
+        <th class="th-notes">CPD Relevance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-capability">Mobile facial recognition
+          <span class="cap-sub">On-device face matching against watchlist</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-partial">PARTIAL</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes">Reveal's Identifi runs bias-mitigated face matching offline. Motorola supports facial recognition via camera integrations, not field-officer mobile</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Fingerprint identification (contact &amp; contactless)
+          <span class="cap-sub">Field fingerprint capture via hardware sled or smartphone camera</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes"><span class="cpd-tag">FIELD OPS</span>IB Five-0 contact sensor + contactless phone-based capture. Offline watchlist matching without dispatch query</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Iris scanning (DoD/NIST-grade)
+          <span class="cap-sub">Dual-eye iris biometric via IriTech IriShield sensor</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes">Military-grade. Useful for high-value target operations, federal task force joint operations, or secure facility access control</td>
+      </tr>
+      <tr>
+        <td class="td-capability">ID card OCR scanning
+          <span class="cap-sub">Auto-extract driver license / ID data into profile</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes">Speeds field contact documentation; integrates ID data directly into geo-tagged encounter record</td>
+      </tr>
+      <tr>
+        <td class="td-capability">License plate recognition (LPR)
+          <span class="cap-sub">Vehicle plate reading, hotlist alerts, fleet tracking</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes"><span class="cpd-tag">PATROL</span>LPR alerts flow directly into CommandCentral COP with APX NEXT radio integration. Critical for CPD vehicle interdiction</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Geo-tagged encounter logging
+          <span class="cap-sub">Capture and store biometric contacts with GPS coordinates</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-partial">PARTIAL</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes">Identifi geo-tags every biometric contact, creating searchable investigative intelligence. Supports CPD consent decree documentation requirements</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Watchlist management (offline-capable)
+          <span class="cap-sub">Customizable on-device wanted persons database</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-partial">PARTIAL</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes">Reveal's watchlist is fully on-device and air-gap capable. Motorola's is cloud-dependent for real-time hits</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 3: COMMAND CENTER & DISPATCH
+  ════════════════════════════════════════════ -->
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <div>
+      <div class="section-title">Command Center, Dispatch &amp; CAD Integration</div>
+      <div class="section-desc">Infrastructure for managing active incidents from central operations and coordinating field units</div>
+    </div>
+  </div>
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th class="th-capability">Capability</th>
+        <th class="th-reveal">Reveal Tech</th>
+        <th class="th-moto">CmdCentral Aware</th>
+        <th class="th-advantage">Edge</th>
+        <th class="th-notes">CPD Relevance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-capability">CAD / 911 system integration
+          <span class="cap-sub">Live call handling and dispatch linked to COP map</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes"><span class="cpd-tag">911 / DISPATCH</span>Native 911 call handling, CAD linkage, VESTA 911 integration. Foundational for CPD's Communications Center upgrade</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Unit GPS tracking on map
+          <span class="cap-sub">Real-time officer/vehicle location across the city</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes">APX NEXT radio emergency button triggers map alert at command; continuous breadcrumb tracking during incidents</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Mission-based workflow management
+          <span class="cap-sub">Structured investigative workspace with AI assist and audit trail</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes"><span class="cpd-tag">RTCC</span>Motorola's "Missions" feature creates a replayable timeline of each RTCC investigation — directly supports CPD consent decree compliance</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Cross-agency collaboration tools
+          <span class="cap-sub">Secure inter-agency messaging, data sharing, joint COP</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-partial">PARTIAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes">Motorola supports 400+ agencies. Reveal shares via ATAK network. CPD works routinely with FBI, OHSP, County Sheriff — Motorola's breadth wins here</td>
+      </tr>
+      <tr>
+        <td class="td-capability">ATAK / TAK network integration
+          <span class="cap-sub">Compatibility with DoD and federal tactical common operating picture</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes">Reveal exports directly to ATAK. Enables CPD joint operations with FBI HRT, USMS, ATF task forces using federal TAK infrastructure</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Automated workflow / rules engine
+          <span class="cap-sub">Trigger camera, alert, or dispatch actions based on sensor input</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes">Motorola automates LPR → alert → camera → dispatch chains. Reduces analyst workload significantly in CPD's proposed RTCC</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 4: LARGE EVENT & TACTICAL PLANNING
+  ════════════════════════════════════════════ -->
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <div>
+      <div class="section-title">Large Event Planning &amp; Tactical Pre-Mission</div>
+      <div class="section-desc">Tools for pre-event intelligence, venue analysis, and coordinating security for high-density public gatherings</div>
+    </div>
+  </div>
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th class="th-capability">Capability</th>
+        <th class="th-reveal">Reveal Tech</th>
+        <th class="th-moto">CmdCentral Aware</th>
+        <th class="th-advantage">Edge</th>
+        <th class="th-notes">CPD Relevance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-capability">3D venue / site pre-modeling
+          <span class="cap-sub">Generate explorable 3D model of stadium, arena, or site pre-event</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes"><span class="cpd-tag">EVENTS</span>Huntington Bank Ballpark, Rocket Arena, Cleveland Browns Stadium, Rock Hall — CPD secures all of them. Pre-event 3D modeling transforms planning</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Crowd movement / evacuation route planning
+          <span class="cap-sub">AI-optimized route planning through complex environments</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-partial">PARTIAL</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes">Reveal's AI route planning minimizes congestion and ensures safe evacuation paths. Motorola provides post-incident replay but limited pre-event AI planning</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Multi-agency event coordination
+          <span class="cap-sub">Shared COP across CPD, Secret Service, FBI, OHSP, EMS</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-partial">PARTIAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes">Motorola's 400+ agency network and Critical Connect interop makes it the backbone for dignitary protection and national-scale events in Cleveland</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Briefing shareability (mobile/tablet)
+          <span class="cap-sub">Share intelligence across team via mobile devices before go-time</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-b">BOTH</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-b">BOTH</span></td>
+        <td class="td-advantage adv-both">SHARED</td>
+        <td class="td-notes">Both platforms support mobile-first distribution. Reveal pushes 3D tactical maps; Motorola pushes live COP and video</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Post-incident timeline reconstruction
+          <span class="cap-sub">Replayable synced video + map trail of how incident unfolded</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-partial">PARTIAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes"><span class="cpd-tag">COMPLIANCE</span>Motorola's Missions feature creates verifiable audit trail — critical for CPD consent decree after-action reporting to DOJ monitor</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 5: PLATFORM & INTEGRATION
+  ════════════════════════════════════════════ -->
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <div>
+      <div class="section-title">Platform Architecture &amp; Integration</div>
+      <div class="section-desc">Technical infrastructure, ecosystem breadth, and ability to extend existing investments</div>
+    </div>
+  </div>
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th class="th-capability">Capability</th>
+        <th class="th-reveal">Reveal Tech</th>
+        <th class="th-moto">CmdCentral Aware</th>
+        <th class="th-advantage">Edge</th>
+        <th class="th-notes">CPD Relevance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-capability">Drone-agnostic sensor ingestion
+          <span class="cap-sub">Works with any UAS that adheres to standard data formats</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-partial">PARTIAL</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes">Reveal is certified on DJI, Skydio, Teal, Black Hornet and others. CPD can deploy Farsight on existing DJI fleet without hardware procurement</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Body camera integration
+          <span class="cap-sub">BWC video linked to incident record</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes">Motorola VB400/V300 BWC auto-activates on radio emergency button press and links to incident. CPD's BWC compliance is consent-decree-mandated</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Records Management System (RMS) integration
+          <span class="cap-sub">Link field contacts to criminal history, warrants, reports</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes">PremierOne Records integration surfaces suspect history instantly at point of dispatch. Deep value for CPD detectives and patrol</td>
+      </tr>
+      <tr>
+        <td class="td-capability">ShotSpotter / GSR sensor integration
+          <span class="cap-sub">Gunshot detection feeds into common operating picture</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-no">NO</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes"><span class="cpd-tag">CRIME REDUCTION</span>ShotSpotter alert → CommandCentral COP map → nearest unit dispatch is a proven CPD workflow candidate for high-violence districts</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Network Authority to Operate (ATO)
+          <span class="cap-sub">Certified for classified/federal network environments</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-yes-r">REVEAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-partial">PARTIAL</span></td>
+        <td class="td-advantage adv-reveal">REVEAL</td>
+        <td class="td-notes">Reveal holds DoD network ATO — enables CPD participation in federal task force operations on classified networks alongside FBI and USMS</td>
+      </tr>
+      <tr>
+        <td class="td-capability">Third-party API / open integration
+          <span class="cap-sub">Extend platform to connect non-native sensors and systems</span>
+        </td>
+        <td class="td-badge col-reveal"><span class="legend-badge badge-partial">PARTIAL</span></td>
+        <td class="td-badge col-moto"><span class="legend-badge badge-yes-m">MOTOROLA</span></td>
+        <td class="td-advantage adv-moto">MOTOROLA</td>
+        <td class="td-notes">Motorola offers 70+ telemetry/video partners plus open API. Reveal integrates via ATAK protocol. Motorola has significantly larger ecosystem footprint</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ═══════════════════════════════════════════
+       SCORECARD
+  ════════════════════════════════════════════ -->
+  <div style="margin-top:56px;">
+    <div class="eyebrow">Summary Scorecard</div>
+    <div style="font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:24px; letter-spacing:0.08em; text-transform:uppercase; color:#fff; margin-bottom:20px;">Capability Advantage Count</div>
+  </div>
+
+  <div class="scorecard">
+    <div class="score-cell">
+      <div class="score-label">Tactical Edge Leader</div>
+      <div class="score-vendor reveal">Reveal Technology</div>
+      <div class="score-number reveal">14</div>
+      <div class="score-desc">Capabilities where Reveal holds clear advantage — concentrated in field-level tactical intelligence: 3D terrain, biometrics, offline ops, drone processing, ATAK/federal integration, and pre-event planning.</div>
+    </div>
+    <div class="score-cell">
+      <div class="score-label">Command Center Leader</div>
+      <div class="score-vendor moto">CommandCentral Aware</div>
+      <div class="score-number moto">12</div>
+      <div class="score-desc">Capabilities where Motorola holds clear advantage — concentrated in enterprise command infrastructure: CAD/911, unit tracking, camera aggregation, RMS, ShotSpotter, body cameras, and cross-agency coordination.</div>
+    </div>
+    <div class="score-cell">
+      <div class="score-label">Shared / Overlapping</div>
+      <div class="score-vendor both">Both Platforms</div>
+      <div class="score-number both">5</div>
+      <div class="score-desc">Capabilities present in both systems — drone feeds, mobile briefing, some cross-agency collaboration, tactical planning, and geo-based logging. Integration multiplies their combined value.</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STRATEGIC RECOMMENDATION
+  ════════════════════════════════════════════ -->
+  <div class="reco-section">
+    <div class="eyebrow" style="margin-top:56px; margin-bottom:16px;">Strategic Recommendation</div>
+    <div class="reco-title">Not Competitors — A Layered Stack</div>
+
+    <div class="reco-grid">
+      <div class="reco-card highlight-moto">
+        <div class="reco-card-title moto">CommandCentral Aware — The Nervous System</div>
+        <p>Deploy as CPD's permanent enterprise infrastructure layer. Manages the city-wide common operating picture, 911/CAD backbone, camera network aggregation, unit tracking, body camera compliance, and cross-agency coordination. The foundational platform every other system feeds into.</p>
+        <ul>
+          <li>RTCC operations hub for CPD</li>
+          <li>Consent decree documentation &amp; audit trail</li>
+          <li>ShotSpotter, LPR, BWC integration point</li>
+          <li>Intra/inter-agency communication spine</li>
+        </ul>
+      </div>
+      <div class="reco-card highlight-reveal">
+        <div class="reco-card-title reveal">Reveal Technology — The Tactical Edge Layer</div>
+        <p>Deploy as the field-portable intelligence layer for SWAT, specialized units, and event security. Operates where CommandCentral can't reach — offline, at the scene, with sub-10-minute 3D terrain modeling from CPD's existing drone fleet and biometric identification from officers' mobile devices.</p>
+        <ul>
+          <li>SWAT pre-breach intelligence &amp; planning</li>
+          <li>Large event venue 3D pre-modeling</li>
+          <li>Field identity verification (Identifi)</li>
+          <li>Federal task force ATAK integration</li>
+        </ul>
+      </div>
+      <div class="reco-card highlight-both">
+        <div class="reco-card-title both">Integration Point — ATAK + CommandCentral Bridge</div>
+        <p>The strongest deployment architecture links Reveal's ATAK output into CommandCentral's common operating picture. Tactical intelligence generated by Farsight in the field (terrain models, LOS analysis, HLZ) gets shared to the RTCC via ATAK export, giving command the same picture SWAT has at the edge.</p>
+        <ul>
+          <li>Drone-generated 3D data populates COP</li>
+          <li>Identifi geo-tagged contacts feed investigative records</li>
+          <li>Bidirectional intelligence: command ↔ field</li>
+        </ul>
+      </div>
+      <div class="reco-card highlight-cpd">
+        <div class="reco-card-title cpd">CPD Consent Decree Alignment</div>
+        <p>Both platforms contribute measurably to CPD's ongoing DOJ consent decree obligations — in different but complementary ways that a technology-forward compliance narrative can leverage.</p>
+        <ul>
+          <li>Motorola: Missions audit trail → DOJ after-action reporting</li>
+          <li>Motorola: BWC auto-activation → use-of-force documentation</li>
+          <li>Reveal: Identifi geo-tagged contacts → encounter accountability</li>
+          <li>Reveal: 3D LOS analysis → officer positioning justification</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">
+      PREPARED FOR: Cleveland Division of Police<br>
+      SUBJECT: Tactical Intelligence Platform Assessment<br>
+      CLASSIFICATION: FOR PLANNING PURPOSES ONLY
+    </div>
+    <div class="footer-right">
+      Reveal Technology · revealtech.ai<br>
+      Motorola Solutions CommandCentral Aware<br>
+      Sources: Official vendor documentation · May 2026
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

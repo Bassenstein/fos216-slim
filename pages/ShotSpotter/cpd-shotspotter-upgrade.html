@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CPD ShotSpotter Upgrade — The FixOurStreets216 Project</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue-dark:    #020d1a;
+    --blue-mid:     #041628;
+    --blue-panel:   #061f38;
+    --blue-card:    #082846;
+    --accent:       #00c8ff;
+    --accent-dim:   rgba(0,200,255,0.15);
+    --accent-glow:  rgba(0,200,255,0.08);
+    --gold:         #f5a623;
+    --gold-dim:     rgba(245,166,35,0.12);
+    --red:          #ff3b3b;
+    --red-dim:      rgba(255,59,59,0.12);
+    --green:        #00e676;
+    --green-dim:    rgba(0,230,118,0.1);
+    --text-primary: #e8f4ff;
+    --text-muted:   #7ea8c9;
+    --text-faint:   #3d6282;
+    --border:       rgba(0,200,255,0.12);
+    --border-strong:rgba(0,200,255,0.28);
+  }
+
+  body {
+    background: var(--blue-dark);
+    color: var(--text-primary);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID SCAN BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SWEEPING SCAN LINE ── */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: scan 8s linear infinite;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  @keyframes scan {
+    0%   { top: -2%; }
+    100% { top: 102%; }
+  }
+
+  .page { position: relative; z-index: 2; max-width: 1280px; margin: 0 auto; padding: 0 32px 80px; }
+
+  /* ── HEADER ── */
+  header {
+    padding: 48px 0 32px;
+    border-bottom: 1px solid var(--border-strong);
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .header-grid {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .shield {
+    width: 72px;
+    height: 80px;
+    position: relative;
+  }
+
+  .shield svg { width: 100%; height: 100%; }
+
+  .header-center h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: clamp(24px, 3.5vw, 38px);
+    color: var(--text-primary);
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+
+  .header-center h1 span { color: var(--accent); }
+
+  .header-center .sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .header-right {
+    text-align: right;
+  }
+
+  .badge-integration {
+    display: inline-block;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: var(--gold-dim);
+    border: 1px solid rgba(245,166,35,0.3);
+    border-radius: 3px;
+    padding: 4px 12px;
+    margin-bottom: 8px;
+  }
+
+  .doc-id {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: var(--blue-panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 24px;
+    margin-bottom: 40px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    flex-wrap: wrap;
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse-green 2s ease infinite; }
+  .dot-gold  { background: var(--gold);  box-shadow: 0 0 6px var(--gold); }
+  .dot-red   { background: var(--red);   box-shadow: 0 0 6px var(--red); animation: pulse-red 1.8s ease infinite; }
+
+  @keyframes pulse-green {
+    0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+  }
+  @keyframes pulse-red {
+    0%,100% { opacity: 1; } 50% { opacity: 0.5; }
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── METRIC CARDS ROW ── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .metric-card {
+    background: var(--blue-panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .metric-card.accent::before  { background: var(--accent); }
+  .metric-card.gold::before    { background: var(--gold); }
+  .metric-card.green::before   { background: var(--green); }
+  .metric-card.red::before     { background: var(--red); }
+
+  .metric-card:hover { border-color: var(--border-strong); }
+
+  .metric-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 10px;
+  }
+
+  .metric-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .metric-card.accent .metric-value  { color: var(--accent); }
+  .metric-card.gold   .metric-value  { color: var(--gold); }
+  .metric-card.green  .metric-value  { color: var(--green); }
+  .metric-card.red    .metric-value  { color: var(--red); }
+
+  .metric-delta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  /* ── MAIN TWO-COL GRID ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .panel {
+    background: var(--blue-panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+  }
+
+  .panel-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-title .icon-accent {
+    color: var(--accent);
+    font-size: 18px;
+  }
+
+  /* ── SENSOR MAP PLACEHOLDER ── */
+  .map-area {
+    background: var(--blue-mid);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    height: 280px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .map-area canvas { position: absolute; inset: 0; }
+
+  .map-overlay-label {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── UPGRADE TIERS ── */
+  .upgrade-list { list-style: none; }
+
+  .upgrade-item {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    align-items: start;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .upgrade-item:last-child { border-bottom: none; }
+
+  .tier-num {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .upgrade-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+
+  .upgrade-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .tier-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .badge-critical { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(255,59,59,0.3); }
+  .badge-high     { background: var(--gold-dim);  color: var(--gold);  border: 1px solid rgba(245,166,35,0.3); }
+  .badge-standard { background: var(--accent-dim);color: var(--accent);border: 1px solid rgba(0,200,255,0.25); }
+
+  /* ── INTEGRATION MATRIX ── */
+  .matrix {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .matrix-node {
+    background: var(--blue-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    text-align: center;
+    position: relative;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: default;
+  }
+
+  .matrix-node:hover {
+    border-color: var(--border-strong);
+    background: rgba(0,200,255,0.04);
+  }
+
+  .matrix-node .node-icon {
+    font-size: 22px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .matrix-node.gold-node .node-icon { color: var(--gold); }
+  .matrix-node.green-node .node-icon { color: var(--green); }
+
+  .node-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .node-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+
+  .node-status.live  { color: var(--green); }
+  .node-status.upgrade { color: var(--gold); }
+  .node-status.new   { color: var(--accent); }
+
+  /* ── ACOUSTIC SPECS TABLE ── */
+  .spec-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+  .spec-table th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    text-align: left;
+    padding: 0 12px 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .spec-table td {
+    padding: 10px 12px 10px 0;
+    border-bottom: 1px solid rgba(0,200,255,0.06);
+    color: var(--text-primary);
+    vertical-align: top;
+  }
+
+  .spec-table tr:last-child td { border-bottom: none; }
+
+  .spec-table td:first-child { color: var(--text-muted); font-size: 12px; }
+
+  .spec-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  /* ── ALERT FEED ── */
+  .alert-feed { list-style: none; }
+
+  .alert-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0,200,255,0.06);
+    font-size: 12px;
+  }
+
+  .alert-item:last-child { border-bottom: none; }
+
+  .alert-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+
+  .alert-dot.g { background: var(--green); }
+  .alert-dot.y { background: var(--gold); }
+  .alert-dot.r { background: var(--red); animation: pulse-red 1.8s ease infinite; }
+
+  .alert-time {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    white-space: nowrap;
+    min-width: 54px;
+  }
+
+  .alert-text { color: var(--text-muted); line-height: 1.4; }
+  .alert-text strong { color: var(--text-primary); font-weight: 500; }
+
+  /* ── FULL-WIDTH PANEL ── */
+  .full-panel {
+    background: var(--blue-panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 40px;
+  }
+
+  /* ── WAVEFORM VISUALIZATION ── */
+  .waveform-container {
+    background: var(--blue-mid);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  /* ── PHASE TIMELINE ── */
+  .phase-timeline {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    position: relative;
+    margin-bottom: 8px;
+  }
+
+  .phase-timeline::before {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+
+  .phase-step {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    padding: 0 8px;
+  }
+
+  .phase-num {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    margin: 0 auto 12px;
+    border: 2px solid;
+    position: relative;
+  }
+
+  .phase-step.complete .phase-num   { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+  .phase-step.active   .phase-num   { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .phase-step.upcoming .phase-num   { background: transparent; border-color: var(--text-faint); color: var(--text-faint); }
+
+  .phase-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .phase-step.complete .phase-title { color: var(--green); }
+  .phase-step.active   .phase-title { color: var(--accent); }
+  .phase-step.upcoming .phase-title { color: var(--text-faint); }
+
+  .phase-detail {
+    font-size: 11px;
+    color: var(--text-faint);
+    line-height: 1.5;
+  }
+
+  .phase-window {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-top: 4px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-left {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 0.1em;
+    line-height: 1.7;
+  }
+
+  .footer-right {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .classified-banner {
+    background: var(--blue-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .main-grid    { grid-template-columns: 1fr; }
+    .matrix       { grid-template-columns: repeat(2, 1fr); }
+    .phase-timeline { grid-template-columns: 1fr; gap: 16px; }
+    .phase-timeline::before { display: none; }
+    .header-grid { grid-template-columns: auto 1fr; }
+    .header-right { display: none; }
+  }
+
+  @media (max-width: 600px) {
+    .page { padding: 0 16px 60px; }
+    .metrics-grid { grid-template-columns: 1fr 1fr; }
+    .matrix { grid-template-columns: 1fr 1fr; }
+    .metric-value { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="classified-banner">
+    ⬡ For Official Use Only — Cleveland Division of Police / 3rd District Operations ⬡
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-grid">
+      <div class="shield">
+        <svg viewBox="0 0 72 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M36 2L6 14V42C6 58 19 72 36 78C53 72 66 58 66 42V14L36 2Z" fill="rgba(0,200,255,0.06)" stroke="rgba(0,200,255,0.35)" stroke-width="1.5"/>
+          <path d="M36 10L13 19.5V40C13 53 22.5 64.5 36 70C49.5 64.5 59 53 59 40V19.5L36 10Z" fill="none" stroke="rgba(0,200,255,0.18)" stroke-width="0.8"/>
+          <text x="36" y="48" font-family="Rajdhani,sans-serif" font-weight="700" font-size="18" fill="#00c8ff" text-anchor="middle" letter-spacing="1">CPD</text>
+          <text x="36" y="30" font-family="Share Tech Mono,monospace" font-size="7" fill="rgba(0,200,255,0.6)" text-anchor="middle" letter-spacing="2">POLICE</text>
+        </svg>
+      </div>
+      <div class="header-center">
+        <h1>ShotSpotter <span>Upgrade</span> Initiative</h1>
+        <div class="sub">Cleveland Division of Police &nbsp;·&nbsp; Acoustic Gunshot Detection Enhancement Program</div>
+      </div>
+      <div class="header-right">
+        <div class="badge-integration">Integration by The FixOurStreets216 Project</div>
+        <div class="doc-id">DOC: FOS216-CPD-SS-2026 &nbsp;|&nbsp; REV: 4.1</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="status-item"><div class="dot dot-green"></div>SYSTEM ONLINE</div>
+    <div class="status-item"><div class="dot dot-gold"></div>UPGRADE PHASE II ACTIVE</div>
+    <div class="status-item"><div class="dot dot-red"></div>3RD DISTRICT: ELEVATED MONITORING</div>
+    <div class="status-item" style="margin-left:auto; color: var(--text-faint);">LAST SYNC: <span id="ts"></span></div>
+  </div>
+
+  <!-- METRICS -->
+  <div class="section-label">System Performance Metrics</div>
+
+  <div class="metrics-grid">
+    <div class="metric-card accent">
+      <div class="metric-label">Detection Accuracy</div>
+      <div class="metric-value">94<span style="font-size:22px">%</span></div>
+      <div class="metric-delta">▲ +11% post-upgrade</div>
+    </div>
+    <div class="metric-card green">
+      <div class="metric-label">Active Sensors</div>
+      <div class="metric-value">187</div>
+      <div class="metric-delta">↑ 43 new nodes added</div>
+    </div>
+    <div class="metric-card gold">
+      <div class="metric-label">Avg. Response Time</div>
+      <div class="metric-value">38<span style="font-size:22px">s</span></div>
+      <div class="metric-delta">▼ −22s from baseline</div>
+    </div>
+    <div class="metric-card red">
+      <div class="metric-label">False Positive Rate</div>
+      <div class="metric-value">6<span style="font-size:22px">%</span></div>
+      <div class="metric-delta">▼ −9pts vs legacy system</div>
+    </div>
+  </div>
+
+  <!-- MAIN TWO-COL -->
+  <div class="main-grid">
+
+    <!-- LEFT: ACOUSTIC MAP -->
+    <div class="panel">
+      <div class="panel-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="icon-accent" style="color:var(--accent)"><circle cx="12" cy="12" r="3"/><path d="M6 12a6 6 0 0 0 12 0"/><path d="M3 12a9 9 0 0 0 18 0"/></svg>
+        Sensor Coverage — Cleveland 3rd District
+      </div>
+      <div class="map-area">
+        <canvas id="mapCanvas"></canvas>
+        <div class="map-overlay-label">SENSOR ARRAY · LIVE TRIANGULATION ACTIVE · WGS84</div>
+      </div>
+      <div style="display:flex; gap:20px; font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-muted); letter-spacing:0.08em;">
+        <span><span style="color:var(--green)">●</span> Active Node</span>
+        <span><span style="color:var(--gold)">●</span> Upgrade Pending</span>
+        <span><span style="color:var(--accent); opacity:0.5">●</span> Coverage Radius</span>
+        <span><span style="color:var(--red)">●</span> Recent Alert</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: UPGRADE TIERS -->
+    <div class="panel">
+      <div class="panel-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--accent)"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Upgrade Components
+      </div>
+      <ul class="upgrade-list">
+        <li class="upgrade-item">
+          <div class="tier-num">01</div>
+          <div>
+            <div class="upgrade-name">Dense Array Microphone Network</div>
+            <div class="upgrade-desc">140+ dB SPL outdoor sensors at 400 ft intervals — eliminates triangulation dead zones across 14.2 sq mi coverage</div>
+          </div>
+          <div class="tier-badge badge-critical">CRITICAL</div>
+        </li>
+        <li class="upgrade-item">
+          <div class="tier-num">02</div>
+          <div>
+            <div class="upgrade-name">Avigilon Visual Confirmation Layer</div>
+            <div class="upgrade-desc">Acoustic-triggered camera correlation — muzzle flash and crowd scatter analysis reduces dispatcher false-alert burden</div>
+          </div>
+          <div class="tier-badge badge-critical">CRITICAL</div>
+        </li>
+        <li class="upgrade-item">
+          <div class="tier-num">03</div>
+          <div>
+            <div class="upgrade-name">ML Secondary Classifier</div>
+            <div class="upgrade-desc">CNN-based parallel classifier trained on 47 caliber signatures + suppressor profiles — confidence scoring overlay on primary AI</div>
+          </div>
+          <div class="tier-badge badge-high">HIGH</div>
+        </li>
+        <li class="upgrade-item">
+          <div class="tier-num">04</div>
+          <div>
+            <div class="upgrade-name">CommandCentral Aware Integration</div>
+            <div class="upgrade-desc">Native fusion of acoustic alerts with CAD, LPR, and video feeds — single-pane dispatch interface for 3rd District ops</div>
+          </div>
+          <div class="tier-badge badge-high">HIGH</div>
+        </li>
+        <li class="upgrade-item">
+          <div class="tier-num">05</div>
+          <div>
+            <div class="upgrade-name">Urban Acoustic Modeling (ODEON)</div>
+            <div class="upgrade-desc">Building canyon multipath analysis for Kinsman / E. 116th corridors — optimizes sensor placement pre-deployment</div>
+          </div>
+          <div class="tier-badge badge-standard">STANDARD</div>
+        </li>
+        <li class="upgrade-item">
+          <div class="tier-num">06</div>
+          <div>
+            <div class="upgrade-name">iZotope RX Forensic Workstation</div>
+            <div class="upgrade-desc">Analyst-grade spectrogram and impulse isolation for evidence-quality audio review and court-admissible waveform reports</div>
+          </div>
+          <div class="tier-badge badge-standard">STANDARD</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- INTEGRATION MATRIX -->
+  <div class="section-label">Integration Ecosystem</div>
+
+  <div class="matrix">
+    <div class="matrix-node">
+      <div class="node-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M6 12a6 6 0 0 0 12 0"/><path d="M3 12a9 9 0 0 0 18 0"/></svg>
+      </div>
+      <div class="node-label">ShotSpotter Core</div>
+      <div class="node-status live">● LIVE / OPERATIONAL</div>
+    </div>
+    <div class="matrix-node gold-node">
+      <div class="node-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+      <div class="node-label">Avigilon Camera AI</div>
+      <div class="node-status upgrade">⬡ UPGRADE IN PROGRESS</div>
+    </div>
+    <div class="matrix-node">
+      <div class="node-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <div class="node-label">CommandCentral Aware</div>
+      <div class="node-status upgrade">⬡ UPGRADE IN PROGRESS</div>
+    </div>
+    <div class="matrix-node">
+      <div class="node-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+      </div>
+      <div class="node-label">Axis Audio Analytics</div>
+      <div class="node-status live">● LIVE / OPERATIONAL</div>
+    </div>
+    <div class="matrix-node">
+      <div class="node-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 12l2 2 4-4"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+      </div>
+      <div class="node-label">iZotope RX Forensic</div>
+      <div class="node-status new">+ NEW — INSTALLING</div>
+    </div>
+    <div class="matrix-node">
+      <div class="node-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div class="node-label">ML Classifier v2</div>
+      <div class="node-status new">+ NEW — TRAINING</div>
+    </div>
+    <div class="matrix-node">
+      <div class="node-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div class="node-label">LPR Fusion Feed</div>
+      <div class="node-status live">● LIVE / OPERATIONAL</div>
+    </div>
+    <div class="matrix-node gold-node">
+      <div class="node-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3h18v18H3zM9 3v18M15 3v18M3 9h18M3 15h18"/></svg>
+      </div>
+      <div class="node-label">ODEON Acoustic Model</div>
+      <div class="node-status upgrade">⬡ CALIBRATION PHASE</div>
+    </div>
+    <div class="matrix-node green-node">
+      <div class="node-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="node-label">Human Review Layer</div>
+      <div class="node-status live">● LIVE / 24-7 STAFFED</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM TWO-COL -->
+  <div class="main-grid">
+
+    <!-- ACOUSTIC SPECS -->
+    <div class="panel">
+      <div class="panel-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--accent)"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        Acoustic Sensor Specifications
+      </div>
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th>Legacy</th>
+            <th>Upgraded</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Max SPL Rating</td>
+            <td style="color:var(--text-faint)">120 dB</td>
+            <td class="spec-val">142 dB</td>
+          </tr>
+          <tr>
+            <td>Frequency Range</td>
+            <td style="color:var(--text-faint)">20 Hz – 8 kHz</td>
+            <td class="spec-val">10 Hz – 20 kHz</td>
+          </tr>
+          <tr>
+            <td>Sensor Spacing</td>
+            <td style="color:var(--text-faint)">800 ft avg</td>
+            <td class="spec-val">380 ft avg</td>
+          </tr>
+          <tr>
+            <td>Location Accuracy</td>
+            <td style="color:var(--text-faint)">±82 ft</td>
+            <td class="spec-val">±25 ft</td>
+          </tr>
+          <tr>
+            <td>Classifier Latency</td>
+            <td style="color:var(--text-faint)">4.2 sec</td>
+            <td class="spec-val">1.1 sec</td>
+          </tr>
+          <tr>
+            <td>Training Set (rounds)</td>
+            <td style="color:var(--text-faint)">8,200</td>
+            <td class="spec-val">41,600+</td>
+          </tr>
+          <tr>
+            <td>Suppressed Fire ID</td>
+            <td style="color:var(--text-faint)">Not supported</td>
+            <td class="spec-val">Active — 23 profiles</td>
+          </tr>
+          <tr>
+            <td>Environmental Zones</td>
+            <td style="color:var(--text-faint)">City-wide flat threshold</td>
+            <td class="spec-val">Per-block geo thresholds</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ALERT FEED + WAVEFORM -->
+    <div class="panel">
+      <div class="panel-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--red)"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Live Event Feed — 3rd District
+      </div>
+      <div class="waveform-container">
+        <canvas id="waveCanvas" height="60" style="width:100%; display:block;"></canvas>
+      </div>
+      <ul class="alert-feed">
+        <li class="alert-item">
+          <div class="alert-dot r"></div>
+          <div class="alert-time">14:32:07</div>
+          <div class="alert-text"><strong>GUNSHOT DETECTED</strong> — E. 116th &amp; Kinsman | 3 rounds | .40 cal match | CAD dispatched</div>
+        </li>
+        <li class="alert-item">
+          <div class="alert-dot g"></div>
+          <div class="alert-time">13:58:41</div>
+          <div class="alert-text"><strong>CLEARED — FALSE POSITIVE</strong> — Harvard &amp; E. 79th | Construction impact | Human review confirmed</div>
+        </li>
+        <li class="alert-item">
+          <div class="alert-dot r"></div>
+          <div class="alert-time">13:21:19</div>
+          <div class="alert-text"><strong>GUNSHOT DETECTED</strong> — Buckeye &amp; E. 120th | Single round | Suppressed signature match | Unit 336 en route</div>
+        </li>
+        <li class="alert-item">
+          <div class="alert-dot y"></div>
+          <div class="alert-time">12:44:55</div>
+          <div class="alert-text"><strong>CLASSIFIER REVIEW</strong> — Mt. Pleasant / E. 131st | 68% confidence | Forwarded to analyst</div>
+        </li>
+        <li class="alert-item">
+          <div class="alert-dot g"></div>
+          <div class="alert-time">11:33:02</div>
+          <div class="alert-text"><strong>SENSOR CALIBRATION COMPLETE</strong> — Node cluster C-14 through C-22 | 9 nodes online | Coverage +0.4 sq mi</div>
+        </li>
+        <li class="alert-item">
+          <div class="alert-dot r"></div>
+          <div class="alert-time">10:17:38</div>
+          <div class="alert-text"><strong>GUNSHOT DETECTED</strong> — E. 93rd &amp; Union | 2 rounds | 9mm match | Avigilon visual confirmed</div>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- DEPLOYMENT TIMELINE -->
+  <div class="full-panel">
+    <div class="panel-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--accent)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Deployment Timeline — The FixOurStreets216 Project Integration Phases
+    </div>
+    <div class="phase-timeline">
+      <div class="phase-step complete">
+        <div class="phase-num">I</div>
+        <div class="phase-title">Assessment &amp; Design</div>
+        <div class="phase-detail">Sensor gap analysis, urban acoustic modeling, NDAA compliance review, 3rd District topology survey</div>
+        <div class="phase-window">Q4 2025 — COMPLETE</div>
+      </div>
+      <div class="phase-step active">
+        <div class="phase-num">II</div>
+        <div class="phase-title">Hardware &amp; Integration</div>
+        <div class="phase-detail">Dense array deployment, Avigilon tie-in, CommandCentral fusion, ML classifier training and validation</div>
+        <div class="phase-window">Q1–Q2 2026 — ACTIVE</div>
+      </div>
+      <div class="phase-step upcoming">
+        <div class="phase-num">III</div>
+        <div class="phase-title">Citywide Rollout</div>
+        <div class="phase-detail">Districts 1, 2, 4, 5, 6 expansion, geo-threshold tuning, analyst training program, grant performance reporting</div>
+        <div class="phase-window">Q3–Q4 2026 — PLANNED</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-left">
+      CLEVELAND DIVISION OF POLICE &nbsp;·&nbsp; ACOUSTIC DETECTION UPGRADE PROGRAM<br/>
+      INTEGRATION MANAGED BY THE FIXOURSTREETS216 PROJECT &nbsp;·&nbsp; BEACHWOOD, OH<br/>
+      DOC FOS216-CPD-SS-2026 &nbsp;·&nbsp; FOR OFFICIAL USE ONLY &nbsp;·&nbsp; NOT FOR PUBLIC DISTRIBUTION
+    </div>
+    <div class="footer-right">The FixOurStreets216 Project</div>
+  </footer>
+
+</div>
+
+<script>
+  // TIMESTAMP
+  const ts = document.getElementById('ts');
+  function tick() {
+    const now = new Date();
+    ts.textContent = now.toLocaleTimeString('en-US', {hour12: false});
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  // MAP CANVAS — sensor nodes
+  const mc = document.getElementById('mapCanvas');
+  const ctx = mc.getContext('2d');
+  function sizeMap() {
+    mc.width  = mc.parentElement.clientWidth;
+    mc.height = mc.parentElement.clientHeight;
+    drawMap();
+  }
+
+  const nodes = [
+    {x:0.18,y:0.22,type:'active'},{x:0.32,y:0.18,type:'active'},{x:0.48,y:0.14,type:'active'},
+    {x:0.62,y:0.20,type:'upgrade'},{x:0.75,y:0.16,type:'active'},{x:0.88,y:0.25,type:'active'},
+    {x:0.12,y:0.42,type:'active'},{x:0.26,y:0.38,type:'active'},{x:0.40,y:0.35,type:'active'},
+    {x:0.55,y:0.38,type:'upgrade'},{x:0.68,y:0.32,type:'active'},{x:0.82,y:0.40,type:'active'},
+    {x:0.20,y:0.58,type:'alert'}, {x:0.35,y:0.55,type:'active'},{x:0.50,y:0.60,type:'active'},
+    {x:0.64,y:0.54,type:'upgrade'},{x:0.78,y:0.58,type:'active'},{x:0.90,y:0.50,type:'active'},
+    {x:0.15,y:0.74,type:'active'},{x:0.30,y:0.72,type:'active'},{x:0.44,y:0.76,type:'upgrade'},
+    {x:0.58,y:0.70,type:'alert'}, {x:0.72,y:0.75,type:'active'},{x:0.85,y:0.68,type:'active'},
+    {x:0.22,y:0.88,type:'active'},{x:0.38,y:0.90,type:'active'},{x:0.54,y:0.86,type:'active'},
+    {x:0.70,y:0.88,type:'upgrade'},{x:0.84,y:0.84,type:'active'},
+  ];
+
+  let pulse = 0;
+
+  function drawMap() {
+    const W = mc.width, H = mc.height;
+    ctx.clearRect(0,0,W,H);
+
+    // street grid hint
+    ctx.strokeStyle = 'rgba(0,200,255,0.06)';
+    ctx.lineWidth = 0.5;
+    for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+    // coverage radii
+    nodes.forEach(n => {
+      const nx = n.x * W, ny = n.y * H;
+      const r = Math.min(W,H) * 0.09;
+      const g = ctx.createRadialGradient(nx,ny,0,nx,ny,r);
+      if (n.type === 'alert') {
+        g.addColorStop(0, 'rgba(255,59,59,0.10)');
+        g.addColorStop(1, 'rgba(255,59,59,0)');
+      } else {
+        g.addColorStop(0, 'rgba(0,200,255,0.07)');
+        g.addColorStop(1, 'rgba(0,200,255,0)');
+      }
+      ctx.beginPath();
+      ctx.arc(nx, ny, r, 0, Math.PI*2);
+      ctx.fillStyle = g;
+      ctx.fill();
+    });
+
+    // connecting lines
+    ctx.strokeStyle = 'rgba(0,200,255,0.08)';
+    ctx.lineWidth = 0.6;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i+1; j < nodes.length; j++) {
+        const dx = (nodes[i].x - nodes[j].x) * W;
+        const dy = (nodes[i].y - nodes[j].y) * H;
+        if (Math.sqrt(dx*dx+dy*dy) < Math.min(W,H)*0.22) {
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x*W, nodes[i].y*H);
+          ctx.lineTo(nodes[j].x*W, nodes[j].y*H);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // nodes
+    nodes.forEach(n => {
+      const nx = n.x * W, ny = n.y * H;
+      let color, r = 4;
+      if (n.type === 'active')  color = '#00e676';
+      else if (n.type === 'upgrade') color = '#f5a623';
+      else if (n.type === 'alert') {
+        color = '#ff3b3b';
+        // pulse ring
+        const pr = 8 + 12 * Math.abs(Math.sin(pulse));
+        ctx.beginPath();
+        ctx.arc(nx, ny, pr, 0, Math.PI*2);
+        ctx.strokeStyle = `rgba(255,59,59,${0.5 - 0.5 * Math.abs(Math.sin(pulse))})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.arc(nx, ny, r, 0, Math.PI*2);
+      ctx.fillStyle = color;
+      ctx.fill();
+    });
+
+    // district label
+    ctx.font = '500 10px "Share Tech Mono"';
+    ctx.fillStyle = 'rgba(0,200,255,0.4)';
+    ctx.letterSpacing = '2px';
+    ctx.fillText('3RD DISTRICT BOUNDARY', 10, 14);
+
+    pulse += 0.04;
+  }
+
+  sizeMap();
+  window.addEventListener('resize', sizeMap);
+  setInterval(drawMap, 50);
+
+  // WAVEFORM
+  const wc = document.getElementById('waveCanvas');
+  const wctx = wc.getContext('2d');
+  let wdata = new Array(200).fill(0);
+  let wFrame = 0;
+
+  function sizeWave() {
+    wc.width  = wc.parentElement.clientWidth;
+    wc.height = 60;
+  }
+
+  function drawWave() {
+    const W = wc.width, H = wc.height;
+    wctx.clearRect(0,0,W,H);
+
+    // generate signal — mostly quiet with occasional spikes
+    wFrame++;
+    let newVal = (Math.random() - 0.5) * 0.08;
+    if (wFrame % 180 < 12) {
+      newVal = (Math.random() - 0.5) * 1.2 * Math.sin((wFrame % 12) * Math.PI / 12);
+    }
+    wdata.push(newVal);
+    if (wdata.length > W) wdata.shift();
+
+    const mid = H / 2;
+    wctx.beginPath();
+    wctx.moveTo(0, mid);
+    for (let i = 0; i < wdata.length; i++) {
+      const amp = Math.min(Math.abs(wdata[i]) > 0.3 ? 1.8 : 1.0, 1.8);
+      wctx.lineTo(i, mid - wdata[i] * mid * amp);
+    }
+    wctx.strokeStyle = 'rgba(0,200,255,0.7)';
+    wctx.lineWidth = 1.2;
+    wctx.stroke();
+
+    wctx.font = '9px "Share Tech Mono"';
+    wctx.fillStyle = 'rgba(0,200,255,0.35)';
+    wctx.fillText('ACOUSTIC FEED — LIVE', 6, 10);
+    wctx.fillStyle = 'rgba(0,200,255,0.25)';
+    wctx.fillText('AMPLITUDE', W - 70, 10);
+  }
+
+  sizeWave();
+  window.addEventListener('resize', sizeWave);
+  setInterval(drawWave, 30);
+</script>
+</body>
+</html>

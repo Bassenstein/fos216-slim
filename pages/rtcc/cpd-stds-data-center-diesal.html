@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPD STDS Data Center — Technical Design Document</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+:root {
+  --bg: #f5f3ef;
+  --white: #ffffff;
+  --ink: #1a1a1a;
+  --ink2: #3d3d3d;
+  --ink3: #6b6b6b;
+  --border: #ddd9d2;
+  --border2: #c5c0b8;
+  --accent: #1a3a8f;
+  --accent2: #0e2460;
+  --red: #c0392b;
+  --green: #1a6b3f;
+  --amber: #8f5c1a;
+  --teal: #0e5c5c;
+  --rule: #b8b3ab;
+}
+
+* { margin:0;padding:0;box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* PAGE STRUCTURE */
+.page { max-width: 900px; margin: 0 auto; padding: 48px 40px; }
+
+/* COVER */
+.cover {
+  border: 2px solid var(--ink);
+  padding: 48px;
+  margin-bottom: 48px;
+  position: relative;
+  background: var(--white);
+}
+
+.cover::before {
+  content: '';
+  position: absolute;
+  top: 6px; left: 6px; right: -6px; bottom: -6px;
+  border: 1px solid var(--border2);
+  z-index: -1;
+}
+
+.doc-class {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+
+.cover-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--ink);
+  margin-bottom: 20px;
+  letter-spacing: -1px;
+}
+
+.cover-sub {
+  font-size: 16px;
+  color: var(--ink2);
+  font-weight: 300;
+  margin-bottom: 32px;
+}
+
+.cover-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+
+.meta-cell label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--ink3);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.meta-cell span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* SECTION */
+.section { margin-bottom: 40px; }
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.sec-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  flex-shrink: 0;
+}
+
+.sec-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+}
+
+/* SUBSECTION */
+.subsec {
+  margin-bottom: 24px;
+  padding-left: 16px;
+  border-left: 2px solid var(--border);
+}
+
+.subsec-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+p { margin-bottom: 12px; color: var(--ink2); font-size: 13px; line-height: 1.75; }
+
+/* SPEC TABLE */
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+
+.spec-table th {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--ink3);
+  text-transform: uppercase;
+  text-align: left;
+  padding: 8px 12px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border2);
+  border-top: 1px solid var(--border2);
+}
+
+.spec-table td {
+  padding: 9px 12px;
+  border-bottom: 0.5px solid var(--border);
+  color: var(--ink2);
+  vertical-align: top;
+}
+
+.spec-table td:first-child {
+  font-weight: 500;
+  color: var(--ink);
+  width: 32%;
+  white-space: nowrap;
+}
+
+.spec-table tr:hover td { background: rgba(26,58,143,0.03); }
+
+/* RACK DIAGRAM */
+.rack-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.rack-card {
+  border: 1px solid var(--border2);
+  background: var(--white);
+  overflow: hidden;
+}
+
+.rack-header {
+  background: var(--ink);
+  color: #fff;
+  padding: 8px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+
+.rack-header.accent { background: var(--accent); }
+.rack-header.teal { background: var(--teal); }
+.rack-header.green { background: var(--green); }
+.rack-header.red { background: var(--red); }
+.rack-header.amber { background: var(--amber); }
+
+.rack-body { padding: 10px 12px; }
+
+.rack-unit {
+  height: 18px;
+  border: 0.5px solid var(--border);
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink2);
+  position: relative;
+  overflow: hidden;
+}
+
+.rack-unit::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+
+.ru-compute::before { background: var(--accent); }
+.ru-storage::before { background: var(--green); }
+.ru-network::before { background: var(--teal); }
+.ru-power::before { background: var(--amber); }
+.ru-gpu::before { background: var(--red); }
+.ru-empty::before { background: var(--border); }
+
+.rack-unit span {
+  padding-left: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rack-footer {
+  border-top: 0.5px solid var(--border);
+  padding: 6px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink3);
+}
+
+/* FLOOR PLAN */
+.floorplan {
+  border: 1px solid var(--border2);
+  background: var(--white);
+  padding: 24px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.room-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+svg.floorplan-svg {
+  width: 100%;
+  display: block;
+}
+
+/* CALLOUT BOXES */
+.callout {
+  border-left: 3px solid;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: var(--white);
+}
+
+.callout.info { border-color: var(--accent); }
+.callout.warn { border-color: var(--amber); }
+.callout.critical { border-color: var(--red); }
+.callout.good { border-color: var(--green); }
+
+.callout-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.callout.info .callout-label { color: var(--accent); }
+.callout.warn .callout-label { color: var(--amber); }
+.callout.critical .callout-label { color: var(--red); }
+.callout.good .callout-label { color: var(--green); }
+
+.callout p { margin-bottom: 0; font-size: 12px; }
+
+/* BUDGET TABLE */
+.budget-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+}
+
+.budget-table th {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #fff;
+  background: var(--ink);
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.budget-table td {
+  padding: 9px 14px;
+  border-bottom: 0.5px solid var(--border);
+  font-size: 12px;
+}
+
+.budget-table td:last-child { text-align: right; font-family: 'DM Mono', monospace; }
+.budget-table tr.subtotal td { background: var(--bg); font-weight: 500; border-top: 1px solid var(--border2); }
+.budget-table tr.total td { background: var(--ink); color: #fff; font-weight: 500; }
+.budget-table tr.total td:first-child { font-family: 'Syne', sans-serif; font-size: 13px; }
+.budget-table .cat { font-weight: 500; color: var(--ink); }
+.budget-table .item { color: var(--ink2); padding-left: 28px; }
+
+/* NETWORK DIAGRAM */
+.net-diagram {
+  background: var(--white);
+  border: 1px solid var(--border2);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* COMPLIANCE MATRIX */
+.compliance-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.comp-item {
+  border: 0.5px solid var(--border2);
+  padding: 12px 14px;
+  background: var(--white);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.comp-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.comp-check.pass { background: #d4f0e0; color: var(--green); }
+.comp-check.req { background: #fde8d0; color: var(--amber); }
+
+.comp-text strong { font-size: 12px; display: block; margin-bottom: 2px; }
+.comp-text span { font-size: 11px; color: var(--ink3); }
+
+/* POWER DIAGRAM */
+.power-flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.pf-node {
+  border: 1px solid var(--border2);
+  background: var(--white);
+  padding: 10px 14px;
+  text-align: center;
+  flex-shrink: 0;
+  min-width: 100px;
+}
+
+.pf-node strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.pf-node span {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink3);
+}
+
+.pf-arrow {
+  font-size: 18px;
+  color: var(--border2);
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+/* PAGE DIVIDER */
+.page-div {
+  border-top: 1px solid var(--rule);
+  margin: 40px 0;
+  position: relative;
+}
+
+.page-div::after {
+  content: attr(data-label);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg);
+  padding: 0 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink3);
+  letter-spacing: 2px;
+}
+
+/* TOC */
+.toc { margin-bottom: 40px; }
+.toc-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 0.5px dotted var(--border);
+  font-size: 12px;
+}
+
+.toc-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); width: 32px; flex-shrink: 0; }
+.toc-name { flex: 1; color: var(--ink2); }
+.toc-dots { flex: 1; }
+.toc-page { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink3); }
+
+/* DATA FLOW LAYERS */
+.layers {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.layer-block {
+  border: 1px solid;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.layer-block.l1 { border-color: var(--red); background: rgba(192,57,43,0.04); }
+.layer-block.l2 { border-color: var(--amber); background: rgba(143,92,26,0.04); }
+.layer-block.l3 { border-color: var(--accent); background: rgba(26,58,143,0.04); }
+.layer-block.l4 { border-color: var(--teal); background: rgba(14,92,92,0.04); }
+.layer-block.l5 { border-color: var(--green); background: rgba(26,107,63,0.04); }
+
+.layer-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.l1 .layer-num { color: var(--red); }
+.l2 .layer-num { color: var(--amber); }
+.l3 .layer-num { color: var(--accent); }
+.l4 .layer-num { color: var(--teal); }
+.l5 .layer-num { color: var(--green); }
+
+.layer-content { flex: 1; }
+.layer-content strong { display: block; font-size: 12px; margin-bottom: 2px; }
+.layer-content span { font-size: 11px; color: var(--ink3); }
+
+.layer-spec {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink3);
+  text-align: right;
+}
+
+/* STAT BAND */
+.stat-band {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--border2);
+  border: 1px solid var(--border2);
+  margin-bottom: 24px;
+}
+
+.stat-cell {
+  background: var(--white);
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-lbl {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: var(--ink3);
+  letter-spacing: 1px;
+}
+
+/* FOOTER */
+footer {
+  border-top: 2px solid var(--ink);
+  padding-top: 20px;
+  margin-top: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+footer p {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink3);
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+/* HIGHLIGHT RULE */
+.highlight-rule {
+  background: var(--accent);
+  color: #fff;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media print {
+  body { background: #fff; }
+  .page { padding: 24px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- COVER -->
+<div class="cover">
+  <div class="doc-class">CONFIDENTIAL — FOR OFFICIAL USE ONLY · DRAFT v1.0 · CJIS CONTROLLED</div>
+  <div class="cover-title">CPD Public Safety<br>Operations Data Center</div>
+  <div class="cover-sub">Technical Design Specification — Street Takeover Detection System (STDS) & Integrated Public Safety Platform · ArtCraft Building, Cleveland, Ohio</div>
+  <div class="cover-meta">
+    <div class="meta-cell">
+      <label>PREPARED FOR</label>
+      <span>Cleveland Division of Police<br>City of Cleveland, Ohio</span>
+    </div>
+    <div class="meta-cell">
+      <label>CLASSIFICATION</label>
+      <span>CJIS Sensitive<br>Law Enforcement Only</span>
+    </div>
+    <div class="meta-cell">
+      <label>DOCUMENT STATUS</label>
+      <span>Design Specification<br>Rev 1.0 — May 2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- STAT BAND -->
+<div class="stat-band">
+  <div class="stat-cell"><div class="stat-val">2,800</div><div class="stat-lbl">SQ FT RAISED FLOOR</div></div>
+  <div class="stat-cell"><div class="stat-val">450 kW</div><div class="stat-lbl">TOTAL IT LOAD</div></div>
+  <div class="stat-cell"><div class="stat-val">N+1</div><div class="stat-lbl">POWER REDUNDANCY</div></div>
+  <div class="stat-cell"><div class="stat-val">CJIS v6.0</div><div class="stat-lbl">COMPLIANCE STANDARD</div></div>
+  <div class="stat-cell"><div class="stat-val">99.99%</div><div class="stat-lbl">TARGET UPTIME</div></div>
+</div>
+
+<!-- ─── SECTION 1: EXECUTIVE SUMMARY ─── -->
+<div class="section">
+  <div class="section-header">
+    <span class="sec-num">01</span>
+    <span class="sec-title">Executive Summary</span>
+  </div>
+
+  <p>This document specifies the design of a dedicated, city-owned public safety data center to be installed within the new Cleveland Division of Police (CDP) headquarters at the ArtCraft Building, downtown Cleveland. The facility will serve as the sole sovereign infrastructure for the Street Takeover Detection System (STDS), CommandCentral Aware data feeds, Avigilon Unity video management, and Skydio DFR Command telemetry — maintaining complete City of Cleveland and CPD data custody under CJIS Security Policy v6.0.</p>
+
+  <div class="callout critical">
+    <div class="callout-label">SOVEREIGNTY REQUIREMENT</div>
+    <p>No STDS incident data, acoustic audio evidence, Avigilon video, LPR captures, drone telemetry, or Criminal Justice Information (CJI) shall be processed or stored on vendor-operated cloud infrastructure. All data remains within city-owned and city-operated hardware at the ArtCraft facility. Vendor platforms (CommandCentral Aware, Avigilon Unity, Skydio DFR Command) operate in on-premises or local-cloud modes connected to this facility.</p>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-label">KEY STRATEGIC BENEFIT</div>
+    <p>City ownership eliminates perpetual SaaS licensing exposure for storage and processing, removes FBI CJIS third-party cloud audit requirements for stored data, and ensures data remains available even if vendor relationships change. Estimated 7-year total cost of ownership is 38% lower than equivalent managed cloud deployments.</p>
+  </div>
+</div>
+
+<div class="page-div" data-label="FACILITY DESIGN"></div>
+
+<!-- ─── SECTION 2: FACILITY ─── -->
+<div class="section">
+  <div class="section-header">
+    <span class="sec-num">02</span>
+    <span class="sec-title">Facility Specification — ArtCraft Building</span>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Location & Space Allocation</div>
+    <p>The data center occupies a dedicated 2,800 square foot raised-floor computer room on the second floor of the ArtCraft Building (1265 Huron Road E, Cleveland, OH 44115), within the secured CPD headquarters zone. The room is adjacent to the Real Time Crime Center (RTCC) operations floor, enabling direct fiber interconnect with sub-millisecond latency to CommandCentral Aware workstations.</p>
+    <table class="spec-table">
+      <tr><th>Parameter</th><th>Specification</th><th>Notes</th></tr>
+      <tr><td>Raised floor area</td><td>2,800 sq ft (260 m²)</td><td>Net white space; 8" raised floor tiles</td></tr>
+      <tr><td>Ceiling clearance</td><td>14 ft (4.3m) to structure</td><td>12 ft clear to overhead cable trays</td></tr>
+      <tr><td>Floor loading</td><td>300 lbs/sq ft</td><td>Structurally reinforced for GPU rack density</td></tr>
+      <tr><td>Fire suppression</td><td>Novec 1230 clean agent</td><td>Equipment-safe; no water suppression in IT room</td></tr>
+      <tr><td>Access control</td><td>AMAG Symmetry — biometric + PIN + badge</td><td>CJIS Tier 3 physical access</td></tr>
+      <tr><td>CCTV coverage</td><td>Avigilon H5SL — 100% room coverage</td><td>4K continuous recording; 90-day retention</td></tr>
+      <tr><td>Visitor control</td><td>Mantrap airlock entry</td><td>Single-person entry; logged escort requirement</td></tr>
+    </table>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Floor Plan Layout</div>
+    <div class="floorplan">
+      <svg class="floorplan-svg" viewBox="0 0 820 420" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e8e4de" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="820" height="420" fill="#f9f8f6"/>
+        <rect width="820" height="420" fill="url(#grid)"/>
+
+        <!-- Outer room wall -->
+        <rect x="30" y="20" width="760" height="380" fill="none" stroke="#1a1a1a" stroke-width="2.5"/>
+
+        <!-- Mantrap vestibule -->
+        <rect x="30" y="160" width="80" height="100" fill="#fff" stroke="#1a1a1a" stroke-width="1.5"/>
+        <text x="70" y="210" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#6b6b6b">MANTRAP</text>
+        <text x="70" y="220" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#6b6b6b">ENTRY</text>
+        <!-- Door symbol -->
+        <line x1="108" y1="160" x2="110" y2="260" stroke="#1a1a1a" stroke-width="1.5"/>
+
+        <!-- HOT AISLE 1 -->
+        <rect x="160" y="40" width="240" height="170" fill="rgba(192,57,43,0.06)" stroke="#c0392b" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="280" y="62" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c0392b">HOT AISLE — ZONE A</text>
+
+        <!-- Racks Zone A — AI/GPU -->
+        <rect x="170" y="70" width="36" height="130" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="188" y="132" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#c0392b" transform="rotate(-90,188,132)">GPU-01 · 30kW</text>
+        <rect x="212" y="70" width="36" height="130" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="230" y="132" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#c0392b" transform="rotate(-90,230,132)">GPU-02 · 30kW</text>
+        <rect x="254" y="70" width="36" height="130" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="272" y="132" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#1a3a8f" transform="rotate(-90,272,132)">STDS-PROC-01</text>
+        <rect x="296" y="70" width="36" height="130" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="314" y="132" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#1a3a8f" transform="rotate(-90,314,132)">STDS-PROC-02</text>
+        <rect x="338" y="70" width="36" height="130" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="356" y="132" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#0e5c5c" transform="rotate(-90,356,132)">KAFKA/REDIS</text>
+
+        <!-- COLD AISLE 1 -->
+        <rect x="160" y="215" width="240" height="50" fill="rgba(26,58,143,0.04)" stroke="#1a3a8f" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <text x="280" y="244" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#1a3a8f">COLD AISLE</text>
+
+        <!-- HOT AISLE 2 -->
+        <rect x="160" y="270" width="240" height="120" fill="rgba(192,57,43,0.04)" stroke="#c0392b" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="280" y="290" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c0392b">HOT AISLE — ZONE B</text>
+
+        <!-- Racks Zone B — Storage/Video -->
+        <rect x="170" y="298" width="36" height="82" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="188" y="337" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#1a6b3f" transform="rotate(-90,188,337)">NAS-01 · 1.2PB</text>
+        <rect x="212" y="298" width="36" height="82" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="230" y="337" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#1a6b3f" transform="rotate(-90,230,337)">NAS-02 · 1.2PB</text>
+        <rect x="254" y="298" width="36" height="82" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="272" y="337" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#1a6b3f" transform="rotate(-90,272,337)">BACKUP TAPE</text>
+        <rect x="296" y="298" width="36" height="82" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="314" y="337" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#0e5c5c" transform="rotate(-90,314,337)">AVI-VMS-01</text>
+        <rect x="338" y="298" width="36" height="82" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="356" y="337" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#0e5c5c" transform="rotate(-90,356,337)">AVI-VMS-02</text>
+
+        <!-- Network zone -->
+        <rect x="430" y="40" width="180" height="340" fill="rgba(14,92,92,0.04)" stroke="#0e5c5c" stroke-width="1"/>
+        <text x="520" y="62" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#0e5c5c">NETWORK ZONE</text>
+        <rect x="445" y="75" width="140" height="50" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="515" y="100" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#0e5c5c">CORE SWITCH · 100GbE</text>
+        <rect x="445" y="135" width="140" height="50" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="515" y="160" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#0e5c5c">FIREWALL · CLUSTER</text>
+        <rect x="445" y="195" width="140" height="50" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="515" y="220" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#0e5c5c">OOB MGMT SWITCH</text>
+        <rect x="445" y="255" width="140" height="50" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="515" y="280" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#1a3a8f">FIRSTNET · UPLINK</text>
+        <rect x="445" y="315" width="140" height="50" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="515" y="340" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#1a3a8f">FIBER · METRO · CPP</text>
+
+        <!-- Power zone -->
+        <rect x="640" y="40" width="130" height="340" fill="rgba(143,92,26,0.04)" stroke="#8f5c1a" stroke-width="1"/>
+        <text x="705" y="62" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#8f5c1a">POWER ZONE</text>
+        <rect x="654" y="75" width="102" height="50" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="705" y="100" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#8f5c1a">UPS A · 250kVA</text>
+        <rect x="654" y="135" width="102" height="50" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="705" y="160" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#8f5c1a">UPS B · 250kVA</text>
+        <rect x="654" y="195" width="102" height="50" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="705" y="220" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#8f5c1a">PDU A · 200A</text>
+        <rect x="654" y="255" width="102" height="50" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+        <text x="705" y="280" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#8f5c1a">PDU B · 200A</text>
+        <rect x="654" y="315" width="102" height="60" fill="#fff" stroke="#8f5c1a" stroke-width="1.5"/>
+        <text x="705" y="342" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#8f5c1a">GENERATOR</text>
+        <text x="705" y="354" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#8f5c1a">750 kVA CUMMINS</text>
+        <text x="705" y="366" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#8f5c1a">72-HR FUEL TANK</text>
+
+        <!-- Cooling -->
+        <rect x="160" y="40" width="0" height="0"/>
+
+        <!-- Labels -->
+        <text x="30" y="16" font-family="DM Mono, monospace" font-size="8" fill="#6b6b6b">ARTCRAFT BLDG — FLOOR 2 · 2,800 SQ FT · CPD STDS DATA CENTER</text>
+        <text x="790" y="410" text-anchor="end" font-family="DM Mono, monospace" font-size="7" fill="#b8b3ab">NOT TO SCALE · SCHEMATIC ONLY</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="page-div" data-label="HARDWARE SPECIFICATION"></div>
+
+<!-- ─── SECTION 3: HARDWARE ─── -->
+<div class="section">
+  <div class="section-header">
+    <span class="sec-num">03</span>
+    <span class="sec-title">Hardware Architecture</span>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Data Processing Stack — Layer Architecture</div>
+    <div class="layers">
+      <div class="layer-block l1">
+        <div class="layer-num">LAYER 1<br>EDGE</div>
+        <div class="layer-content">
+          <strong>180× STDS Node Processors (Raspberry Pi 5 CM / Rockchip RK3588)</strong>
+          <span>Distributed — streetlight poles, 3rd District. FFT, MFCC, CNN inference at node. Only confirmed events transmitted.</span>
+        </div>
+        <div class="layer-spec">4G FirstNet<br>TLS 1.3 uplink</div>
+      </div>
+      <div class="layer-block l2">
+        <div class="layer-num">LAYER 2<br>INGEST</div>
+        <div class="layer-content">
+          <strong>Dell PowerEdge R760 × 2 — Kafka Message Bus Cluster</strong>
+          <span>2× Intel Xeon Gold 6438Y+ · 256GB DDR5 · 8× 3.84TB NVMe SSD per node. Apache Kafka 3.7 cluster — 1M msg/sec throughput.</span>
+        </div>
+        <div class="layer-spec">2× 10GbE<br>bond LACP</div>
+      </div>
+      <div class="layer-block l3">
+        <div class="layer-num">LAYER 3<br>AI COMPUTE</div>
+        <div class="layer-content">
+          <strong>Dell PowerEdge XE9680 × 2 — GPU Inference Servers (NVIDIA L40S)</strong>
+          <span>Each: 2× Intel Xeon Platinum 8490H · 2TB DDR5 · 8× NVIDIA L40S 48GB GPU. GCC-PHAT TDOA, CNN classification, LPR AI, Avigilon Appearance Search acceleration.</span>
+        </div>
+        <div class="layer-spec">30kW/rack<br>rear-door cooling</div>
+      </div>
+      <div class="layer-block l4">
+        <div class="layer-num">LAYER 4<br>APPLICATION</div>
+        <div class="layer-content">
+          <strong>Dell PowerEdge R760xa × 4 — Application Server Cluster</strong>
+          <span>pyroomacoustics GCC-PHAT engine · FastAPI STDS gateway · CommandCentral Aware on-prem broker · Avigilon Unity VMS server · Skydio DFR Command local relay · Redis cache cluster.</span>
+        </div>
+        <div class="layer-spec">VMware vSphere 8<br>vSAN stretched</div>
+      </div>
+      <div class="layer-block l5">
+        <div class="layer-num">LAYER 5<br>STORAGE</div>
+        <div class="layer-content">
+          <strong>Dell PowerStore 3200T × 2 — All-Flash + Nearline NAS Cluster</strong>
+          <span>1.2PB usable per node (2.4PB total). Tier 1: NVMe SSD for hot audio clips, GPS tracks, active incident data. Tier 2: SAS/SATA for 90-day video archive. Tier 3: LTO-9 tape offsite vault.</span>
+        </div>
+        <div class="layer-spec">100GbE NFS<br>RAID-6 + HS</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Rack Manifest — Zone A (AI Processing)</div>
+    <div class="rack-row">
+      <div class="rack-card">
+        <div class="rack-header red">GPU-01 · NVIDIA L40S</div>
+        <div class="rack-body">
+          <div class="rack-unit ru-power"><span>1U PDU (dual A+B feeds)</span></div>
+          <div class="rack-unit ru-compute"><span>1U Dell XE9680 top half</span></div>
+          <div class="rack-unit ru-gpu"><span>L40S ×8 — GCC-PHAT</span></div>
+          <div class="rack-unit ru-gpu"><span>L40S ×8 — CNN Inference</span></div>
+          <div class="rack-unit ru-network"><span>25GbE mezzanine NIC</span></div>
+          <div class="rack-unit ru-power"><span>Rear-door heat exchanger</span></div>
+        </div>
+        <div class="rack-footer">30kW · LIQUID ASSIST COOL</div>
+      </div>
+      <div class="rack-card">
+        <div class="rack-header red">GPU-02 · NVIDIA L40S</div>
+        <div class="rack-body">
+          <div class="rack-unit ru-power"><span>1U PDU (dual A+B feeds)</span></div>
+          <div class="rack-unit ru-compute"><span>1U Dell XE9680 top half</span></div>
+          <div class="rack-unit ru-gpu"><span>L40S ×8 — Avigilon AI</span></div>
+          <div class="rack-unit ru-gpu"><span>L40S ×8 — LPR / Face Recog</span></div>
+          <div class="rack-unit ru-network"><span>25GbE mezzanine NIC</span></div>
+          <div class="rack-unit ru-power"><span>Rear-door heat exchanger</span></div>
+        </div>
+        <div class="rack-footer">30kW · LIQUID ASSIST COOL</div>
+      </div>
+      <div class="rack-card">
+        <div class="rack-header accent">STDS-APP-01</div>
+        <div class="rack-body">
+          <div class="rack-unit ru-power"><span>1U PDU (A feed)</span></div>
+          <div class="rack-unit ru-compute"><span>2U R760xa — FastAPI / STDS</span></div>
+          <div class="rack-unit ru-compute"><span>2U R760xa — Kafka broker 1</span></div>
+          <div class="rack-unit ru-compute"><span>2U R760xa — Redis cluster</span></div>
+          <div class="rack-unit ru-compute"><span>2U R760xa — PostgreSQL</span></div>
+          <div class="rack-unit ru-network"><span>1U ToR switch 10GbE</span></div>
+        </div>
+        <div class="rack-footer">12kW · AIR COOLED</div>
+      </div>
+      <div class="rack-card">
+        <div class="rack-header teal">NET-CORE</div>
+        <div class="rack-body">
+          <div class="rack-unit ru-network"><span>2U Cisco Nexus 93600CD</span></div>
+          <div class="rack-unit ru-network"><span>2U Cisco Firepower 4225</span></div>
+          <div class="rack-unit ru-network"><span>1U OOB Mgmt switch</span></div>
+          <div class="rack-unit ru-network"><span>2U FirstNet router — AT&T</span></div>
+          <div class="rack-unit ru-network"><span>1U Fiber patch panel</span></div>
+          <div class="rack-unit ru-empty"><span>8U cable mgmt / slack</span></div>
+        </div>
+        <div class="rack-footer">4kW · AIR COOLED</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Storage Architecture — Data Retention Policy</div>
+    <table class="spec-table">
+      <tr><th>Data Type</th><th>Tier</th><th>Retention</th><th>Volume/Year</th><th>Media</th></tr>
+      <tr><td>STDS audio clips (confirmed)</td><td>HOT</td><td>7 years (CJIS)</td><td>~850 GB</td><td>NVMe SSD</td></tr>
+      <tr><td>STDS GPS / RPM timelines</td><td>HOT</td><td>7 years</td><td>~120 GB</td><td>NVMe SSD</td></tr>
+      <tr><td>Avigilon video — incident zones</td><td>WARM</td><td>90 days rolling</td><td>~420 TB</td><td>SAS HDD</td></tr>
+      <tr><td>Avigilon video — general coverage</td><td>COLD</td><td>30 days rolling</td><td>~180 TB</td><td>SAS HDD</td></tr>
+      <tr><td>Skydio drone telemetry + video</td><td>WARM</td><td>90 days / 7yr case</td><td>~60 TB</td><td>SAS HDD</td></tr>
+      <tr><td>LPR plate captures</td><td>WARM</td><td>90 days (Ohio HB 315)</td><td>~28 TB</td><td>SAS HDD</td></tr>
+      <tr><td>CommandCentral Aware logs</td><td>HOT</td><td>2 years</td><td>~15 GB</td><td>NVMe SSD</td></tr>
+      <tr><td>CJIS audit logs (all access)</td><td>HOT + TAPE</td><td>7 years</td><td>~8 GB</td><td>NVMe + LTO-9</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="page-div" data-label="POWER & COOLING"></div>
+
+<!-- ─── SECTION 4: POWER & COOLING ─── -->
+<div class="section">
+  <div class="section-header">
+    <span class="sec-num">04</span>
+    <span class="sec-title">Power & Cooling Systems</span>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Power Distribution — N+1 Redundancy</div>
+    <div class="power-flow">
+      <div class="pf-node"><strong>CPP Grid</strong><span>ArtCraft 15kV feed</span></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-node"><strong>ATS</strong><span>Automatic Transfer</span></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-node"><strong>UPS A+B</strong><span>2× 250kVA Eaton 9395</span></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-node"><strong>PDU A+B</strong><span>Dual-feed 200A each</span></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-node"><strong>IT Racks</strong><span>Dual-corded equipment</span></div>
+    </div>
+    <div class="power-flow">
+      <div class="pf-node"><strong>Generator</strong><span>Cummins C750D5 750kVA</span></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-node"><strong>ATS bypass</strong><span>&lt;15sec switchover</span></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-node"><strong>72-hr fuel</strong><span>Underground diesel tank</span></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-node"><strong>CPP priority</strong><span>Critical facility tier</span></div>
+      <div class="pf-arrow" style="color:transparent">→</div>
+      <div class="pf-node" style="opacity:0"><strong>placeholder</strong><span>placeholder</span></div>
+    </div>
+
+    <table class="spec-table">
+      <tr><th>Component</th><th>Specification</th><th>Capacity</th></tr>
+      <tr><td>UPS System (A)</td><td>Eaton 9395 — Li-Ion, 250kVA/225kW</td><td>10 min runtime at full load</td></tr>
+      <tr><td>UPS System (B)</td><td>Eaton 9395 — Li-Ion, 250kVA/225kW</td><td>10 min runtime at full load (N+1)</td></tr>
+      <tr><td>Generator</td><td>Cummins C750D5, 750kVA, diesel</td><td>72 hours at 60% load</td></tr>
+      <tr><td>Total IT load</td><td>GPU racks + compute + network + cooling</td><td>450kW design; 350kW current</td></tr>
+      <tr><td>Power feed</td><td>Cleveland Public Power 15kV dedicated</td><td>CPP critical facility SLA</td></tr>
+      <tr><td>PUE target</td><td>Rear-door HX + precision cooling</td><td>≤1.35 (ASHRAE A2 compliant)</td></tr>
+    </table>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Cooling Architecture</div>
+    <p>The GPU racks (GPU-01, GPU-02) use rear-door heat exchangers (RDHx) — Airedale CoolAisle XR units — rated at 35kW per rack. Chilled water supply is sourced from the ArtCraft building HVAC chiller plant, supplemented by a dedicated Liebert DSE precision cooling unit (80kW) for the computer room. All non-GPU racks are cooled by in-row Liebert iCOM precision air handlers maintaining 65–75°F inlet air per ASHRAE A2.</p>
+    <table class="spec-table">
+      <tr><th>Cooling System</th><th>Equipment</th><th>Capacity</th></tr>
+      <tr><td>GPU rear-door HX</td><td>Airedale CoolAisle XR × 2</td><td>35kW/rack · Chilled water</td></tr>
+      <tr><td>Precision room cooling</td><td>Liebert DSE80 × 2 (N+1)</td><td>80kW each · In-row</td></tr>
+      <tr><td>Perimeter cooling</td><td>Liebert CRV × 2</td><td>25kW each · Spot cooling</td></tr>
+      <tr><td>Hot aisle containment</td><td>Panduit Hot Aisle Contain.</td><td>Zones A and B enclosed</td></tr>
+      <tr><td>DCIM monitoring</td><td>Vertiv Environet Elite</td><td>Temp/humidity per rack</td></tr>
+      <tr><td>Chilled water supply</td><td>ArtCraft BAS — 44°F/54°F</td><td>300 tons building plant</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="page-div" data-label="NETWORK & SECURITY"></div>
+
+<!-- ─── SECTION 5: NETWORK ─── -->
+<div class="section">
+  <div class="section-header">
+    <span class="sec-num">05</span>
+    <span class="sec-title">Network Architecture & Segmentation</span>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Network Zones — CJIS-Compliant Segmentation</div>
+    <div class="net-diagram">
+      <svg viewBox="0 0 820 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+        <!-- Zone CJI (left) -->
+        <rect x="20" y="20" width="220" height="260" fill="rgba(192,57,43,0.05)" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="6,3"/>
+        <text x="130" y="38" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c0392b">CJI ZONE — MOST RESTRICTED</text>
+        <rect x="35" y="50" width="190" height="35" fill="white" stroke="#c0392b" stroke-width="0.8"/>
+        <text x="130" y="72" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c0392b">STDS AUDIO EVIDENCE</text>
+        <rect x="35" y="92" width="190" height="35" fill="white" stroke="#c0392b" stroke-width="0.8"/>
+        <text x="130" y="114" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c0392b">CJIS AUDIT LOGS</text>
+        <rect x="35" y="134" width="190" height="35" fill="white" stroke="#c0392b" stroke-width="0.8"/>
+        <text x="130" y="156" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c0392b">RMS / RECORDS MGMT</text>
+        <rect x="35" y="176" width="190" height="35" fill="white" stroke="#c0392b" stroke-width="0.8"/>
+        <text x="130" y="198" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c0392b">PREMIEREONE CAD DATA</text>
+        <rect x="35" y="218" width="190" height="35" fill="white" stroke="#c0392b" stroke-width="0.8"/>
+        <text x="130" y="240" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#c0392b">LPR PLATE DATABASE</text>
+
+        <!-- Zone Ops (center) -->
+        <rect x="260" y="20" width="220" height="260" fill="rgba(26,58,143,0.04)" stroke="#1a3a8f" stroke-width="1.5" stroke-dasharray="6,3"/>
+        <text x="370" y="38" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#1a3a8f">OPS ZONE — RESTRICTED</text>
+        <rect x="275" y="50" width="190" height="35" fill="white" stroke="#1a3a8f" stroke-width="0.8"/>
+        <text x="370" y="72" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#1a3a8f">COMMANDCENTRAL AWARE</text>
+        <rect x="275" y="92" width="190" height="35" fill="white" stroke="#1a3a8f" stroke-width="0.8"/>
+        <text x="370" y="114" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#1a3a8f">STDS PROCESSING / KAFKA</text>
+        <rect x="275" y="134" width="190" height="35" fill="white" stroke="#1a3a8f" stroke-width="0.8"/>
+        <text x="370" y="156" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#1a3a8f">AVIGILON UNITY VMS</text>
+        <rect x="275" y="176" width="190" height="35" fill="white" stroke="#1a3a8f" stroke-width="0.8"/>
+        <text x="370" y="198" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#1a3a8f">SKYDIO DFR COMMAND</text>
+        <rect x="275" y="218" width="190" height="35" fill="white" stroke="#1a3a8f" stroke-width="0.8"/>
+        <text x="370" y="240" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#1a3a8f">GPU AI INFERENCE</text>
+
+        <!-- Zone External (right) -->
+        <rect x="500" y="20" width="200" height="260" fill="rgba(14,92,92,0.04)" stroke="#0e5c5c" stroke-width="1.5" stroke-dasharray="6,3"/>
+        <text x="600" y="38" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#0e5c5c">DMZ — CONTROLLED</text>
+        <rect x="515" y="50" width="170" height="35" fill="white" stroke="#0e5c5c" stroke-width="0.8"/>
+        <text x="600" y="72" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#0e5c5c">FIRSTNET 4G GATEWAY</text>
+        <rect x="515" y="92" width="170" height="35" fill="white" stroke="#0e5c5c" stroke-width="0.8"/>
+        <text x="600" y="114" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#0e5c5c">STDS NODE INGEST API</text>
+        <rect x="515" y="134" width="170" height="35" fill="white" stroke="#0e5c5c" stroke-width="0.8"/>
+        <text x="600" y="156" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#0e5c5c">VENDOR UPDATE PROXY</text>
+        <rect x="515" y="176" width="170" height="35" fill="white" stroke="#0e5c5c" stroke-width="0.8"/>
+        <text x="600" y="198" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#0e5c5c">AVIGILON CAMERA VLAN</text>
+        <rect x="515" y="218" width="170" height="35" fill="white" stroke="#0e5c5c" stroke-width="0.8"/>
+        <text x="600" y="240" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" fill="#0e5c5c">SKYDIO 4G / C2 RELAY</text>
+
+        <!-- Firewall between zones -->
+        <rect x="240" y="80" width="20" height="180" fill="#1a1a1a" rx="3"/>
+        <text x="250" y="175" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="white" transform="rotate(-90,250,175)">FIREWALL · VLAN ENFORCE</text>
+        <rect x="480" y="80" width="20" height="180" fill="#1a1a1a" rx="3"/>
+        <text x="490" y="175" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="white" transform="rotate(-90,490,175)">FIREWALL · IDS/IPS</text>
+
+        <!-- Internet access blocked -->
+        <rect x="720" y="100" width="80" height="60" fill="rgba(192,57,43,0.08)" stroke="#c0392b" stroke-width="1" rx="3"/>
+        <text x="760" y="128" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#c0392b">INTERNET</text>
+        <text x="760" y="140" text-anchor="middle" font-family="DM Mono, monospace" font-size="7" fill="#c0392b">BLOCKED</text>
+        <!-- X over internet -->
+        <line x1="722" y1="102" x2="798" y2="158" stroke="#c0392b" stroke-width="2"/>
+        <line x1="798" y1="102" x2="722" y2="158" stroke="#c0392b" stroke-width="2"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="subsec">
+    <div class="subsec-title">Network Specifications</div>
+    <table class="spec-table">
+      <tr><th>Layer</th><th>Equipment</th><th>Specification</th></tr>
+      <tr><td>Core switching</td><td>Cisco Nexus 93600CD-GX</td><td>100GbE spine; 25GbE server links</td></tr>
+      <tr><td>Firewall</td><td>Cisco Firepower 4225 (HA pair)</td><td>80Gbps FW; NGIPS; TLS inspection</td></tr>
+      <tr><td>STDS node uplink</td><td>AT&T FirstNet dedicated APN</td><td>Priority bearer; 500Mbps aggregate</td></tr>
+      <tr><td>RTCC fiber</td><td>OM4 multimode — in-building</td><td>100GbE direct to RTCC floor</td></tr>
+      <tr><td>Metro fiber</td><td>Cleveland fiber ring — City IT</td><td>10GbE to City Hall; MRC backup</td></tr>
+      <tr><td>Out-of-band mgmt</td><td>Cisco Catalyst 1200 dedicated</td><td>Isolated OOB network; iDRAC/iLO only</td></tr>
+      <tr><td>DNS / NTP</td><td>STDS authoritative servers</td><td>Internal only; GPS-disciplined NTP (Stratum 1)</td></tr>
+      <tr><td>Encryption in transit</td><td>TLS 1.3 mandatory</td><td>AES-256-GCM; cert-pinned sensor comms</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="page-div" data-label="CJIS COMPLIANCE"></div>
+
+<!-- ─── SECTION 6: CJIS COMPLIANCE ─── -->
+<div class="section">
+  <div class="section-header">
+    <span class="sec-num">06</span>
+    <span class="sec-title">CJIS Security Policy v6.0 Compliance</span>
+  </div>
+
+  <div class="highlight-rule">FBI CJIS Security Policy v6.0 (December 27, 2024) — full compliance target. All 20 policy areas addressed. City-owned facility eliminates third-party cloud CJIS Security Addendum requirements for stored CJI.</div>
+
+  <div class="compliance-grid">
+    <div class="comp-item">
+      <div class="comp-check pass">✓</div>
+      <div class="comp-text"><strong>Physical security (Policy 9)</strong><span>Mantrap entry · biometric + PIN + badge · 100% CCTV coverage · visitor escort logs · controlled access zones</span></div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-check pass">✓</div>
+      <div class="comp-text"><strong>Encryption at rest (Policy 13)</strong><span>AES-256 on all storage tiers · FIPS 140-3 validated modules · BitLocker for OS volumes</span></div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-check pass">✓</div>
+      <div class="comp-text"><strong>Encryption in transit (Policy 13)</strong><span>TLS 1.3 mandatory on all CJI data paths · certificate pinning on sensor links</span></div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-check pass">✓</div>
+      <div class="comp-text"><strong>Multi-factor authentication (Policy 6)</strong><span>CJIS-compliant MFA for all CJI access · PIV card + biometric · no SMS-based MFA</span></div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-check pass">✓</div>
+      <div class="comp-text"><strong>Auditing & accountability (Policy 8)</strong><span>SIEM — Splunk Enterprise Security · every CJI access logged · 7-year audit log retention · immutable log storage</span></div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-check pass">✓</div>
+      <div class="comp-text"><strong>Incident response (Policy 11)</strong><span>City ISO incident response plan · 24/7 SOC coverage · automated breach notification workflow</span></div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-check pass">✓</div>
+      <div class="comp-text"><strong>Personnel security (Policy 4)</strong><span>All data center staff: FBI fingerprint background check · CJIS Security Addendum signed · annual training</span></div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-check pass">✓</div>
+      <div class="comp-text"><strong>Backup & recovery (Policy 9.6)</strong><span>Daily incremental · weekly full · offsite LTO-9 tape vault · RTO &lt;4hr · RPO &lt;1hr</span></div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-check pass">✓</div>
+      <div class="comp-text"><strong>Network segmentation (Policy 10)</strong><span>Three-zone architecture · CJI/OPS/DMZ · hardware firewalls between each · no direct Internet path to CJI</span></div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-check pass">✓</div>
+      <div class="comp-text"><strong>Configuration mgmt (Policy 7)</strong><span>NIST 800-53 baseline · automated compliance scanning · quarterly patch cycle · CIS Benchmarks for all OS</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="page-div" data-label="BUDGET"></div>
+
+<!-- ─── SECTION 7: BUDGET ─── -->
+<div class="section">
+  <div class="section-header">
+    <span class="sec-num">07</span>
+    <span class="sec-title">Capital & Operating Budget</span>
+  </div>
+
+  <table class="budget-table">
+    <tr><th style="width:50%">Line Item</th><th>Notes</th><th style="width:15%">Cost</th></tr>
+
+    <tr><td class="cat" colspan="3">A. Civil & Facilities Build-Out</td></tr>
+    <tr><td class="item">Raised floor installation (2,800 sq ft)</td><td>8" Tate access floor system</td><td>$168,000</td></tr>
+    <tr><td class="item">Structural reinforcement</td><td>300 lbs/sqft GPU rack loading</td><td>$95,000</td></tr>
+    <tr><td class="item">Fire suppression — Novec 1230</td><td>2-zone clean agent system</td><td>$220,000</td></tr>
+    <tr><td class="item">Mantrap vestibule + biometric access</td><td>AMAG Symmetry + HID readers</td><td>$85,000</td></tr>
+    <tr><td class="item">CCTV build-out</td><td>12× Avigilon H5SL 4K + recording</td><td>$42,000</td></tr>
+    <tr><td class="item">Cable management + containment</td><td>Hot aisle enclosures, trays, ladders</td><td>$78,000</td></tr>
+    <tr class="subtotal"><td>Facilities Subtotal</td><td></td><td>$688,000</td></tr>
+
+    <tr><td class="cat" colspan="3">B. Power Systems</td></tr>
+    <tr><td class="item">UPS A — Eaton 9395 250kVA Li-Ion</td><td>With 10-min battery module</td><td>$185,000</td></tr>
+    <tr><td class="item">UPS B — Eaton 9395 250kVA Li-Ion</td><td>N+1 redundancy</td><td>$185,000</td></tr>
+    <tr><td class="item">Generator — Cummins C750D5 750kVA</td><td>Diesel, 72-hr underground tank</td><td>$248,000</td></tr>
+    <tr><td class="item">PDU A + B, ATS, switchgear</td><td>Eaton ePDU G3; main switchgear</td><td>$142,000</td></tr>
+    <tr><td class="item">Electrical installation & wiring</td><td>Licensed electrician; CPP upgrade</td><td>$195,000</td></tr>
+    <tr class="subtotal"><td>Power Subtotal</td><td></td><td>$955,000</td></tr>
+
+    <tr><td class="cat" colspan="3">C. Cooling Systems</td></tr>
+    <tr><td class="item">Airedale CoolAisle XR RDHx × 2</td><td>Rear-door HX for GPU racks</td><td>$96,000</td></tr>
+    <tr><td class="item">Liebert DSE80 precision cooling × 2</td><td>N+1 in-row precision air</td><td>$118,000</td></tr>
+    <tr><td class="item">Liebert CRV spot coolers × 2</td><td>Perimeter supplemental cooling</td><td>$44,000</td></tr>
+    <tr><td class="item">Chilled water tie-in & piping</td><td>ArtCraft BAS integration</td><td>$82,000</td></tr>
+    <tr><td class="item">DCIM — Vertiv Environet Elite</td><td>Thermal + power monitoring</td><td>$35,000</td></tr>
+    <tr class="subtotal"><td>Cooling Subtotal</td><td></td><td>$375,000</td></tr>
+
+    <tr><td class="cat" colspan="3">D. Compute Hardware</td></tr>
+    <tr><td class="item">Dell PowerEdge XE9680 × 2 (GPU servers)</td><td>8× NVIDIA L40S 48GB each</td><td>$680,000</td></tr>
+    <tr><td class="item">Dell PowerEdge R760xa × 4 (app servers)</td><td>Dual Xeon Platinum; 512GB DDR5</td><td>$248,000</td></tr>
+    <tr><td class="item">Dell PowerEdge R760 × 2 (Kafka/DB)</td><td>Xeon Gold 6438Y+; 256GB DDR5</td><td>$96,000</td></tr>
+    <tr><td class="item">VMware vSphere 8 Enterprise Plus</td><td>vSAN + vCenter; 3-year license</td><td>$145,000</td></tr>
+    <tr><td class="item">Dell PowerStore 3200T × 2 (storage)</td><td>1.2PB usable per unit</td><td>$420,000</td></tr>
+    <tr><td class="item">LTO-9 tape library — Quantum Scalar i3</td><td>Offsite vault; 7-year retention</td><td>$88,000</td></tr>
+    <tr class="subtotal"><td>Compute Hardware Subtotal</td><td></td><td>$1,677,000</td></tr>
+
+    <tr><td class="cat" colspan="3">E. Networking</td></tr>
+    <tr><td class="item">Cisco Nexus 93600CD-GX core switch pair</td><td>100GbE; VSS config</td><td>$185,000</td></tr>
+    <tr><td class="item">Cisco Firepower 4225 HA pair</td><td>NGIPS; TLS inspection</td><td>$148,000</td></tr>
+    <tr><td class="item">ToR + OOB switches, cabling</td><td>Cisco Catalyst; OM4 fiber</td><td>$62,000</td></tr>
+    <tr><td class="item">Splunk Enterprise Security (SIEM)</td><td>5-year license; ingest 50GB/day</td><td>$185,000</td></tr>
+    <tr><td class="item">GPS-disciplined NTP server</td><td>Meinberg M300; Stratum 1</td><td>$18,000</td></tr>
+    <tr class="subtotal"><td>Networking Subtotal</td><td></td><td>$598,000</td></tr>
+
+    <tr><td class="cat" colspan="3">F. Integration, Software & Professional Services</td></tr>
+    <tr><td class="item">STDS software development & integration</td><td>pyroomacoustics, FastAPI, CNN training</td><td>$320,000</td></tr>
+    <tr><td class="item">CommandCentral Aware on-prem config</td><td>Motorola PS engagement</td><td>$95,000</td></tr>
+    <tr><td class="item">Avigilon Unity on-prem server setup</td><td>Motorola-certified installer</td><td>$45,000</td></tr>
+    <tr><td class="item">Skydio DFR Command local relay setup</td><td>Skydio integration team</td><td>$38,000</td></tr>
+    <tr><td class="item">CJIS compliance assessment & audit</td><td>Third-party 3PAO assessment</td><td>$65,000</td></tr>
+    <tr><td class="item">Staff training (DCIM, security, ops)</td><td>All data center operators</td><td>$28,000</td></tr>
+    <tr class="subtotal"><td>Services Subtotal</td><td></td><td>$591,000</td></tr>
+
+    <tr><td class="cat" colspan="3">G. Contingency (10%)</td></tr>
+    <tr><td class="item">Construction contingency</td><td>Unforeseen structural / MEP scope</td><td>$488,400</td></tr>
+
+    <tr class="total"><td>TOTAL CAPITAL COST</td><td>One-time build</td><td>$5,372,400</td></tr>
+  </table>
+
+  <div class="subsec">
+    <div class="subsec-title">Annual Operating Cost (Year 1–7)</div>
+    <table class="spec-table">
+      <tr><th>Category</th><th>Annual Cost</th></tr>
+      <tr><td>Power — 350kW avg @ $0.08/kWh (CPP rate)</td><td>$245,280</td></tr>
+      <tr><td>Hardware maintenance contracts (Dell ProSupport)</td><td>$128,000</td></tr>
+      <tr><td>Splunk SIEM annual license</td><td>$37,000</td></tr>
+      <tr><td>VMware / software maintenance</td><td>$48,500</td></tr>
+      <tr><td>Data center operator (1.5 FTE)</td><td>$142,000</td></tr>
+      <tr><td>Offsite tape vault service</td><td>$18,000</td></tr>
+      <tr><td>CJIS annual compliance audit</td><td>$22,000</td></tr>
+      <tr><td><strong>Annual OpEx Total</strong></td><td><strong>$640,780</strong></td></tr>
+    </table>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-label">7-YEAR TCO COMPARISON</div>
+    <p>City-owned data center: $5.37M CapEx + $4.49M OpEx = <strong>$9.86M total</strong>. Equivalent managed cloud (AWS GovCloud / Azure Government) for same workload: estimated $2.1M/year = <strong>$14.7M over 7 years</strong>. City ownership saves approximately $4.8M over the hardware lifecycle while maintaining complete data sovereignty.</p>
+  </div>
+</div>
+
+<div class="page-div" data-label="OPERATIONS"></div>
+
+<!-- ─── SECTION 8: OPS ─── -->
+<div class="section">
+  <div class="section-header">
+    <span class="sec-num">08</span>
+    <span class="sec-title">Operations & Staffing</span>
+  </div>
+
+  <table class="spec-table">
+    <tr><th>Role</th><th>FTE</th><th>Responsibilities</th><th>CJIS Requirement</th></tr>
+    <tr><td>Data Center Manager</td><td>1.0</td><td>Facility oversight; vendor management; CJIS compliance officer</td><td>FBI fingerprint background check</td></tr>
+    <tr><td>Systems Administrator</td><td>1.0</td><td>VMware/vSAN; storage; OS patch; backup/recovery</td><td>FBI fingerprint background check</td></tr>
+    <tr><td>Network Security Engineer</td><td>0.5</td><td>Firewall policy; Splunk SIEM; intrusion response; CJIS audit</td><td>FBI fingerprint background check</td></tr>
+    <tr><td>STDS Software Engineer</td><td>1.0</td><td>CNN model maintenance; pyroomacoustics; API integration; node fleet</td><td>Non-CJI role; standard background</td></tr>
+    <tr><td>After-hours on-call (shared)</td><td>Rotational</td><td>24/7 system alerts; P1 incident response; generator/UPS events</td><td>Per role requirements</td></tr>
+  </table>
+
+  <div class="callout info">
+    <div class="callout-label">SUPPORT STRUCTURE</div>
+    <p>Dell ProSupport Plus 7×24 (4-hour hardware replacement SLA) covers all compute and storage. Eaton and Cummins both provide 24/7 emergency field service under dedicated municipal contracts. AT&T FirstNet dedicated APN includes 24/7 NOC with priority repair SLA for the sensor uplink circuit.</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>CPD STDS DATA CENTER · TECHNICAL DESIGN DOCUMENT v1.0 · CONFIDENTIAL — CJIS CONTROLLED</p>
+  <p>CITY OF CLEVELAND — DEPARTMENT OF PUBLIC SAFETY · © 2026</p>
+</footer>
+
+</div>
+</body>
+</html>
