@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Municipal Industrial Construction — The FixOurStreets216 Project</title>
+<title>Raising the Standard: Building A Bold, New Cleveland — The FixOurStreets216 Project</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -83,6 +83,43 @@
     text-transform: uppercase;
     text-decoration: none;
   }
+  .nav-nowater {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.7rem 1.3rem;
+    border: 1px solid rgba(25,195,178,0.7);
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(225,86,15,0.18), rgba(14,142,132,0.22));
+    color: #dff7f4;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 0 18px rgba(25,195,178,0.25);
+    transition: box-shadow 0.25s, transform 0.25s, background 0.25s;
+  }
+  .nav-nowater:hover, .nav-nowater:focus-visible {
+    background: linear-gradient(90deg, rgba(225,86,15,0.35), rgba(14,142,132,0.4));
+    box-shadow: 0 0 28px rgba(25,195,178,0.5);
+    transform: translateY(-1px);
+    outline: none;
+  }
+  .nav-nowater .nw-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #19C3B2; box-shadow: 0 0 10px #19C3B2;
+    animation: nwPulse 1.6s infinite;
+  }
+  .nav-nowater .nw-arrow { color: #FF6A1A; transition: transform 0.25s; }
+  .nav-nowater:hover .nw-arrow { transform: translateX(3px); }
+  @keyframes nwPulse { 50% { opacity: 0.25; } }
+  @media (max-width: 900px) {
+    nav { flex-wrap: wrap; gap: 0.9rem; }
+    .nav-nowater { order: 3; width: 100%; justify-content: center; white-space: normal; text-align: center; font-size: 0.66rem; letter-spacing: 0.08em; padding: 0.7rem 1rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .nav-nowater .nw-dot { animation: none; } }
   .nav-tag {
     font-family: 'DM Mono', monospace;
     font-size: 0.65rem;
@@ -126,7 +163,7 @@
 
   h1 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(3rem, 5.5vw, 5.2rem);
+    font-size: clamp(2.8rem, 5.5vw, 5rem);
     line-height: 0.92;
     letter-spacing: 0.02em;
     color: var(--offwhite);
@@ -832,6 +869,9 @@
     <img src="LOGO_PLACEHOLDER" alt="The FixOurStreets216 Project logo" style="height:48px;width:auto;display:block;">
     <span>The FixOurStreets216 Project</span>
   </a>
+  <a href="https://nowater.cooling.fixourstreets216.com/" class="nav-nowater" title="No More Water — Data Center Cooling | The FixOurStreets216 Project">
+    <span class="nw-dot"></span>No More Water — Data Center Cooling<span class="nw-arrow">→</span>
+  </a>
   <span class="nav-tag">build.fixourstreets216.com</span>
 </nav>
 
@@ -839,15 +879,11 @@
 <section class="hero">
   <div class="hero-left">
     <div class="hero-eyebrow">Municipal Industrial Construction</div>
-    <h1>Raising The Standard:<em>Building A Bold,</em>New Cleveland.</h1>
+    <h1>Raising the Standard:<em>Building A Bold,</em>New Cleveland.</h1>
     <p class="hero-sub">
-      From hyperscale data center campuses to integrated industrial districts
-      to immersive large scale music events —
+      From hyperscale data center campuses to integrated industrial districts —
       The FixOurStreets216 Project leads technical planning, regulatory navigation,
       and community benefit frameworks for Cleveland's most complex builds.
-    </p>
-    <p class="hero-sub" style="margin-top:-1.5rem;">
-      All while injecting extreme excitement and innovation into Cleveland's Entertainment &amp; Hospitality Industry.
     </p>
     <a href="#projects" class="hero-cta">
       View active projects <span class="arrow">→</span>
@@ -1008,86 +1044,106 @@
   </div>
 </section>
 
-<!-- ── LAW ENFORCEMENT TECHNOLOGY ── -->
-<section id="law-enforcement" style="border-bottom:1px solid rgba(220,50,50,0.2);">
+<!-- ── GENERATION SYSTEMS ── -->
+<section id="generation">
+  <div class="section-label">Generation technology</div>
+  <h2>Power Architecture</h2>
+  <p style="max-width:600px; color:rgba(242,239,232,0.6); font-size:0.95rem; margin-bottom:0;">
+    Our campuses are designed as self-sufficient power islands — on-site generation
+    eliminates grid dependency and creates district energy export revenue from thermal waste.
+  </p>
 
-  <!-- Section Header -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;padding:4rem 3rem 3rem;border-bottom:1px solid rgba(220,50,50,0.2);">
-    <div>
-      <div style="font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.2em;color:#e03030;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;">
-        <span style="display:block;width:32px;height:1px;background:#e03030;"></span>
-        Public Safety Technology
-      </div>
-      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,5vw,4.5rem);line-height:0.92;letter-spacing:0.02em;color:var(--offwhite);margin-bottom:1.5rem;">Law Enforcement<span style="display:block;color:#e03030;">Technology</span></h2>
-      <p style="font-size:1rem;font-weight:300;color:rgba(242,239,232,0.7);line-height:1.8;max-width:480px;">
-        Next-generation public safety infrastructure for the Cleveland Division of Police — from acoustic pre-detection and drone dispatch to real-time crime center modernization and integrated sensor networks.
-      </p>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:flex-end;">
-      <div style="border:1px solid rgba(220,50,50,0.3);padding:2rem 2.5rem;max-width:320px;">
-        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.2em;color:#e03030;text-transform:uppercase;margin-bottom:0.75rem;">Mission</div>
-        <p style="font-size:0.88rem;color:rgba(242,239,232,0.6);line-height:1.75;">Building Cleveland's most advanced, integrated, and NDAA-compliant public safety technology ecosystem — purpose-built for CPD's operational reality.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 4-Card Grid -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid rgba(220,50,50,0.2);">
-
-    <!-- Card 1: STDS -->
-    <div style="background:var(--black);padding:3rem 2rem;border-right:1px solid rgba(220,50,50,0.18);position:relative;overflow:hidden;transition:background 0.25s;" onmouseover="this.style.background='rgba(220,50,50,0.05)'" onmouseout="this.style.background='var(--black)'">
-      <div style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.22em;color:#e03030;text-transform:uppercase;margin-bottom:1.5rem;opacity:0.8;">LET-01</div>
-      <h5 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.04em;line-height:1;margin-bottom:1.2rem;color:var(--offwhite);">Street Takeover Detection System</h5>
-      <p style="font-size:0.82rem;color:rgba(242,239,232,0.5);line-height:1.75;margin-bottom:1.5rem;">RPM-based acoustic pre-detection with Raspberry Pi 5 edge compute and 180-node deployment across CPD's 3rd District. The first such system nationally.</p>
-      <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.5rem;">
-        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:#e03030;border:1px solid rgba(220,50,50,0.35);padding:0.2rem 0.55rem;">Acoustic Detection</span>
-        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:#e03030;border:1px solid rgba(220,50,50,0.35);padding:0.2rem 0.55rem;">Edge Compute</span>
-        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:#e03030;border:1px solid rgba(220,50,50,0.35);padding:0.2rem 0.55rem;">Drone Dispatch</span>
-      </div>
-      <a href="/fos216-slim/pages/stds/" style="display:inline-flex;align-items:center;gap:0.5rem;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:#e03030;text-decoration:none;">Learn More <span>→</span></a>
-    </div>
-
-    <!-- Card 2: RTCC -->
-    <div style="background:var(--black);padding:3rem 2rem;border-right:1px solid rgba(220,50,50,0.18);position:relative;overflow:hidden;transition:background 0.25s;" onmouseover="this.style.background='rgba(220,50,50,0.05)'" onmouseout="this.style.background='var(--black)'">
-      <div style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.22em;color:#e03030;text-transform:uppercase;margin-bottom:1.5rem;opacity:0.8;">LET-02</div>
-      <h5 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.04em;line-height:1;margin-bottom:1.2rem;color:var(--offwhite);">RTCC — Motorola CommandCentral Aware</h5>
-      <p style="font-size:0.82rem;color:rgba(242,239,232,0.5);line-height:1.75;margin-bottom:1.5rem;">Upgrading Cleveland's Real-Time Crime Center with Motorola CommandCentral Aware, consolidating Fusus/Axon video, ShotSpotter, Flock Safety LPR, and Avigilon analytics.</p>
-      <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.5rem;">
-        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:#e03030;border:1px solid rgba(220,50,50,0.35);padding:0.2rem 0.55rem;">CommandCentral</span>
-        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:#e03030;border:1px solid rgba(220,50,50,0.35);padding:0.2rem 0.55rem;">CJIS v6.0</span>
-        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:#e03030;border:1px solid rgba(220,50,50,0.35);padding:0.2rem 0.55rem;">Video Fusion</span>
-      </div>
-      <a href="/fos216-slim/pages/rtcc/" style="display:inline-flex;align-items:center;gap:0.5rem;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:#e03030;text-decoration:none;">Learn More <span>→</span></a>
-    </div>
-
-    <!-- Card 3: Skydio -->
-    <div style="background:var(--black);padding:3rem 2rem;border-right:1px solid rgba(220,50,50,0.18);position:relative;overflow:hidden;transition:background 0.25s;" onmouseover="this.style.background='rgba(220,50,50,0.05)'" onmouseout="this.style.background='var(--black)'">
-      <div style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.22em;color:#e03030;text-transform:uppercase;margin-bottom:1.5rem;opacity:0.8;">LET-03</div>
-      <h5 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.04em;line-height:1;margin-bottom:1.2rem;color:var(--offwhite);">Skydio Drone Integration</h5>
-      <p style="font-size:0.82rem;color:rgba(242,239,232,0.5);line-height:1.75;margin-bottom:1.5rem;">Skydio X10 drone hive deployment with autonomous dispatch, integrated into the RTCC and STDS pre-detection pipeline for rapid response across CPD districts.</p>
-      <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.5rem;">
-        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:#e03030;border:1px solid rgba(220,50,50,0.35);padding:0.2rem 0.55rem;">Skydio X10</span>
-        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:#e03030;border:1px solid rgba(220,50,50,0.35);padding:0.2rem 0.55rem;">Autonomous Dispatch</span>
-        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:#e03030;border:1px solid rgba(220,50,50,0.35);padding:0.2rem 0.55rem;">NDAA Compliant</span>
-      </div>
-      <a href="/fos216-slim/pages/skydio/" style="display:inline-flex;align-items:center;gap:0.5rem;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:#e03030;text-decoration:none;">Learn More <span>→</span></a>
-    </div>
-
-    <!-- Card 4: ShotSpotter & Flock/Raven -->
-    <div style="background:var(--black);padding:3rem 2rem;position:relative;overflow:hidden;transition:background 0.25s;" onmouseover="this.style.background='rgba(220,50,50,0.05)'" onmouseout="this.style.background='var(--black)'">
-      <div style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.22em;color:#e03030;text-transform:uppercase;margin-bottom:1.5rem;opacity:0.8;">LET-04</div>
-      <h5 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.04em;line-height:1;margin-bottom:1.2rem;color:var(--offwhite);">ShotSpotter & Flock/Raven Systems</h5>
-      <p style="font-size:0.82rem;color:rgba(242,239,232,0.5);line-height:1.75;margin-bottom:1.5rem;">Maximizing the design and operational impact of SoundThinking ShotSpotter and Flock Safety LPR/Raven sensor networks — coverage optimization, alert routing, and RTCC integration.</p>
-      <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.5rem;">
-        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:#e03030;border:1px solid rgba(220,50,50,0.35);padding:0.2rem 0.55rem;">ShotSpotter</span>
-        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:#e03030;border:1px solid rgba(220,50,50,0.35);padding:0.2rem 0.55rem;">Flock Safety LPR</span>
-        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:#e03030;border:1px solid rgba(220,50,50,0.35);padding:0.2rem 0.55rem;">Raven</span>
-      </div>
-      <a href="/fos216-slim/pages/shotspotter-flock-raven/" style="display:inline-flex;align-items:center;gap:0.5rem;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:#e03030;text-decoration:none;">Learn More <span>→</span></a>
-    </div>
-
-  </div>
+  <table class="gen-table">
+    <thead>
+      <tr>
+        <th>System</th>
+        <th>Role</th>
+        <th>Output</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="gen-name">GE Vernova 7HA.01</span><span class="gen-role">Primary baseload</span></td>
+        <td>Gas turbine — simple cycle</td>
+        <td class="gen-mw">270–340 MW</td>
+        <td class="gen-note">Anchor generation, Morabito campus. HRSG thermal extraction for district energy loop.</td>
+      </tr>
+      <tr>
+        <td><span class="gen-name">Mainspring Linear Generator</span><span class="gen-role">Commercial bridge / Phase 1</span></td>
+        <td>LGen yards — distributed</td>
+        <td class="gen-mw">Modular</td>
+        <td class="gen-note">Fastest path to on-site generation. Used in both Morabito and Industrial Valley Phase 1.</td>
+      </tr>
+      <tr>
+        <td><span class="gen-name">Hyliion KARNO</span><span class="gen-role">Supplemental / Phase 2</span></td>
+        <td>Linear generator — multi-fuel</td>
+        <td class="gen-mw">Scalable</td>
+        <td class="gen-note">Mid-term scale-up layer, subject to go/no-go milestone. Low-emission profile.</td>
+      </tr>
+      <tr>
+        <td><span class="gen-name">Kawasaki Hydrogen Turbines</span><span class="gen-role">Phase 2 — IPGD</span></td>
+        <td>GPB17MMX + L30A</td>
+        <td class="gen-mw">17–30 MW ea.</td>
+        <td class="gen-note">Hydrogen-capable turbines in the IPGD generation mix for Industrial Valley.</td>
+      </tr>
+      <tr>
+        <td><span class="gen-name">NuScale VOYGR SMR</span><span class="gen-role">Long-term baseload</span></td>
+        <td>Small modular reactor</td>
+        <td class="gen-mw">77 MW per module</td>
+        <td class="gen-note">Industrial Valley long-horizon anchor. Qualifies for §45Y clean energy PTC.</td>
+      </tr>
+      <tr>
+        <td><span class="gen-name">Exowatt P3</span><span class="gen-role">Solar thermal offset</span></td>
+        <td>Baseload offset — Morabito</td>
+        <td class="gen-mw">15–20% offset</td>
+        <td class="gen-note">Modeled as daytime baseload reduction against gas turbine fuel cost.</td>
+      </tr>
+    </tbody>
+  </table>
 </section>
+
+<!-- ── CAPABILITIES ── -->
+<section id="capabilities">
+  <div class="section-label">What we deliver</div>
+  <h2>Full-Stack Construction Advisory</h2>
+
+  <div class="capabilities-grid">
+    <div class="cap-cell">
+      <div class="cap-num">01</div>
+      <h4>Technical Planning</h4>
+      <p>Power architecture, generation pathway analysis, HRSG sizing, 800 VDC distribution design, and cooling system integration from first principles.</p>
+    </div>
+    <div class="cap-cell">
+      <div class="cap-num">02</div>
+      <h4>Regulatory Navigation</h4>
+      <p>Cleveland Public Power, NEORSD, Cleveland Water, Ohio EPA Title V air permitting, RACT NOx compliance, and ERC acquisition strategy.</p>
+    </div>
+    <div class="cap-cell">
+      <div class="cap-num">03</div>
+      <h4>Financial Modeling</h4>
+      <p>Class 4 cost estimating, IRA tax credit stacking (§48C, §45Y, DOE LPO Title 17), PJM revenue modeling, and 20-year pro forma construction.</p>
+    </div>
+    <div class="cap-cell">
+      <div class="cap-num">04</div>
+      <h4>District Energy</h4>
+      <p>Waste heat monetization via steam loops, LiBr absorption chilling, and district energy spine design serving adjacent industrial customers.</p>
+    </div>
+    <div class="cap-cell">
+      <div class="cap-num">05</div>
+      <h4>Community Benefits</h4>
+      <p>CBA framework development and negotiation per Cleveland Ordinance 2023-014 — environmental justice compliance, workforce, and neighborhood agreements.</p>
+    </div>
+    <div class="cap-cell">
+      <div class="cap-num">06</div>
+      <h4>Infrastructure Strategy</h4>
+      <p>Cost-sharing structures between developer and city, IPGD ring-fencing from existing utility contracts, and ward-based microgrid transition planning.</p>
+    </div>
+  </div>
+
+
+</section>
+
 
 <!-- ── ENTERTAINMENT PRODUCTION MANAGEMENT ── -->
 <section class="epm-section" id="entertainment">
@@ -1113,20 +1169,12 @@
         <span class="epm-spec-val">Meyer Sound · BASSBOSS full line</span>
       </div>
       <div class="epm-spec-row">
-        <span class="epm-spec-key">BASSBOSS Sub Arrays</span>
-        <span class="epm-spec-val">Kraken-MK3, Makara-MK3 &amp; ZV28-MK3 cardioid stacks</span>
+        <span class="epm-spec-key">Subwoofer arrays</span>
+        <span class="epm-spec-val">KRAKATOA · KRAKEN · cardioid stacks</span>
       </div>
       <div class="epm-spec-row">
-        <span class="epm-spec-key">Meyer Sound Sub Arrays</span>
-        <span class="epm-spec-val">1100-LFC, 900-LFC &amp; VLFC cardioid stacks</span>
-      </div>
-      <div class="epm-spec-row">
-        <span class="epm-spec-key">Lighting Control</span>
+        <span class="epm-spec-key">Lighting console</span>
         <span class="epm-spec-val">WholeHog 4 — programming + operation</span>
-      </div>
-      <div class="epm-spec-row">
-        <span class="epm-spec-key"></span>
-        <span class="epm-spec-val">GrandMA 2 &amp; 3 — programming + operation</span>
       </div>
       <div class="epm-spec-row">
         <span class="epm-spec-key">Lighting protocol</span>
@@ -1191,7 +1239,6 @@
         <span class="epm-tag">System integration</span>
         <span class="epm-tag">Strike</span>
       </div>
-      <a href="/fos216-slim/pages/entertainment/technical-direction/" style="display:inline-flex;align-items:center;gap:0.5rem;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber-light);text-decoration:none;margin-top:1.5rem;">Learn More <span>→</span></a>
     </div>
     <div class="epm-disc-cell">
       <div class="epm-disc-id">07 — B</div>
@@ -1205,7 +1252,6 @@
         <span class="epm-tag">Dante</span>
         <span class="epm-tag">AES3</span>
       </div>
-      <a href="/fos216-slim/pages/entertainment/audio-design/" style="display:inline-flex;align-items:center;gap:0.5rem;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber-light);text-decoration:none;margin-top:1.5rem;">Learn More <span>→</span></a>
     </div>
     <div class="epm-disc-cell">
       <div class="epm-disc-id">07 — C</div>
@@ -1218,7 +1264,6 @@
         <span class="epm-tag">sACN</span>
         <span class="epm-tag">Fixture spec</span>
       </div>
-      <a href="/fos216-slim/pages/entertainment/lighting-design/" style="display:inline-flex;align-items:center;gap:0.5rem;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber-light);text-decoration:none;margin-top:1.5rem;">Learn More <span>→</span></a>
     </div>
     <div class="epm-disc-cell">
       <div class="epm-disc-id">07 — D</div>
@@ -1231,7 +1276,6 @@
         <span class="epm-tag">Pixel map</span>
         <span class="epm-tag">Broadcast</span>
       </div>
-      <a href="/fos216-slim/pages/entertainment/video-design/" style="display:inline-flex;align-items:center;gap:0.5rem;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber-light);text-decoration:none;margin-top:1.5rem;">Learn More <span>→</span></a>
     </div>
     <div class="epm-disc-cell">
       <div class="epm-disc-id">07 — E</div>
@@ -1244,7 +1288,6 @@
         <span class="epm-tag">Site flow</span>
         <span class="epm-tag">Strike</span>
       </div>
-      <a href="/fos216-slim/pages/entertainment/site-logistics/" style="display:inline-flex;align-items:center;gap:0.5rem;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber-light);text-decoration:none;margin-top:1.5rem;">Learn More <span>→</span></a>
     </div>
   </div>
 
@@ -1265,7 +1308,6 @@
   </div>
 
 </section>
-
 
 <!-- ── APPROACH ── -->
 <section id="approach">
@@ -1294,43 +1336,12 @@
       <p>Full pro forma, capital stack, debt/equity structure, and investor-ready presentation materials tied to the technical design.</p>
     </div>
   </div>
-
-  <!-- Entertainment & Hospitality Strip -->
-  <div style="border-top:1px solid var(--border);margin-top:0;padding:3rem;">
-    <div style="font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.2em;color:var(--amber);text-transform:uppercase;margin-bottom:2.5rem;display:flex;align-items:center;gap:0.75rem;">
-      <span style="display:block;width:32px;height:1px;background:var(--amber);"></span>
-      Entertainment &amp; Hospitality Management
-    </div>
-    <div class="approach-strip" style="border-top:none;">
-      <div class="approach-cell">
-        <div class="approach-step" style="color:var(--amber);border-color:var(--amber);">Phase 01</div>
-        <h4>Concept &amp; Vision</h4>
-        <p>Event concept development, venue assessment, audience and market analysis, and production budget framing — from initial idea through a presentation-ready brief.</p>
-      </div>
-      <div class="approach-cell">
-        <div class="approach-step" style="color:var(--amber);border-color:var(--amber);">Phase 02</div>
-        <h4>Production Design</h4>
-        <p>Full technical specification across audio, lighting, video, and site systems. Rider fulfillment strategy, vendor selection, system integration design, and department scheduling.</p>
-      </div>
-      <div class="approach-cell">
-        <div class="approach-step" style="color:var(--amber);border-color:var(--amber);">Phase 03</div>
-        <h4>Permitting &amp; Logistics</h4>
-        <p>City permitting, site licensing, public safety coordination, temporary power layout, load-in sequencing, and hospitality infrastructure planning for large-format events.</p>
-      </div>
-      <div class="approach-cell">
-        <div class="approach-step" style="color:var(--amber);border-color:var(--amber);">Phase 04</div>
-        <h4>Execution &amp; Strike</h4>
-        <p>On-site technical direction across every department from load-in through final strike. Real-time problem resolution, show-file management, and post-event debrief reporting.</p>
-      </div>
-    </div>
-  </div>
 </section>
 
 <!-- ── FOOTER ── -->
 <section style="padding:5rem 3rem;border-bottom:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;">
   <img src="LOGO_PLACEHOLDER" alt="The FixOurStreets216 Project" style="width:280px;height:auto;display:block;opacity:0.92;filter:invert(1);">
   <span style="font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.18em;color:var(--muted);text-transform:uppercase;">Neighborhoods First &nbsp;·&nbsp; #WeThePeople</span>
-  <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.08em;color:var(--green-light);font-style:italic;">#NewCleveland</span>
 </section>
 
 <footer>
